@@ -9,11 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TalentRouteImport } from './routes/talent'
+import { Route as ServicesRouteImport } from './routes/services'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotRouteImport } from './routes/forgot'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TalentRoute = TalentRouteImport.update({
+  id: '/talent',
+  path: '/talent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesRoute = ServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -40,12 +52,16 @@ export interface FileRoutesByFullPath {
   '/forgot': typeof ForgotRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/services': typeof ServicesRoute
+  '/talent': typeof TalentRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/forgot': typeof ForgotRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/services': typeof ServicesRoute
+  '/talent': typeof TalentRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +69,22 @@ export interface FileRoutesById {
   '/forgot': typeof ForgotRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/services': typeof ServicesRoute
+  '/talent': typeof TalentRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/forgot' | '/login' | '/register'
+  fullPaths: '/' | '/forgot' | '/login' | '/register' | '/services' | '/talent'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/forgot' | '/login' | '/register'
-  id: '__root__' | '/' | '/forgot' | '/login' | '/register'
+  to: '/' | '/forgot' | '/login' | '/register' | '/services' | '/talent'
+  id:
+    | '__root__'
+    | '/'
+    | '/forgot'
+    | '/login'
+    | '/register'
+    | '/services'
+    | '/talent'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,10 +92,26 @@ export interface RootRouteChildren {
   ForgotRoute: typeof ForgotRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
+  ServicesRoute: typeof ServicesRoute
+  TalentRoute: typeof TalentRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/talent': {
+      id: '/talent'
+      path: '/talent'
+      fullPath: '/talent'
+      preLoaderRoute: typeof TalentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services': {
+      id: '/services'
+      path: '/services'
+      fullPath: '/services'
+      preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
@@ -107,6 +148,8 @@ const rootRouteChildren: RootRouteChildren = {
   ForgotRoute: ForgotRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
+  ServicesRoute: ServicesRoute,
+  TalentRoute: TalentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
