@@ -12,9 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TalentRouteImport } from './routes/talent'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotRouteImport } from './routes/forgot'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardPaymentsRouteImport } from './routes/dashboard/payments'
+import { Route as DashboardMessagesRouteImport } from './routes/dashboard/messages'
 import { Route as DashboardFreelancerRouteImport } from './routes/dashboard/freelancer'
 import { Route as DashboardClientRouteImport } from './routes/dashboard/client'
 import { Route as DashboardFreelancerServicesRouteImport } from './routes/dashboard/freelancer.services'
@@ -36,6 +39,11 @@ const RegisterRoute = RegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PremiumRoute = PremiumRouteImport.update({
+  id: '/premium',
+  path: '/premium',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -49,6 +57,16 @@ const ForgotRoute = ForgotRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardPaymentsRoute = DashboardPaymentsRouteImport.update({
+  id: '/dashboard/payments',
+  path: '/dashboard/payments',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardMessagesRoute = DashboardMessagesRouteImport.update({
+  id: '/dashboard/messages',
+  path: '/dashboard/messages',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardFreelancerRoute = DashboardFreelancerRouteImport.update({
@@ -83,11 +101,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/forgot': typeof ForgotRoute
   '/login': typeof LoginRoute
+  '/premium': typeof PremiumRoute
   '/register': typeof RegisterRoute
   '/services': typeof ServicesRoute
   '/talent': typeof TalentRoute
   '/dashboard/client': typeof DashboardClientRouteWithChildren
   '/dashboard/freelancer': typeof DashboardFreelancerRouteWithChildren
+  '/dashboard/messages': typeof DashboardMessagesRoute
+  '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/client/projects': typeof DashboardClientProjectsRoute
   '/dashboard/freelancer/portfolio': typeof DashboardFreelancerPortfolioRoute
   '/dashboard/freelancer/services': typeof DashboardFreelancerServicesRoute
@@ -96,11 +117,14 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/forgot': typeof ForgotRoute
   '/login': typeof LoginRoute
+  '/premium': typeof PremiumRoute
   '/register': typeof RegisterRoute
   '/services': typeof ServicesRoute
   '/talent': typeof TalentRoute
   '/dashboard/client': typeof DashboardClientRouteWithChildren
   '/dashboard/freelancer': typeof DashboardFreelancerRouteWithChildren
+  '/dashboard/messages': typeof DashboardMessagesRoute
+  '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/client/projects': typeof DashboardClientProjectsRoute
   '/dashboard/freelancer/portfolio': typeof DashboardFreelancerPortfolioRoute
   '/dashboard/freelancer/services': typeof DashboardFreelancerServicesRoute
@@ -110,11 +134,14 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/forgot': typeof ForgotRoute
   '/login': typeof LoginRoute
+  '/premium': typeof PremiumRoute
   '/register': typeof RegisterRoute
   '/services': typeof ServicesRoute
   '/talent': typeof TalentRoute
   '/dashboard/client': typeof DashboardClientRouteWithChildren
   '/dashboard/freelancer': typeof DashboardFreelancerRouteWithChildren
+  '/dashboard/messages': typeof DashboardMessagesRoute
+  '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/client/projects': typeof DashboardClientProjectsRoute
   '/dashboard/freelancer/portfolio': typeof DashboardFreelancerPortfolioRoute
   '/dashboard/freelancer/services': typeof DashboardFreelancerServicesRoute
@@ -125,11 +152,14 @@ export interface FileRouteTypes {
     | '/'
     | '/forgot'
     | '/login'
+    | '/premium'
     | '/register'
     | '/services'
     | '/talent'
     | '/dashboard/client'
     | '/dashboard/freelancer'
+    | '/dashboard/messages'
+    | '/dashboard/payments'
     | '/dashboard/client/projects'
     | '/dashboard/freelancer/portfolio'
     | '/dashboard/freelancer/services'
@@ -138,11 +168,14 @@ export interface FileRouteTypes {
     | '/'
     | '/forgot'
     | '/login'
+    | '/premium'
     | '/register'
     | '/services'
     | '/talent'
     | '/dashboard/client'
     | '/dashboard/freelancer'
+    | '/dashboard/messages'
+    | '/dashboard/payments'
     | '/dashboard/client/projects'
     | '/dashboard/freelancer/portfolio'
     | '/dashboard/freelancer/services'
@@ -151,11 +184,14 @@ export interface FileRouteTypes {
     | '/'
     | '/forgot'
     | '/login'
+    | '/premium'
     | '/register'
     | '/services'
     | '/talent'
     | '/dashboard/client'
     | '/dashboard/freelancer'
+    | '/dashboard/messages'
+    | '/dashboard/payments'
     | '/dashboard/client/projects'
     | '/dashboard/freelancer/portfolio'
     | '/dashboard/freelancer/services'
@@ -165,11 +201,14 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ForgotRoute: typeof ForgotRoute
   LoginRoute: typeof LoginRoute
+  PremiumRoute: typeof PremiumRoute
   RegisterRoute: typeof RegisterRoute
   ServicesRoute: typeof ServicesRoute
   TalentRoute: typeof TalentRoute
   DashboardClientRoute: typeof DashboardClientRouteWithChildren
   DashboardFreelancerRoute: typeof DashboardFreelancerRouteWithChildren
+  DashboardMessagesRoute: typeof DashboardMessagesRoute
+  DashboardPaymentsRoute: typeof DashboardPaymentsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -195,6 +234,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/premium': {
+      id: '/premium'
+      path: '/premium'
+      fullPath: '/premium'
+      preLoaderRoute: typeof PremiumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -214,6 +260,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/payments': {
+      id: '/dashboard/payments'
+      path: '/dashboard/payments'
+      fullPath: '/dashboard/payments'
+      preLoaderRoute: typeof DashboardPaymentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/messages': {
+      id: '/dashboard/messages'
+      path: '/dashboard/messages'
+      fullPath: '/dashboard/messages'
+      preLoaderRoute: typeof DashboardMessagesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/freelancer': {
@@ -283,11 +343,14 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ForgotRoute: ForgotRoute,
   LoginRoute: LoginRoute,
+  PremiumRoute: PremiumRoute,
   RegisterRoute: RegisterRoute,
   ServicesRoute: ServicesRoute,
   TalentRoute: TalentRoute,
   DashboardClientRoute: DashboardClientRouteWithChildren,
   DashboardFreelancerRoute: DashboardFreelancerRouteWithChildren,
+  DashboardMessagesRoute: DashboardMessagesRoute,
+  DashboardPaymentsRoute: DashboardPaymentsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
