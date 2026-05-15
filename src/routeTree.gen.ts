@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TalentRouteImport } from './routes/talent'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PremiumRouteImport } from './routes/premium'
@@ -27,6 +28,11 @@ import { Route as DashboardClientProjectsRouteImport } from './routes/dashboard/
 const TalentRoute = TalentRouteImport.update({
   id: '/talent',
   path: '/talent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesRoute = ServicesRouteImport.update({
@@ -104,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/premium': typeof PremiumRoute
   '/register': typeof RegisterRoute
   '/services': typeof ServicesRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/talent': typeof TalentRoute
   '/dashboard/client': typeof DashboardClientRouteWithChildren
   '/dashboard/freelancer': typeof DashboardFreelancerRouteWithChildren
@@ -120,6 +127,7 @@ export interface FileRoutesByTo {
   '/premium': typeof PremiumRoute
   '/register': typeof RegisterRoute
   '/services': typeof ServicesRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/talent': typeof TalentRoute
   '/dashboard/client': typeof DashboardClientRouteWithChildren
   '/dashboard/freelancer': typeof DashboardFreelancerRouteWithChildren
@@ -137,6 +145,7 @@ export interface FileRoutesById {
   '/premium': typeof PremiumRoute
   '/register': typeof RegisterRoute
   '/services': typeof ServicesRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/talent': typeof TalentRoute
   '/dashboard/client': typeof DashboardClientRouteWithChildren
   '/dashboard/freelancer': typeof DashboardFreelancerRouteWithChildren
@@ -155,6 +164,7 @@ export interface FileRouteTypes {
     | '/premium'
     | '/register'
     | '/services'
+    | '/sitemap.xml'
     | '/talent'
     | '/dashboard/client'
     | '/dashboard/freelancer'
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/premium'
     | '/register'
     | '/services'
+    | '/sitemap.xml'
     | '/talent'
     | '/dashboard/client'
     | '/dashboard/freelancer'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/premium'
     | '/register'
     | '/services'
+    | '/sitemap.xml'
     | '/talent'
     | '/dashboard/client'
     | '/dashboard/freelancer'
@@ -204,6 +216,7 @@ export interface RootRouteChildren {
   PremiumRoute: typeof PremiumRoute
   RegisterRoute: typeof RegisterRoute
   ServicesRoute: typeof ServicesRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TalentRoute: typeof TalentRoute
   DashboardClientRoute: typeof DashboardClientRouteWithChildren
   DashboardFreelancerRoute: typeof DashboardFreelancerRouteWithChildren
@@ -218,6 +231,13 @@ declare module '@tanstack/react-router' {
       path: '/talent'
       fullPath: '/talent'
       preLoaderRoute: typeof TalentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/services': {
@@ -346,6 +366,7 @@ const rootRouteChildren: RootRouteChildren = {
   PremiumRoute: PremiumRoute,
   RegisterRoute: RegisterRoute,
   ServicesRoute: ServicesRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TalentRoute: TalentRoute,
   DashboardClientRoute: DashboardClientRouteWithChildren,
   DashboardFreelancerRoute: DashboardFreelancerRouteWithChildren,
