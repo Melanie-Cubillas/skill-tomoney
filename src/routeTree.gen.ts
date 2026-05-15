@@ -15,6 +15,7 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotRouteImport } from './routes/forgot'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardFreelancerRouteImport } from './routes/dashboard/freelancer'
 
 const TalentRoute = TalentRouteImport.update({
   id: '/talent',
@@ -46,6 +47,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardFreelancerRoute = DashboardFreelancerRouteImport.update({
+  id: '/dashboard/freelancer',
+  path: '/dashboard/freelancer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/services': typeof ServicesRoute
   '/talent': typeof TalentRoute
+  '/dashboard/freelancer': typeof DashboardFreelancerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/services': typeof ServicesRoute
   '/talent': typeof TalentRoute
+  '/dashboard/freelancer': typeof DashboardFreelancerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,12 +79,27 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/services': typeof ServicesRoute
   '/talent': typeof TalentRoute
+  '/dashboard/freelancer': typeof DashboardFreelancerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/forgot' | '/login' | '/register' | '/services' | '/talent'
+  fullPaths:
+    | '/'
+    | '/forgot'
+    | '/login'
+    | '/register'
+    | '/services'
+    | '/talent'
+    | '/dashboard/freelancer'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/forgot' | '/login' | '/register' | '/services' | '/talent'
+  to:
+    | '/'
+    | '/forgot'
+    | '/login'
+    | '/register'
+    | '/services'
+    | '/talent'
+    | '/dashboard/freelancer'
   id:
     | '__root__'
     | '/'
@@ -85,6 +108,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/services'
     | '/talent'
+    | '/dashboard/freelancer'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -94,6 +118,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   ServicesRoute: typeof ServicesRoute
   TalentRoute: typeof TalentRoute
+  DashboardFreelancerRoute: typeof DashboardFreelancerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -140,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/freelancer': {
+      id: '/dashboard/freelancer'
+      path: '/dashboard/freelancer'
+      fullPath: '/dashboard/freelancer'
+      preLoaderRoute: typeof DashboardFreelancerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -150,6 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   ServicesRoute: ServicesRoute,
   TalentRoute: TalentRoute,
+  DashboardFreelancerRoute: DashboardFreelancerRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
