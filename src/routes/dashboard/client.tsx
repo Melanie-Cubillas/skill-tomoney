@@ -1,65 +1,75 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Sparkles, Search, Briefcase, Star, MessageSquare } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { freelancers } from "@/data/mock";
+import { Sparkles, Star, ArrowRight, Wallet, FolderKanban, MessageSquare } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard/client")({
-  head: () => ({ meta: [{ title: "Dashboard MYPE · SkilltoMoney" }] }),
+  head: () => ({ meta: [{ title: "Dashboard Cliente · SkilltoMoney" }] }),
   component: () => (
     <DashboardShell role="client">
-      <div className="mb-8 flex items-end justify-between gap-4 flex-wrap">
-        <div><h1 className="font-display text-3xl font-bold">Hola, Cafetería Lúmen ☕</h1><p className="mt-1 text-muted-foreground">Encuentra el talento ideal para tu próximo proyecto.</p></div>
-        <Button asChild className="bg-gradient-primary"><Link to="/talent"><Search className="mr-1 h-4 w-4" /> Buscar talento</Link></Button>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Hola, Lúmen Café 👋</div>
+          <h1 className="mt-1 font-display text-3xl font-bold">Tu próximo proyecto digital</h1>
+        </div>
+        <Button asChild className="bg-gradient-primary shadow-soft"><Link to="/talent">+ Publicar proyecto</Link></Button>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        {[{l:"Proyectos activos",v:"3",i:Briefcase},{l:"Mensajes",v:"5",i:MessageSquare},{l:"Freelancers favoritos",v:"12",i:Star}].map(s=>(
-          <Card key={s.l} className="p-5"><div className="flex items-center justify-between"><div className="text-sm text-muted-foreground">{s.l}</div><s.i className="h-4 w-4 text-primary" /></div><div className="mt-2 text-2xl font-bold">{s.v}</div></Card>
+      <div className="mt-6 grid gap-4 sm:grid-cols-3">
+        {[
+          { l: "Proyectos activos", v: "3", i: FolderKanban },
+          { l: "En escrow", v: "S/ 480", i: Wallet },
+          { l: "Mensajes sin leer", v: "5", i: MessageSquare },
+        ].map(s=>(
+          <Card key={s.l} className="p-5 shadow-soft">
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-muted-foreground">{s.l}</div>
+              <div className="grid h-8 w-8 place-items-center rounded-lg bg-accent text-accent-foreground"><s.i className="h-4 w-4" /></div>
+            </div>
+            <div className="mt-2 font-display text-3xl font-bold">{s.v}</div>
+          </Card>
         ))}
       </div>
 
-      <Card className="mt-8 p-6">
-        <div className="mb-4 flex items-center gap-2 rounded-xl bg-accent/60 p-3 text-sm"><Sparkles className="h-4 w-4 text-primary" /><b>Freelancers recomendados para ti</b> · según tu última búsqueda</div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {freelancers.slice(0,3).map(f=>(
-            <Card key={f.id} className="p-5">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3"><div className="grid h-11 w-11 place-items-center rounded-full bg-gradient-primary font-semibold text-primary-foreground">{f.avatar}</div><div><div className="font-semibold">{f.name}</div><div className="text-xs text-muted-foreground">{f.role}</div></div></div>
-                <Badge className="bg-success/15 text-success">{f.match}%</Badge>
-              </div>
-              <div className="mt-3 flex flex-wrap gap-1"><div className="text-xs text-muted-foreground">{f.skills.join(" · ")}</div></div>
-              <div className="mt-4 flex items-center justify-between border-t border-border pt-3"><span className="text-sm font-semibold text-gradient">S/ {f.price}/h</span><Button size="sm" variant="outline">Ver perfil</Button></div>
-            </Card>
-          ))}
+      <Card className="relative mt-6 overflow-hidden border-primary/20 bg-gradient-hero p-6 text-primary-foreground shadow-glow">
+        <div className="absolute inset-0 grid-pattern opacity-30" />
+        <div className="relative flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 text-xs"><Sparkles className="h-3.5 w-3.5 text-primary-glow" /> Match IA</div>
+            <h3 className="mt-1 font-display text-2xl font-bold">Tenemos 3 freelancers ideales para tu cafetería</h3>
+            <p className="mt-2 text-sm text-white/75">Basado en tu última búsqueda: "branding y reels para café".</p>
+          </div>
+          <Button className="bg-white/15 text-primary-foreground backdrop-blur hover:bg-white/25" asChild><Link to="/talent">Ver matches <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link></Button>
         </div>
       </Card>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <Card className="p-6">
-          <h3 className="mb-4 font-display font-semibold">Proyectos activos</h3>
-          <div className="space-y-3">
-            {[{t:"Branding cafetería",f:"Camila Rojas",s:"En progreso"},{t:"Edición de 10 reels",f:"Diego Salazar",s:"Esperando entrega"},{t:"Landing menú online",f:"Mateo Quispe",s:"Revisión"}].map(p=>(
-              <div key={p.t} className="flex items-center justify-between rounded-xl border border-border p-4">
-                <div><div className="font-medium">{p.t}</div><div className="text-xs text-muted-foreground">{p.f}</div></div>
-                <Badge variant="secondary" className="bg-accent text-accent-foreground">{p.s}</Badge>
+      <div className="mt-6">
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-lg font-semibold">Recomendados para ti</h2>
+          <Button variant="ghost" size="sm" asChild><Link to="/talent">Ver todos</Link></Button>
+        </div>
+        <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {freelancers.slice(0,3).map(f=>(
+            <Card key={f.id} className="p-5 shadow-soft transition hover:-translate-y-1 hover:shadow-elegant">
+              <div className="flex items-center gap-3">
+                <div className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-primary font-bold text-primary-foreground">{f.avatar}</div>
+                <div>
+                  <div className="font-display font-semibold">{f.name}</div>
+                  <div className="text-xs text-muted-foreground">{f.role}</div>
+                </div>
+                <Badge variant="outline" className="ml-auto border-primary/30 text-primary">{f.match}%</Badge>
               </div>
-            ))}
-          </div>
-        </Card>
-        <Card className="p-6">
-          <h3 className="mb-4 font-display font-semibold">Mensajes</h3>
-          <div className="space-y-2">
-            {freelancers.slice(0,3).map(f=>(
-              <Link key={f.id} to="/dashboard/messages" className="flex items-center gap-3 rounded-xl p-3 hover:bg-muted/60">
-                <div className="grid h-9 w-9 place-items-center rounded-full bg-gradient-primary text-xs font-semibold text-primary-foreground">{f.avatar}</div>
-                <div className="min-w-0 flex-1"><div className="truncate text-sm font-medium">{f.name}</div><div className="truncate text-xs text-muted-foreground">Te paso la propuesta hoy 🚀</div></div>
-              </Link>
-            ))}
-          </div>
-        </Card>
+              <div className="mt-3 flex items-center justify-between text-sm">
+                <div className="flex items-center gap-1 text-warning"><Star className="h-3.5 w-3.5 fill-current" /> <span className="font-semibold text-foreground">{f.rating}</span></div>
+                <div className="font-display font-bold">S/ {f.price}/h</div>
+              </div>
+              <Button className="mt-4 w-full bg-gradient-primary shadow-soft" size="sm">Invitar a proyecto</Button>
+            </Card>
+          ))}
+        </div>
       </div>
     </DashboardShell>
   ),
