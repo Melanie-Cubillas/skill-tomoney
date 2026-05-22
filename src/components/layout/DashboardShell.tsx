@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Sparkles, LayoutDashboard, Briefcase, MessageSquare, Wallet, Crown, Settings, Search, Users, FolderKanban } from "lucide-react";
+import { LayoutDashboard, Briefcase, MessageSquare, Wallet, Crown, Settings, Search, Users, FolderKanban, Bell } from "lucide-react";
 
 export function DashboardShell({ role, children }: { role: "freelancer" | "client"; children: React.ReactNode }) {
   const path = useRouterState({ select: (r) => r.location.pathname });
@@ -22,35 +22,61 @@ export function DashboardShell({ role, children }: { role: "freelancer" | "clien
       ];
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-[260px_1fr]">
-      <aside className="hidden border-r border-border bg-sidebar lg:flex lg:flex-col">
-        <Link to="/" className="flex items-center gap-2 px-6 py-5 font-display font-bold">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-primary text-primary-foreground"><Sparkles className="h-4 w-4" /></span>
-          SkilltoMoney
+    <div className="grid min-h-screen bg-muted/40 lg:grid-cols-[256px_1fr]">
+      <aside className="hidden border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex lg:flex-col">
+        <Link to="/" className="flex items-center gap-2.5 px-6 py-5">
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-primary shadow-glow">
+            <span className="font-display text-sm font-bold text-primary-foreground">S</span>
+          </span>
+          <span className="font-display text-base font-bold">SkilltoMoney</span>
         </Link>
+        <div className="px-4 pb-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">
+          {role === "freelancer" ? "Freelancer" : "Cliente / MYPE"}
+        </div>
         <nav className="flex-1 space-y-1 px-3">
           {items.map((it) => {
             const active = path === it.to;
             return (
-              <Link key={it.to} to={it.to} className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${active ? "bg-gradient-primary text-primary-foreground shadow-soft" : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"}`}>
+              <Link
+                key={it.to}
+                to={it.to}
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
+                  active
+                    ? "bg-gradient-primary text-primary-foreground shadow-soft"
+                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                }`}
+              >
                 <it.icon className="h-4 w-4" /> {it.label}
               </Link>
             );
           })}
         </nav>
+        <div className="m-3 rounded-2xl border border-sidebar-border bg-sidebar-accent/40 p-4">
+          <div className="flex items-center gap-2 text-xs font-semibold text-primary-glow">
+            <Crown className="h-3.5 w-3.5" /> Skill Pro
+          </div>
+          <p className="mt-1.5 text-xs text-sidebar-foreground/70">Mentorías 1:1, IA ilimitada y mejor visibilidad.</p>
+          <Link to="/premium" className="mt-3 inline-flex w-full justify-center rounded-lg bg-gradient-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">
+            Subir a Pro
+          </Link>
+        </div>
         <div className="border-t border-sidebar-border p-3">
           <Link to="/" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent">
             <Settings className="h-4 w-4" /> Ajustes
           </Link>
         </div>
       </aside>
-      <div className="flex flex-col bg-muted/30">
-        <header className="flex items-center justify-between border-b border-border bg-background px-6 py-3">
+      <div className="flex flex-col">
+        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-background/80 px-6 py-3 backdrop-blur-xl">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Users className="h-4 w-4" /> {role === "freelancer" ? "Cuenta Freelancer" : "Cuenta MYPE / Cliente"}
+            <Users className="h-4 w-4" /> {role === "freelancer" ? "Modo Freelancer" : "Modo Cliente / MYPE"}
           </div>
           <div className="flex items-center gap-3">
-            <div className="grid h-9 w-9 place-items-center rounded-full bg-gradient-primary text-sm font-semibold text-primary-foreground">YO</div>
+            <button className="relative grid h-9 w-9 place-items-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground">
+              <Bell className="h-4 w-4" />
+              <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-primary" />
+            </button>
+            <div className="grid h-9 w-9 place-items-center rounded-full bg-gradient-primary text-sm font-semibold text-primary-foreground shadow-soft">YO</div>
           </div>
         </header>
         <div className="flex-1 p-6 lg:p-8">{children}</div>
