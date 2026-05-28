@@ -1,8 +1,11 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Briefcase, MessageSquare, Wallet, Crown, Settings, Search, Users, FolderKanban, Bell } from "lucide-react";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { LayoutDashboard, Briefcase, MessageSquare, Wallet, Crown, Settings, Search, Users, FolderKanban, Bell, LogOut } from "lucide-react";
+import { api } from "@/lib/api";
+import { clearSession, getToken } from "@/lib/auth";
 
 export function DashboardShell({ role, children }: { role: "freelancer" | "client"; children: React.ReactNode }) {
   const path = useRouterState({ select: (r) => r.location.pathname });
+  const navigate = useNavigate();
   const items = role === "freelancer"
     ? [
         { to: "/dashboard/freelancer", icon: LayoutDashboard, label: "Inicio" },
@@ -20,6 +23,20 @@ export function DashboardShell({ role, children }: { role: "freelancer" | "clien
         { to: "/dashboard/payments", icon: Wallet, label: "Pagos" },
         { to: "/premium", icon: Crown, label: "Premium" },
       ];
+
+  const onLogout = async () => {
+    try {
+      const token = getToken();
+      if (token) {
+        await api.logout(token);
+      }
+    } catch {
+      // no-op
+    } finally {
+      clearSession();
+      navigate({ to: "/login" });
+    }
+  };
 
   return (
     <div className="grid min-h-screen bg-muted/40 lg:grid-cols-[256px_1fr]">
@@ -55,7 +72,7 @@ export function DashboardShell({ role, children }: { role: "freelancer" | "clien
           <div className="flex items-center gap-2 text-xs font-semibold text-primary-glow">
             <Crown className="h-3.5 w-3.5" /> Skill Pro
           </div>
-          <p className="mt-1.5 text-xs text-sidebar-foreground/70">Mentorías 1:1, IA ilimitada y mejor visibilidad.</p>
+          <p className="mt-1.5 text-xs text-sidebar-foreground/70">Mentorias 1:1, IA ilimitada y mejor visibilidad.</p>
           <Link to="/premium" className="mt-3 inline-flex w-full justify-center rounded-lg bg-gradient-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">
             Subir a Pro
           </Link>
@@ -64,6 +81,9 @@ export function DashboardShell({ role, children }: { role: "freelancer" | "clien
           <Link to="/" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent">
             <Settings className="h-4 w-4" /> Ajustes
           </Link>
+          <button onClick={onLogout} className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent">
+            <LogOut className="h-4 w-4" /> Cerrar sesion
+          </button>
         </div>
       </aside>
       <div className="flex flex-col">

@@ -42,6 +42,17 @@ export type ProfilePayload = {
   photo_url: string | null;
 };
 
+export type RecommendationPayload = {
+  id: number;
+  user_id: number;
+  recommendation_type: string;
+  title: string;
+  description: string;
+  score: string | null;
+  data: Record<string, unknown> | null;
+  status: string;
+};
+
 type RequestOptions = RequestInit & {
   token?: string;
 };
@@ -141,4 +152,19 @@ export const api = {
       token,
       body: JSON.stringify({ social_links }),
     }),
+  updatePhoto: (token: string, photo: File) => {
+    const body = new FormData();
+    body.append("photo", photo);
+
+    return apiRequest<ProfilePayload>("/profile/photo", {
+      method: "POST",
+      token,
+      body,
+    });
+  },
+  getRecommendations: (token: string, recommendationType?: string) =>
+    apiRequest<RecommendationPayload[]>(
+      `/recommendations${recommendationType ? `?type=${encodeURIComponent(recommendationType)}` : ""}`,
+      { token }
+    ),
 };
