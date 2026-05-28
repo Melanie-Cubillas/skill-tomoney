@@ -1,4 +1,6 @@
-const API_URL = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000/api";
+const API_URL = import.meta.env.VITE_API_URL ?? "https://skill-to-money-backend.onrender.com/api";
+
+export const API_BASE_URL = API_URL;
 
 export type ApiResponse<T> = {
   success: boolean;
