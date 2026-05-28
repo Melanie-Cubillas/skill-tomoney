@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Sparkles, Zap, Wallet, Users, CheckCircle2, Star, TrendingUp, Shield, Rocket, MessageSquare } from "lucide-react";
 import { Shell } from "@/components/layout/Shell";
+import { BackendStatus } from "@/components/BackendStatus";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,9 +32,12 @@ function Landing() {
         <div className="relative mx-auto max-w-7xl px-6 pb-24 pt-20 lg:pb-32 lg:pt-28">
           <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs backdrop-blur">
-                <span className="grid h-4 w-4 place-items-center rounded-full bg-gradient-primary"><Sparkles className="h-2.5 w-2.5" /></span>
-                Beta abierta · Sin comisiones por 90 días
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs backdrop-blur">
+                  <span className="grid h-4 w-4 place-items-center rounded-full bg-gradient-primary"><Sparkles className="h-2.5 w-2.5" /></span>
+                  Beta abierta · Sin comisiones por 90 días
+                </div>
+                <BackendStatus />
               </div>
               <h1 className="mt-6 font-display text-5xl font-extrabold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
                 Convierte tus <span className="text-gradient">skills digitales</span>
