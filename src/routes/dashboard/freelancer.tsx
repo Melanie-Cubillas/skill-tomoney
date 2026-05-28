@@ -9,7 +9,7 @@ import { api, type ProfilePayload, type RecommendationPayload } from "@/lib/api"
 import { getToken } from "@/lib/auth";
 
 export const Route = createFileRoute("/dashboard/freelancer")({
-  head: () => ({ meta: [{ title: "Dashboard Freelancer · SkilltoMoney" }] }),
+  head: () => ({ meta: [{ title: "Dashboard Freelancer Â· SkilltoMoney" }] }),
   component: FreelancerDashboard,
 });
 
@@ -17,6 +17,8 @@ function FreelancerDashboard() {
   const token = getToken();
   const [profile, setProfile] = useState<Partial<ProfilePayload>>({});
   const [skillsText, setSkillsText] = useState("");
+  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
   const [recommendations, setRecommendations] = useState<RecommendationPayload[]>([]);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +44,14 @@ function FreelancerDashboard() {
     void load();
   }, [token]);
 
+  useEffect(() => {
+    return () => {
+      if (photoPreviewUrl) {
+        URL.revokeObjectURL(photoPreviewUrl);
+      }
+    };
+  }, [photoPreviewUrl]);
+
   const socialLinks = useMemo(() => {
     const raw = profile.social_links ?? {};
     return {
@@ -61,6 +71,13 @@ function FreelancerDashboard() {
     return token;
   };
 
+  const getErrorMessage = (err: unknown, fallback: string): string => {
+    const payload = err as { message?: string; errors?: Record<string, string[]> };
+    const firstErrorGroup = payload?.errors ? Object.values(payload.errors)[0] : undefined;
+
+    return firstErrorGroup?.[0] ?? payload?.message ?? fallback;
+  };
+
   const saveBaseProfile = async () => {
     const t = requireToken();
     if (!t) return;
@@ -76,8 +93,8 @@ function FreelancerDashboard() {
       });
       setProfile(response.data ?? {});
       setMessage("Perfil actualizado.");
-    } catch {
-      setError("No se pudo actualizar el perfil.");
+    } catch (err) {
+      setError(getErrorMessage(err, "No se pudo actualizar el perfil."));
     }
   };
 
@@ -87,10 +104,11 @@ function FreelancerDashboard() {
     setError(null);
     setMessage(null);
     try {
-      await api.updateDescription(t, profile.description ?? "");
+      const response = await api.updateDescription(t, profile.description ?? "");
+      if (response.data) setProfile(response.data);
       setMessage("Descripcion actualizada.");
-    } catch {
-      setError("No se pudo actualizar la descripcion.");
+    } catch (err) {
+      setError(getErrorMessage(err, "No se pudo actualizar la descripcion."));
     }
   };
 
@@ -107,8 +125,8 @@ function FreelancerDashboard() {
     try {
       await api.updateSkills(t, skills);
       setMessage("Habilidades actualizadas.");
-    } catch {
-      setError("No se pudieron guardar las habilidades.");
+    } catch (err) {
+      setError(getErrorMessage(err, "No se pudieron guardar las habilidades."));
     }
   };
 
@@ -126,24 +144,34 @@ function FreelancerDashboard() {
         website: socialLinks.website || null,
       });
       setMessage("Redes sociales actualizadas.");
-    } catch {
-      setError("No se pudieron actualizar las redes.");
+    } catch (err) {
+      setError(getErrorMessage(err, "No se pudieron actualizar las redes."));
     }
   };
 
-  const savePhoto = async (file: File | null) => {
+  const selectPhoto = (file: File | null) => {
+    setSelectedPhoto(file);
+    setMessage(null);
+    setError(null);
+    setPhotoPreviewUrl(file ? URL.createObjectURL(file) : null);
+  };
+
+  const savePhoto = async () => {
     const t = requireToken();
-    if (!t || !file) return;
+    if (!t || !selectedPhoto) return;
     setError(null);
     setMessage(null);
     try {
-      const response = await api.updatePhoto(t, file);
+      const response = await api.updatePhoto(t, selectedPhoto);
       if (response.data) setProfile(response.data);
+      setSelectedPhoto(null);
       setMessage("Foto actualizada.");
-    } catch {
-      setError("No se pudo subir la foto.");
+    } catch (err) {
+      setError(getErrorMessage(err, "No se pudo subir la foto."));
     }
   };
+
+  const visiblePhotoUrl = photoPreviewUrl ?? profile.photo_url ?? null;
 
   return (
     <DashboardShell role="freelancer">
@@ -178,7 +206,11 @@ function FreelancerDashboard() {
 
         <Card className="space-y-3 p-5">
           <h2 className="font-semibold">Foto de perfil</h2>
-          <Input type="file" accept="image/*" onChange={(e) => savePhoto(e.target.files?.[0] ?? null)} />
+          {visiblePhotoUrl ? (
+            <img src={visiblePhotoUrl} alt="Foto de perfil" className="h-24 w-24 rounded-full object-cover ring-2 ring-primary/20" />
+          ) : null}
+          <Input type="file" accept="image/*" onChange={(e) => selectPhoto(e.target.files?.[0] ?? null)} />
+          <Button onClick={savePhoto} disabled={!selectedPhoto}>Guardar foto</Button>
           {profile.photo_url ? <a href={profile.photo_url} target="_blank" rel="noreferrer" className="text-sm text-primary underline">Ver foto actual</a> : null}
         </Card>
 
