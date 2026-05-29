@@ -174,7 +174,7 @@ function FreelancerDashboard() {
   const visiblePhotoUrl = photoPreviewUrl ?? profile.photo_url ?? null;
 
   return (
-    <DashboardShell role="freelancer">
+    <DashboardShell role="freelancer" profilePhotoUrl={visiblePhotoUrl}>
       <div>
         <h1 className="font-display text-3xl font-bold">Perfil freelancer</h1>
         <p className="text-muted-foreground">Gestiona tu perfil real conectado al backend.</p>

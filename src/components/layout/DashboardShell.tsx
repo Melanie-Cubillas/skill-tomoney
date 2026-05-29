@@ -3,7 +3,15 @@ import { LayoutDashboard, Briefcase, MessageSquare, Wallet, Crown, Settings, Sea
 import { api } from "@/lib/api";
 import { clearSession, getToken } from "@/lib/auth";
 
-export function DashboardShell({ role, children }: { role: "freelancer" | "client"; children: React.ReactNode }) {
+export function DashboardShell({
+  role,
+  children,
+  profilePhotoUrl,
+}: {
+  role: "freelancer" | "client";
+  children: React.ReactNode;
+  profilePhotoUrl?: string | null;
+}) {
   const path = useRouterState({ select: (r) => r.location.pathname });
   const navigate = useNavigate();
   const items = role === "freelancer"
@@ -96,7 +104,11 @@ export function DashboardShell({ role, children }: { role: "freelancer" | "clien
               <Bell className="h-4 w-4" />
               <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-primary" />
             </button>
-            <div className="grid h-9 w-9 place-items-center rounded-full bg-gradient-primary text-sm font-semibold text-primary-foreground shadow-soft">YO</div>
+            {profilePhotoUrl ? (
+              <img src={profilePhotoUrl} alt="Foto de perfil" className="h-9 w-9 rounded-full object-cover shadow-soft ring-2 ring-primary/20" />
+            ) : (
+              <div className="grid h-9 w-9 place-items-center rounded-full bg-gradient-primary text-sm font-semibold text-primary-foreground shadow-soft">YO</div>
+            )}
           </div>
         </header>
         <div className="flex-1 p-6 lg:p-8">{children}</div>
