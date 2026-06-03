@@ -28,6 +28,17 @@ export type AuthPayload = {
   access_token: string;
   expires_at: string | null;
   user: AuthUser;
+  freelancer_profile?: {
+    id: number;
+    dni: string;
+    experience_area?: string | null;
+  };
+  mype_profile?: {
+    id: number;
+    business_name: string;
+    ruc: string;
+    location?: string | null;
+  };
 };
 
 export type ProfilePayload = {
@@ -102,7 +113,14 @@ export const api = {
       method: "POST",
       body: JSON.stringify(body),
     }),
-  registerFreelancer: (body: { first_name: string; last_name: string; email: string; password: string; phone?: string }) =>
+  registerFreelancer: (body: {
+    first_name: string;
+    last_name: string;
+    dni: string;
+    email: string;
+    password: string;
+    phone?: string;
+  }) =>
     apiRequest<AuthPayload>("/auth/register/freelancer", {
       method: "POST",
       body: JSON.stringify(body),
@@ -111,6 +129,7 @@ export const api = {
     first_name: string;
     last_name: string;
     company_name?: string;
+    ruc: string;
     email: string;
     password: string;
     phone?: string;
@@ -167,6 +186,6 @@ export const api = {
   getRecommendations: (token: string, recommendationType?: string) =>
     apiRequest<RecommendationPayload[]>(
       `/recommendations${recommendationType ? `?type=${encodeURIComponent(recommendationType)}` : ""}`,
-      { token }
+      { token },
     ),
 };

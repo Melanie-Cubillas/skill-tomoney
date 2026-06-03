@@ -1,7 +1,17 @@
 import { Link } from "@tanstack/react-router";
 import { Sparkles } from "lucide-react";
 
-export function AuthLayout({ title, subtitle, children, footer }: { title: string; subtitle: string; children: React.ReactNode; footer?: React.ReactNode }) {
+export function AuthLayout({
+  title,
+  subtitle,
+  children,
+  footer,
+}: {
+  title: string;
+  subtitle: string;
+  children: React.ReactNode;
+  footer?: React.ReactNode;
+}) {
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <div className="relative hidden overflow-hidden bg-gradient-hero text-primary-foreground lg:flex lg:flex-col lg:justify-between lg:p-12">
@@ -21,22 +31,34 @@ export function AuthLayout({ title, subtitle, children, footer }: { title: strin
             Tu próximo cliente está a un clic.
           </h2>
           <p className="mt-4 text-white/70">
-            Únete a +1,200 freelancers y +380 MYPES que ya están construyendo juntos en SkilltoMoney.
+            Únete a +1,200 freelancers y +380 MYPES que ya están construyendo juntos en
+            SkilltoMoney.
           </p>
           <div className="mt-8 grid grid-cols-3 gap-3">
-            {[["+2.1k","proyectos"],["4.9★","rating"],["S/ 320","ingreso prom."]].map(([a,b])=>(
-              <div key={a} className="rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur">
-                <div className="font-display text-lg font-bold">{a}</div>
-                <div className="text-[11px] uppercase tracking-wide text-white/60">{b}</div>
+            {[
+              ["+2.1k", "proyectos"],
+              ["4.9★", "rating"],
+              ["S/ 320", "ingreso prom."],
+            ].map(([value, label]) => (
+              <div
+                key={value}
+                className="rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur"
+              >
+                <div className="font-display text-lg font-bold">{value}</div>
+                <div className="text-[11px] uppercase tracking-wide text-white/60">{label}</div>
               </div>
             ))}
           </div>
         </div>
-        <div className="relative text-xs text-white/50">MVP universitario · Hecho con 💜 en Perú</div>
+        <div className="relative text-xs text-white/50">
+          MVP universitario · Hecho con dedicación en Perú
+        </div>
       </div>
       <div className="flex flex-col bg-background">
         <div className="flex justify-end p-6 lg:hidden">
-          <Link to="/" className="font-display text-sm font-bold">SkilltoMoney</Link>
+          <Link to="/" className="font-display text-sm font-bold">
+            SkilltoMoney
+          </Link>
         </div>
         <div className="flex flex-1 items-center justify-center px-6 py-10">
           <div className="w-full max-w-md">
