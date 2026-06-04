@@ -60,6 +60,25 @@ function Register() {
   const [rucCondition, setRucCondition] = useState<string | null>(null);
 
   const strength = getPasswordStrength(password);
+<<<<<<< Updated upstream
+=======
+  const personalTerms = [firstName, lastName, companyName, email.split("@")[0], dni, ruc]
+    .map(normalizePasswordTerm)
+    .filter((term) => term.length >= 3);
+  const normalizedPassword = password.toLowerCase();
+  const usesPersonalInfo = personalTerms.some((term) => normalizedPassword.includes(term));
+  const passwordRequirements = [
+    { label: "Mínimo 8 caracteres", met: password.length >= 8 },
+    { label: "Incluye una letra mayúscula", met: /[A-Z]/.test(password) },
+    { label: "Incluye un número", met: /\d/.test(password) },
+    { label: "Incluye un símbolo", met: /[^a-zA-Z0-9]/.test(password) },
+    { label: "No uses tu nombre, apellido, correo, DNI, RUC o empresa", met: !usesPersonalInfo },
+  ];
+  const isPasswordValid = passwordRequirements.every((requirement) => requirement.met);
+  const needsDniValidation = role === "freelancer" && !dniLookedUp;
+  const needsRucValidation = role === "mype" && !rucLookedUp;
+  const needsIdentityValidation = needsDniValidation || needsRucValidation;
+>>>>>>> Stashed changes
 
   const handleDniLookup = useCallback(async () => {
     if (dni.length !== 8 || lookingUp) return;
@@ -100,6 +119,21 @@ function Register() {
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+<<<<<<< Updated upstream
+=======
+    if (role === "freelancer" && !dniLookedUp) {
+      setError("Primero valida tu DNI para continuar con el registro.");
+      return;
+    }
+    if (role === "mype" && !rucLookedUp) {
+      setError("Primero valida tu RUC para continuar con el registro.");
+      return;
+    }
+    if (!isPasswordValid) {
+      setError("Completa los requisitos de la contraseña antes de crear la cuenta.");
+      return;
+    }
+>>>>>>> Stashed changes
     setLoading(true);
     setError(null);
 
@@ -125,7 +159,7 @@ function Register() {
       }
 
       saveSession(response.data.access_token, response.data.user);
-      navigate({ to: role === "freelancer" ? "/dashboard/freelancer" : "/dashboard/client" });
+      navigate({ to: role === "freelancer" ? "/freelancer-onboarding" : "/mype-onboarding" });
     } catch (err: unknown) {
       const payload = err as { message?: string; errors?: Record<string, string[]> };
       const firstError = Object.values(payload?.errors ?? {})[0]?.[0];
@@ -403,6 +437,14 @@ function Register() {
             Presiona Enter o el botón de buscar para validar tu DNI primero.
           </p>
         )}
+<<<<<<< Updated upstream
+=======
+        {role === "mype" && !rucLookedUp && ruc.length > 0 && (
+          <p className="text-center text-xs text-muted-foreground">
+            Presiona Enter o el botón de buscar para validar tu RUC primero.
+          </p>
+        )}
+>>>>>>> Stashed changes
       </form>
     </AuthLayout>
   );

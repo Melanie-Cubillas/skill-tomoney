@@ -44,15 +44,71 @@ export type AuthPayload = {
 export type ProfilePayload = {
   id: number;
   user_id: number;
-  headline: string | null;
-  category: string | null;
+  dni?: string | null;
+  ruc?: string | null;
+  business_name?: string | null;
+  industry?: string | null;
+  experience_area?: string | null;
   bio: string | null;
   description: string | null;
   location: string | null;
-  hourly_rate: string | null;
+  contact_phone?: string | null;
+  website: string | null;
+  availability_status?: string | null;
+  rating?: string | null;
+  completed_jobs?: number | null;
+  visibility_score?: string | null;
   skills: string[] | null;
   social_links: Record<string, string | null> | null;
+  profile_photo?: string | null;
   photo_url: string | null;
+};
+
+export type CategoryPayload = {
+  id: number;
+  name: string;
+  description: string | null;
+  status: string;
+};
+
+export type ServicePayload = {
+  id: number;
+  category_id: number | null;
+  category: string | null;
+  title: string;
+  description: string;
+  price: string;
+  currency: string;
+  delivery_days: number;
+  status: "active" | "paused" | "draft";
+  views_count: number;
+  created_at: string;
+};
+
+export type ServiceInput = {
+  category_id: number | null;
+  title: string;
+  description: string;
+  price: string;
+  currency: string;
+  delivery_days: number;
+  status: "active" | "paused" | "draft";
+};
+
+export type PortfolioProjectPayload = {
+  id: number;
+  category_id: number | null;
+  category: string | null;
+  title: string;
+  description: string | null;
+  image_path: string | null;
+  image_url: string | null;
+  file_path: string | null;
+  file_url: string | null;
+  external_url: string | null;
+  project_order: number;
+  is_featured: boolean;
+  created_at: string;
 };
 
 export type RecommendationPayload = {
@@ -203,6 +259,44 @@ export const api = {
       body,
     });
   },
+  getCategories: (token: string) => apiRequest<CategoryPayload[]>("/catalog/categories", { token }),
+  getServices: (token: string) => apiRequest<ServicePayload[]>("/freelancer/services", { token }),
+  createService: (token: string, body: ServiceInput) =>
+    apiRequest<ServicePayload>("/freelancer/services", {
+      method: "POST",
+      token,
+      body: JSON.stringify(body),
+    }),
+  updateService: (token: string, id: number, body: ServiceInput) =>
+    apiRequest<ServicePayload>(`/freelancer/services/${id}`, {
+      method: "PUT",
+      token,
+      body: JSON.stringify(body),
+    }),
+  deleteService: (token: string, id: number) =>
+    apiRequest<null>(`/freelancer/services/${id}`, {
+      method: "DELETE",
+      token,
+    }),
+  getPortfolioProjects: (token: string) =>
+    apiRequest<PortfolioProjectPayload[]>("/freelancer/portfolio", { token }),
+  createPortfolioProject: (token: string, body: FormData) =>
+    apiRequest<PortfolioProjectPayload>("/freelancer/portfolio", {
+      method: "POST",
+      token,
+      body,
+    }),
+  updatePortfolioProject: (token: string, id: number, body: FormData) =>
+    apiRequest<PortfolioProjectPayload>(`/freelancer/portfolio/${id}`, {
+      method: "POST",
+      token,
+      body,
+    }),
+  deletePortfolioProject: (token: string, id: number) =>
+    apiRequest<null>(`/freelancer/portfolio/${id}`, {
+      method: "DELETE",
+      token,
+    }),
   getRecommendations: (token: string, recommendationType?: string) =>
     apiRequest<RecommendationPayload[]>(
       `/recommendations${recommendationType ? `?type=${encodeURIComponent(recommendationType)}` : ""}`,

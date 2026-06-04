@@ -15,6 +15,7 @@ import { Route as ServicesRouteImport } from './routes/services'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PremiumRouteImport } from './routes/premium'
+import { Route as MypeOnboardingRouteImport } from './routes/mype-onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotRouteImport } from './routes/forgot'
 import { Route as IndexRouteImport } from './routes/index'
@@ -23,7 +24,9 @@ import { Route as DashboardMessagesRouteImport } from './routes/dashboard/messag
 import { Route as DashboardFreelancerRouteImport } from './routes/dashboard/freelancer'
 import { Route as DashboardClientRouteImport } from './routes/dashboard/client'
 import { Route as DashboardFreelancerServicesRouteImport } from './routes/dashboard/freelancer.services'
+import { Route as DashboardFreelancerProfileRouteImport } from './routes/dashboard/freelancer.profile'
 import { Route as DashboardFreelancerPortfolioRouteImport } from './routes/dashboard/freelancer.portfolio'
+import { Route as DashboardClientProfileRouteImport } from './routes/dashboard/client.profile'
 import { Route as DashboardClientProjectsRouteImport } from './routes/dashboard/client.projects'
 
 const TalentRoute = TalentRouteImport.update({
@@ -54,6 +57,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const PremiumRoute = PremiumRouteImport.update({
   id: '/premium',
   path: '/premium',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MypeOnboardingRoute = MypeOnboardingRouteImport.update({
+  id: '/mype-onboarding',
+  path: '/mype-onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -97,12 +105,23 @@ const DashboardFreelancerServicesRoute =
     path: '/services',
     getParentRoute: () => DashboardFreelancerRoute,
   } as any)
+const DashboardFreelancerProfileRoute =
+  DashboardFreelancerProfileRouteImport.update({
+    id: '/profile',
+    path: '/profile',
+    getParentRoute: () => DashboardFreelancerRoute,
+  } as any)
 const DashboardFreelancerPortfolioRoute =
   DashboardFreelancerPortfolioRouteImport.update({
     id: '/portfolio',
     path: '/portfolio',
     getParentRoute: () => DashboardFreelancerRoute,
   } as any)
+const DashboardClientProfileRoute = DashboardClientProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => DashboardClientRoute,
+} as any)
 const DashboardClientProjectsRoute = DashboardClientProjectsRouteImport.update({
   id: '/projects',
   path: '/projects',
@@ -113,6 +132,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/forgot': typeof ForgotRoute
   '/login': typeof LoginRoute
+  '/mype-onboarding': typeof MypeOnboardingRoute
   '/premium': typeof PremiumRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -124,6 +144,8 @@ export interface FileRoutesByFullPath {
   '/dashboard/messages': typeof DashboardMessagesRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/client/projects': typeof DashboardClientProjectsRoute
+  '/dashboard/client/profile': typeof DashboardClientProfileRoute
+  '/dashboard/freelancer/profile': typeof DashboardFreelancerProfileRoute
   '/dashboard/freelancer/portfolio': typeof DashboardFreelancerPortfolioRoute
   '/dashboard/freelancer/services': typeof DashboardFreelancerServicesRoute
 }
@@ -131,6 +153,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/forgot': typeof ForgotRoute
   '/login': typeof LoginRoute
+  '/mype-onboarding': typeof MypeOnboardingRoute
   '/premium': typeof PremiumRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -142,6 +165,8 @@ export interface FileRoutesByTo {
   '/dashboard/messages': typeof DashboardMessagesRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/client/projects': typeof DashboardClientProjectsRoute
+  '/dashboard/client/profile': typeof DashboardClientProfileRoute
+  '/dashboard/freelancer/profile': typeof DashboardFreelancerProfileRoute
   '/dashboard/freelancer/portfolio': typeof DashboardFreelancerPortfolioRoute
   '/dashboard/freelancer/services': typeof DashboardFreelancerServicesRoute
 }
@@ -150,6 +175,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/forgot': typeof ForgotRoute
   '/login': typeof LoginRoute
+  '/mype-onboarding': typeof MypeOnboardingRoute
   '/premium': typeof PremiumRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -161,6 +187,8 @@ export interface FileRoutesById {
   '/dashboard/messages': typeof DashboardMessagesRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/client/projects': typeof DashboardClientProjectsRoute
+  '/dashboard/client/profile': typeof DashboardClientProfileRoute
+  '/dashboard/freelancer/profile': typeof DashboardFreelancerProfileRoute
   '/dashboard/freelancer/portfolio': typeof DashboardFreelancerPortfolioRoute
   '/dashboard/freelancer/services': typeof DashboardFreelancerServicesRoute
 }
@@ -170,6 +198,7 @@ export interface FileRouteTypes {
     | '/'
     | '/forgot'
     | '/login'
+    | '/mype-onboarding'
     | '/premium'
     | '/register'
     | '/reset-password'
@@ -181,6 +210,8 @@ export interface FileRouteTypes {
     | '/dashboard/messages'
     | '/dashboard/payments'
     | '/dashboard/client/projects'
+    | '/dashboard/client/profile'
+    | '/dashboard/freelancer/profile'
     | '/dashboard/freelancer/portfolio'
     | '/dashboard/freelancer/services'
   fileRoutesByTo: FileRoutesByTo
@@ -188,6 +219,7 @@ export interface FileRouteTypes {
     | '/'
     | '/forgot'
     | '/login'
+    | '/mype-onboarding'
     | '/premium'
     | '/register'
     | '/reset-password'
@@ -199,6 +231,8 @@ export interface FileRouteTypes {
     | '/dashboard/messages'
     | '/dashboard/payments'
     | '/dashboard/client/projects'
+    | '/dashboard/client/profile'
+    | '/dashboard/freelancer/profile'
     | '/dashboard/freelancer/portfolio'
     | '/dashboard/freelancer/services'
   id:
@@ -206,6 +240,7 @@ export interface FileRouteTypes {
     | '/'
     | '/forgot'
     | '/login'
+    | '/mype-onboarding'
     | '/premium'
     | '/register'
     | '/reset-password'
@@ -217,6 +252,8 @@ export interface FileRouteTypes {
     | '/dashboard/messages'
     | '/dashboard/payments'
     | '/dashboard/client/projects'
+    | '/dashboard/client/profile'
+    | '/dashboard/freelancer/profile'
     | '/dashboard/freelancer/portfolio'
     | '/dashboard/freelancer/services'
   fileRoutesById: FileRoutesById
@@ -225,6 +262,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ForgotRoute: typeof ForgotRoute
   LoginRoute: typeof LoginRoute
+  MypeOnboardingRoute: typeof MypeOnboardingRoute
   PremiumRoute: typeof PremiumRoute
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -288,6 +326,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+<<<<<<< Updated upstream
+=======
+    '/mype-onboarding': {
+      id: '/mype-onboarding'
+      path: '/mype-onboarding'
+      fullPath: '/mype-onboarding'
+      preLoaderRoute: typeof MypeOnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/freelancer-onboarding': {
+      id: '/freelancer-onboarding'
+      path: '/freelancer-onboarding'
+      fullPath: '/freelancer-onboarding'
+      preLoaderRoute: typeof FreelancerOnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+>>>>>>> Stashed changes
     '/forgot': {
       id: '/forgot'
       path: '/forgot'
@@ -337,12 +392,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardFreelancerServicesRouteImport
       parentRoute: typeof DashboardFreelancerRoute
     }
+    '/dashboard/freelancer/profile': {
+      id: '/dashboard/freelancer/profile'
+      path: '/profile'
+      fullPath: '/dashboard/freelancer/profile'
+      preLoaderRoute: typeof DashboardFreelancerProfileRouteImport
+      parentRoute: typeof DashboardFreelancerRoute
+    }
     '/dashboard/freelancer/portfolio': {
       id: '/dashboard/freelancer/portfolio'
       path: '/portfolio'
       fullPath: '/dashboard/freelancer/portfolio'
       preLoaderRoute: typeof DashboardFreelancerPortfolioRouteImport
       parentRoute: typeof DashboardFreelancerRoute
+    }
+    '/dashboard/client/profile': {
+      id: '/dashboard/client/profile'
+      path: '/profile'
+      fullPath: '/dashboard/client/profile'
+      preLoaderRoute: typeof DashboardClientProfileRouteImport
+      parentRoute: typeof DashboardClientRoute
     }
     '/dashboard/client/projects': {
       id: '/dashboard/client/projects'
@@ -356,10 +425,12 @@ declare module '@tanstack/react-router' {
 
 interface DashboardClientRouteChildren {
   DashboardClientProjectsRoute: typeof DashboardClientProjectsRoute
+  DashboardClientProfileRoute: typeof DashboardClientProfileRoute
 }
 
 const DashboardClientRouteChildren: DashboardClientRouteChildren = {
   DashboardClientProjectsRoute: DashboardClientProjectsRoute,
+  DashboardClientProfileRoute: DashboardClientProfileRoute,
 }
 
 const DashboardClientRouteWithChildren = DashboardClientRoute._addFileChildren(
@@ -368,11 +439,13 @@ const DashboardClientRouteWithChildren = DashboardClientRoute._addFileChildren(
 
 interface DashboardFreelancerRouteChildren {
   DashboardFreelancerPortfolioRoute: typeof DashboardFreelancerPortfolioRoute
+  DashboardFreelancerProfileRoute: typeof DashboardFreelancerProfileRoute
   DashboardFreelancerServicesRoute: typeof DashboardFreelancerServicesRoute
 }
 
 const DashboardFreelancerRouteChildren: DashboardFreelancerRouteChildren = {
   DashboardFreelancerPortfolioRoute: DashboardFreelancerPortfolioRoute,
+  DashboardFreelancerProfileRoute: DashboardFreelancerProfileRoute,
   DashboardFreelancerServicesRoute: DashboardFreelancerServicesRoute,
 }
 
@@ -383,6 +456,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ForgotRoute: ForgotRoute,
   LoginRoute: LoginRoute,
+  MypeOnboardingRoute: MypeOnboardingRoute,
   PremiumRoute: PremiumRoute,
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
