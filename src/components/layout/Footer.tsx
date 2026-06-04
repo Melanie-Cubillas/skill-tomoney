@@ -55,7 +55,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-white/10 px-6 py-5 text-center text-xs text-white/55">
-        © 2026 SkilltoMoney
+        © 2026 · Todos los derechos reservados.
       </div>
     </footer>
   );

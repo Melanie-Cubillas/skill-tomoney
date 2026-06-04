@@ -143,6 +143,7 @@ export const api = {
       body: JSON.stringify(body),
     }),
   registerMype: (body: {
+    business_name: string;
     first_name: string;
     last_name: string;
     company_name?: string;
@@ -157,6 +158,11 @@ export const api = {
     }),
   forgotPassword: (body: { email: string }) =>
     apiRequest<null>("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  resetPassword: (body: { token: string; email: string; password: string; password_confirmation: string }) =>
+    apiRequest<null>("/auth/reset-password", {
       method: "POST",
       body: JSON.stringify(body),
     }),

@@ -1,5 +1,5 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, useCallback } from "react";
+﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,12 +9,7 @@ import { api, type DniLookupPayload, type RucLookupPayload } from "@/lib/api";
 import { saveSession } from "@/lib/auth";
 
 export const Route = createFileRoute("/register")({
-  head: () => ({
-    meta: [
-      { title: "Crear cuenta · SkilltoMoney" },
-      { name: "description", content: "Crea tu cuenta en SkilltoMoney en menos de 2 minutos." },
-    ],
-  }),
+  head: () => ({ meta: [{ title: "Crear cuenta · Skill-to-Money" }, { name: "description", content: "Crea tu cuenta en Skill-to-Money en menos de 2 minutos." }] }),
   component: Register,
 });
 
@@ -34,7 +29,7 @@ function getPasswordStrength(password: string): { score: number; label: string; 
 
 function Register() {
   const navigate = useNavigate();
-  const [role, setRole] = useState<"freelancer" | "client">("freelancer");
+  const [role, setRole] = useState<"freelancer" | "mype">("freelancer");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [companyName, setCompanyName] = useState("");
@@ -45,6 +40,19 @@ function Register() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const aside = useMemo(() => role === "freelancer"
+    ? {
+        eyebrow: "Para freelancers",
+        title: "Convierte tus skills en oportunidades reales.",
+        subtitle: "Crea tu perfil, recibe recomendaciones personalizadas y conecta con MYPES que necesitan talento digital.",
+        stats: [["+3.2k", "oportunidades"], ["IA", "recomendaciones"], ["0%", "comision inicial"]] as Array<[string, string]>,
+      }
+    : {
+        eyebrow: "Para MYPES",
+        title: "Encuentra talento digital confiable para tu negocio.",
+        subtitle: "Registra tu MYPE, explora freelancers verificados y empieza a publicar oportunidades.",
+        stats: [["+3.2k", "oportunidades"], ["24/7", "soporte"], ["match", "recomendado"]] as Array<[string, string]>,
+      }, [role]);
   const [lookingUp, setLookingUp] = useState(false);
   const [dniLookedUp, setDniLookedUp] = useState(false);
   const [rucLookedUp, setRucLookedUp] = useState(false);
