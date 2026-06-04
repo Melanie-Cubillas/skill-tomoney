@@ -50,10 +50,7 @@ export function DashboardShell({
     <div className="grid min-h-screen bg-muted/40 lg:grid-cols-[256px_1fr]">
       <aside className="hidden border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex lg:flex-col">
         <Link to="/" className="flex items-center gap-2.5 px-6 py-5">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-primary shadow-glow">
-            <span className="font-display text-sm font-bold text-primary-foreground">S</span>
-          </span>
-          <span className="font-display text-base font-bold">SkilltoMoney</span>
+          <img src="/brand/skill-to-money-logo-white.png" alt="Skill-to-Money" className="h-auto w-[160px] object-contain" />
         </Link>
         <div className="px-4 pb-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">
           {role === "freelancer" ? "Freelancer" : "Cliente / MYPE"}
@@ -78,7 +75,7 @@ export function DashboardShell({
         </nav>
         <div className="m-3 rounded-2xl border border-sidebar-border bg-sidebar-accent/40 p-4">
           <div className="flex items-center gap-2 text-xs font-semibold text-primary-glow">
-            <Crown className="h-3.5 w-3.5" /> Skill Pro
+            <Crown className="h-3.5 w-3.5" /> Plan Pro
           </div>
           <p className="mt-1.5 text-xs text-sidebar-foreground/70">Mentorias 1:1, IA ilimitada y mejor visibilidad.</p>
           <Link to="/premium" className="mt-3 inline-flex w-full justify-center rounded-lg bg-gradient-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">

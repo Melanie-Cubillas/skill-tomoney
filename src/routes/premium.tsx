@@ -12,7 +12,7 @@ export const Route = createFileRoute("/premium")({
       <section className="relative overflow-hidden bg-gradient-hero py-20 text-primary-foreground">
         <div className="absolute inset-0 grid-pattern opacity-30" />
         <div className="relative mx-auto max-w-4xl px-6 text-center">
-          <Badge className="bg-white/15 text-primary-foreground backdrop-blur"><Crown className="mr-1 h-3 w-3" /> SkilltoMoney Pro</Badge>
+          <Badge className="bg-white/15 text-primary-foreground backdrop-blur"><Crown className="mr-1 h-3 w-3" /> Plan Pro</Badge>
           <h1 className="mt-4 font-display text-5xl font-bold">Mentorías que aceleran tu crecimiento</h1>
           <p className="mt-4 text-white/75">Aprende de freelancers top, recibe feedback real y consigue mejores clientes más rápido.</p>
         </div>
