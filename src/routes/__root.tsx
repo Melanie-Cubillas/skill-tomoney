@@ -72,17 +72,43 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SkilltoMoney — Convierte tus skills digitales en ingresos" },
-      { name: "description", content: "Plataforma para freelancers principiantes y MYPES: portafolio, servicios, matching y pagos protegidos." },
-      { property: "og:title", content: "SkilltoMoney — Convierte tus skills digitales en ingresos" },
-      { property: "og:description", content: "Plataforma para freelancers principiantes y MYPES: portafolio, servicios, matching y pagos protegidos." },
+      { title: "SkilltoMoney · Convierte tus habilidades digitales en ingresos" },
+      {
+        name: "description",
+        content:
+          "Plataforma para freelancers principiantes y MYPES: portafolio, servicios, matching y pagos protegidos.",
+      },
+      {
+        property: "og:title",
+        content: "SkilltoMoney · Convierte tus habilidades digitales en ingresos",
+      },
+      {
+        property: "og:description",
+        content:
+          "Plataforma para freelancers principiantes y MYPES: portafolio, servicios, matching y pagos protegidos.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "SkilltoMoney — Convierte tus skills digitales en ingresos" },
-      { name: "twitter:description", content: "Plataforma para freelancers principiantes y MYPES: portafolio, servicios, matching y pagos protegidos." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/18ff3554-f36e-4d57-bf99-095340397732/id-preview-abc3432b--4ed91d87-1499-4c6b-96d8-fc04a664d153.lovable.app-1779419072890.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/18ff3554-f36e-4d57-bf99-095340397732/id-preview-abc3432b--4ed91d87-1499-4c6b-96d8-fc04a664d153.lovable.app-1779419072890.png" },
+      {
+        name: "twitter:title",
+        content: "SkilltoMoney · Convierte tus habilidades digitales en ingresos",
+      },
+      {
+        name: "twitter:description",
+        content:
+          "Plataforma para freelancers principiantes y MYPES: portafolio, servicios, matching y pagos protegidos.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/18ff3554-f36e-4d57-bf99-095340397732/id-preview-abc3432b--4ed91d87-1499-4c6b-96d8-fc04a664d153.lovable.app-1779419072890.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/18ff3554-f36e-4d57-bf99-095340397732/id-preview-abc3432b--4ed91d87-1499-4c6b-96d8-fc04a664d153.lovable.app-1779419072890.png",
+      },
     ],
     links: [
       {

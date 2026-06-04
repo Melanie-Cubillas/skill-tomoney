@@ -33,16 +33,17 @@ import { Shell } from "@/components/layout/Shell";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Skill-to-Money — Donde tus skills se convierten en ingresos reales" },
+      { title: "Skill-to-Money · Donde tus habilidades se convierten en ingresos reales" },
       {
         name: "description",
         content:
           "Conectamos talento digital con MYPES. Más oportunidades, trabajos de calidad y pagos seguros.",
       },
-      { property: "og:title", content: "Skill-to-Money — Ingresos reales con tus skills" },
+      { property: "og:title", content: "Skill-to-Money · Ingresos reales con tus habilidades" },
       {
         property: "og:description",
-        content: "Plataforma para freelancers, MYPES y talento digital con pagos seguros e IA incluida.",
+        content:
+          "Plataforma para freelancers, MYPES y talento digital con pagos seguros e IA incluida.",
       },
     ],
   }),
@@ -50,12 +51,52 @@ export const Route = createFileRoute("/")({
 });
 
 const categories = [
-  { icon: Palette, title: "Diseño Gráfico", count: "142", tone: "from-[#051b1e] to-[#063b3b]", iconTone: "bg-[#ff3dca]" },
-  { icon: Clapperboard, title: "Edición de Video", count: "98", tone: "from-[#ffe4d9] to-[#fff2e8]", iconTone: "bg-[#ff442f]", light: true },
-  { icon: Megaphone, title: "Marketing & CM", count: "76", tone: "from-[#d9fbf5] to-[#ecfffb]", iconTone: "bg-[#00bfae]", light: true },
-  { icon: Monitor, title: "Desarrollo Web", count: "121", tone: "from-[#dcd7ff] to-[#f4f1ff]", iconTone: "bg-[#6c5cff]", light: true },
-  { icon: WandSparkles, title: "Diseño UX/UI", count: "64", tone: "from-[#120928] to-[#251052]", iconTone: "bg-[#8d5cff]" },
-  { icon: Bot, title: "IA & Automatización", count: "53", tone: "from-[#ccecff] to-[#eaf7ff]", iconTone: "bg-[#5b8cff]", light: true },
+  {
+    icon: Palette,
+    title: "Diseño Gráfico",
+    count: "142",
+    tone: "from-[#051b1e] to-[#063b3b]",
+    iconTone: "bg-[#ff3dca]",
+  },
+  {
+    icon: Clapperboard,
+    title: "Edición de Video",
+    count: "98",
+    tone: "from-[#ffe4d9] to-[#fff2e8]",
+    iconTone: "bg-[#ff442f]",
+    light: true,
+  },
+  {
+    icon: Megaphone,
+    title: "Marketing & CM",
+    count: "76",
+    tone: "from-[#d9fbf5] to-[#ecfffb]",
+    iconTone: "bg-[#00bfae]",
+    light: true,
+  },
+  {
+    icon: Monitor,
+    title: "Desarrollo Web",
+    count: "121",
+    tone: "from-[#dcd7ff] to-[#f4f1ff]",
+    iconTone: "bg-[#6c5cff]",
+    light: true,
+  },
+  {
+    icon: WandSparkles,
+    title: "Diseño UX/UI",
+    count: "64",
+    tone: "from-[#120928] to-[#251052]",
+    iconTone: "bg-[#8d5cff]",
+  },
+  {
+    icon: Bot,
+    title: "IA & Automatización",
+    count: "53",
+    tone: "from-[#ccecff] to-[#eaf7ff]",
+    iconTone: "bg-[#5b8cff]",
+    light: true,
+  },
 ];
 
 const freelancers = [
@@ -98,7 +139,7 @@ const testimonials = [
   {
     text: "Encontré un editor de video buenísimo y a muy buen precio para nuestro TikTok. Subimos 3x los seguidores.",
     name: "Ricardo Vega",
-    role: "Cafetería Limen - MYPE",
+    role: "Cafetería Limen · MYPE",
     city: "Arequipa, Perú",
   },
   {
@@ -140,14 +181,16 @@ function HeroSection() {
               <Sparkles className="h-6 w-6" />
             </div>
             <h1 className="font-display text-5xl font-extrabold leading-[0.98] tracking-[-0.07em] sm:text-6xl lg:text-[4.9rem]">
-              Donde tus skills
+              Donde tus habilidades
               <br />
               se convierten en
               <br />
-              <span className="text-primary">ingresos</span> <span className="text-accent">reales.</span>
+              <span className="text-primary">ingresos</span>{" "}
+              <span className="text-accent">reales.</span>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/82">
-              Conectamos talento digital con MYPES. Más oportunidades, trabajos de calidad y pagos seguros.
+              Conectamos talento digital con MYPES. Más oportunidades, trabajos de calidad y pagos
+              seguros.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Link
@@ -195,9 +238,21 @@ function HeroPill({ icon: Icon, text }: { icon: typeof Wallet; text: string }) {
   );
 }
 
-function StatItem({ icon: Icon, value, label, last = false }: { icon: typeof UserRound; value: string; label: string; last?: boolean }) {
+function StatItem({
+  icon: Icon,
+  value,
+  label,
+  last = false,
+}: {
+  icon: typeof UserRound;
+  value: string;
+  label: string;
+  last?: boolean;
+}) {
   return (
-    <div className={`flex items-center gap-4 px-6 py-5 ${last ? "" : "border-b border-white/10 md:border-b-0 md:border-r"}`}>
+    <div
+      className={`flex items-center gap-4 px-6 py-5 ${last ? "" : "border-b border-white/10 md:border-b-0 md:border-r"}`}
+    >
       <Icon className="h-7 w-7 text-primary" />
       <div>
         <div className="font-display text-xl font-extrabold leading-none text-white">{value}</div>
@@ -241,7 +296,9 @@ function HeroVisual() {
           </span>
           <span className="font-display text-lg font-extrabold">Asistente IA</span>
         </div>
-        <p className="mt-4 text-sm font-semibold leading-relaxed text-[#38484d]">Te sugiero ajustar tus precios y mejorar tu visibilidad.</p>
+        <p className="mt-4 text-sm font-semibold leading-relaxed text-[#38484d]">
+          Te sugiero ajustar tus precios y mejorar tu visibilidad.
+        </p>
         <button className="absolute bottom-5 right-5 grid h-10 w-10 place-items-center rounded-full border border-accent/40 bg-white text-accent">
           <ArrowRight className="h-5 w-5" />
         </button>
@@ -252,12 +309,31 @@ function HeroVisual() {
 
 function CategoriesSection() {
   return (
-    <section id="categorias" className="relative overflow-hidden bg-[#fff7ee] py-16 text-[#071014] cream-pattern">
+    <section
+      id="categorias"
+      className="relative overflow-hidden bg-[#fff7ee] py-16 text-[#071014] cream-pattern"
+    >
       <div className="absolute -left-16 bottom-6 h-48 w-48 rounded-full border border-accent/50" />
       <div className="absolute right-10 top-20 h-36 w-24 dot-field opacity-50" />
-      <svg className="absolute left-[13%] top-[62%] hidden h-32 w-52 text-accent lg:block" viewBox="0 0 220 130" fill="none" aria-hidden="true">
-        <path d="M5 103C78 129 159 88 202 17" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-        <path d="M178 17H204V43" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+      <svg
+        className="absolute left-[13%] top-[62%] hidden h-32 w-52 text-accent lg:block"
+        viewBox="0 0 220 130"
+        fill="none"
+        aria-hidden="true"
+      >
+        <path
+          d="M5 103C78 129 159 88 202 17"
+          stroke="currentColor"
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
+        <path
+          d="M178 17H204V43"
+          stroke="currentColor"
+          strokeWidth="4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
       <div className="mx-auto grid max-w-7xl gap-9 px-6 lg:grid-cols-[0.58fr_1.42fr]">
         <div className="relative flex flex-col justify-center">
@@ -270,7 +346,10 @@ function CategoriesSection() {
           <p className="mt-5 max-w-sm text-sm font-medium leading-relaxed text-muted-foreground">
             Explora oportunidades reales en las habilidades que las MYPES están buscando hoy.
           </p>
-          <a href="/services" className="mt-8 inline-flex w-fit items-center gap-3 rounded-full bg-[#071014] px-7 py-3.5 text-sm font-extrabold text-white shadow-elegant">
+          <a
+            href="/services"
+            className="mt-8 inline-flex w-fit items-center gap-3 rounded-full bg-[#071014] px-7 py-3.5 text-sm font-extrabold text-white shadow-elegant"
+          >
             Ver todas las categorías
             <ArrowRight className="h-4 w-4 text-accent" />
           </a>
@@ -278,17 +357,29 @@ function CategoriesSection() {
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {categories.map((category) => (
-            <a key={category.title} href="/services" className={`group relative min-h-[168px] overflow-hidden rounded-[1.35rem] bg-gradient-to-br ${category.tone} p-6 shadow-elegant ring-1 ring-black/5 transition hover:-translate-y-1`}>
-              <Sparkles className={`absolute right-8 top-6 h-4 w-4 ${category.light ? "text-accent/45" : "text-white/35"}`} />
+            <a
+              key={category.title}
+              href="/services"
+              className={`group relative min-h-[168px] overflow-hidden rounded-[1.35rem] bg-gradient-to-br ${category.tone} p-6 shadow-elegant ring-1 ring-black/5 transition hover:-translate-y-1`}
+            >
+              <Sparkles
+                className={`absolute right-8 top-6 h-4 w-4 ${category.light ? "text-accent/45" : "text-white/35"}`}
+              />
               <div className="relative z-10 flex items-start gap-5 pr-14">
-                <span className={`grid h-16 w-16 shrink-0 place-items-center rounded-2xl ${category.iconTone} text-white shadow-soft`}>
+                <span
+                  className={`grid h-16 w-16 shrink-0 place-items-center rounded-2xl ${category.iconTone} text-white shadow-soft`}
+                >
                   <category.icon className="h-9 w-9" />
                 </span>
                 <div className={category.light ? "text-[#071014]" : "text-white"}>
-                  <h3 className="font-display text-2xl font-extrabold leading-[1.04]">{category.title}</h3>
+                  <h3 className="font-display text-2xl font-extrabold leading-[1.04]">
+                    {category.title}
+                  </h3>
                 </div>
               </div>
-              <div className={`absolute bottom-6 left-6 ${category.light ? "text-[#071014]" : "text-white"}`}>
+              <div
+                className={`absolute bottom-6 left-6 ${category.light ? "text-[#071014]" : "text-white"}`}
+              >
                 <p className="text-2xl font-extrabold leading-none">{category.count}</p>
                 <p className="text-sm font-semibold opacity-75">freelancers activos</p>
               </div>
@@ -305,7 +396,10 @@ function CategoriesSection() {
 
 function HowItWorksSection() {
   return (
-    <section id="como-funciona" className="relative overflow-hidden bg-gradient-primary py-16 text-white">
+    <section
+      id="como-funciona"
+      className="relative overflow-hidden bg-gradient-primary py-16 text-white"
+    >
       <div className="absolute inset-0 opacity-20 [background-image:radial-gradient(circle_at_90%_30%,white_1px,transparent_1.5px)] [background-size:18px_18px]" />
       <div className="absolute right-0 top-0 h-full w-1/2 rounded-l-full border-l border-white/20 opacity-30" />
       <div className="relative mx-auto grid max-w-7xl gap-8 px-6 lg:grid-cols-[0.7fr_1.3fr]">
@@ -323,9 +417,25 @@ function HowItWorksSection() {
         <div className="relative grid gap-5 md:grid-cols-3">
           <StepConnector className="left-[30.5%]" />
           <StepConnector className="left-[64.5%]" />
-          <StepCard number="01" icon={UserRound} title="Crea tu perfil" text="Completa tu información, muestra tus habilidades y destaca tu talento." />
-          <StepCard dark number="02" icon={Rocket} title="Publica tu servicio" text="Define qué ofreces, tu precio y tiempo de entrega. La IA te ayuda a optimizarlo." />
-          <StepCard number="03" icon={ShieldCheck} title="Cobra protegido" text="El cliente paga con escrow y recibes tu dinero de forma segura y sin sustos." />
+          <StepCard
+            number="01"
+            icon={UserRound}
+            title="Crea tu perfil"
+            text="Completa tu información, muestra tus habilidades y destaca tu talento."
+          />
+          <StepCard
+            dark
+            number="02"
+            icon={Rocket}
+            title="Publica tu servicio"
+            text="Define qué ofreces, tu precio y tiempo de entrega. La IA te ayuda a optimizarlo."
+          />
+          <StepCard
+            number="03"
+            icon={ShieldCheck}
+            title="Cobra protegido"
+            text="El cliente paga con escrow y recibes tu dinero de forma segura y sin sustos."
+          />
         </div>
       </div>
     </section>
@@ -334,7 +444,10 @@ function HowItWorksSection() {
 
 function StepConnector({ className }: { className: string }) {
   return (
-    <div className={`pointer-events-none absolute top-1/2 z-20 hidden w-[8.5%] -translate-y-1/2 md:block ${className}`} aria-hidden="true">
+    <div
+      className={`pointer-events-none absolute top-1/2 z-20 hidden w-[8.5%] -translate-y-1/2 md:block ${className}`}
+      aria-hidden="true"
+    >
       <div className="border-t-2 border-dashed border-[#071014]/75" />
       <span className="absolute left-1/2 top-1/2 grid h-8 w-8 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white text-[#071014] shadow-soft ring-4 ring-primary">
         <ArrowRight className="h-4 w-4" />
@@ -343,13 +456,37 @@ function StepConnector({ className }: { className: string }) {
   );
 }
 
-function StepCard({ number, icon: Icon, title, text, dark = false }: { number: string; icon: typeof UserRound; title: string; text: string; dark?: boolean }) {
+function StepCard({
+  number,
+  icon: Icon,
+  title,
+  text,
+  dark = false,
+}: {
+  number: string;
+  icon: typeof UserRound;
+  title: string;
+  text: string;
+  dark?: boolean;
+}) {
   return (
-    <div className={`relative min-h-[250px] rounded-[1.8rem] p-7 shadow-elegant ring-1 ${dark ? "bg-[#071014] text-white ring-white/10" : "bg-[#fff7ee] text-[#071014] ring-white/70"}`}>
-      <span className={`grid h-16 w-16 place-items-center rounded-full font-display text-2xl font-extrabold text-white shadow-soft ${dark ? "bg-gradient-primary" : "bg-gradient-teal"}`}>{number}</span>
-      <Icon className={`absolute right-8 top-8 h-16 w-16 stroke-[1.6] ${dark ? "text-primary" : "text-[#071014]"}`} />
+    <div
+      className={`relative min-h-[250px] rounded-[1.8rem] p-7 shadow-elegant ring-1 ${dark ? "bg-[#071014] text-white ring-white/10" : "bg-[#fff7ee] text-[#071014] ring-white/70"}`}
+    >
+      <span
+        className={`grid h-16 w-16 place-items-center rounded-full font-display text-2xl font-extrabold text-white shadow-soft ${dark ? "bg-gradient-primary" : "bg-gradient-teal"}`}
+      >
+        {number}
+      </span>
+      <Icon
+        className={`absolute right-8 top-8 h-16 w-16 stroke-[1.6] ${dark ? "text-primary" : "text-[#071014]"}`}
+      />
       <h3 className="mt-9 font-display text-2xl font-extrabold">{title}</h3>
-      <p className={`mt-3 text-base font-semibold leading-relaxed ${dark ? "text-white/72" : "text-[#4d5b60]"}`}>{text}</p>
+      <p
+        className={`mt-3 text-base font-semibold leading-relaxed ${dark ? "text-white/72" : "text-[#4d5b60]"}`}
+      >
+        {text}
+      </p>
     </div>
   );
 }
@@ -369,7 +506,10 @@ function FreelancersSection() {
             <br />
             tu proyecto
           </h2>
-          <a href="/talent" className="mt-8 inline-flex w-fit items-center gap-3 rounded-full bg-[#071014] px-6 py-3 text-sm font-extrabold text-white shadow-elegant">
+          <a
+            href="/talent"
+            className="mt-8 inline-flex w-fit items-center gap-3 rounded-full bg-[#071014] px-6 py-3 text-sm font-extrabold text-white shadow-elegant"
+          >
             Ver todos los freelancers
             <ArrowRight className="h-4 w-4 text-primary" />
           </a>
@@ -384,7 +524,15 @@ function FreelancersSection() {
   );
 }
 
-function FreelancerCard({ name, role, rating, city, tags, price, tone }: (typeof freelancers)[number]) {
+function FreelancerCard({
+  name,
+  role,
+  rating,
+  city,
+  tags,
+  price,
+  tone,
+}: (typeof freelancers)[number]) {
   return (
     <article className="group overflow-hidden rounded-[1.7rem] bg-white shadow-elegant ring-1 ring-black/5 transition hover:-translate-y-1">
       <div className={`relative h-[220px] overflow-hidden bg-gradient-to-br ${tone}`}>
@@ -401,7 +549,12 @@ function FreelancerCard({ name, role, rating, city, tags, price, tone }: (typeof
       <div className="relative bg-white px-6 pb-6 pt-7">
         <div className="absolute -top-5 left-5 right-5 flex flex-wrap gap-2">
           {tags.map((tag) => (
-            <span key={tag} className="rounded-full border border-black/10 bg-white/95 px-3 py-1 text-xs font-bold shadow-soft backdrop-blur">{tag}</span>
+            <span
+              key={tag}
+              className="rounded-full border border-black/10 bg-white/95 px-3 py-1 text-xs font-bold shadow-soft backdrop-blur"
+            >
+              {tag}
+            </span>
           ))}
         </div>
 
@@ -413,7 +566,9 @@ function FreelancerCard({ name, role, rating, city, tags, price, tone }: (typeof
             </h3>
             <p className="mt-1 text-sm font-semibold text-muted-foreground">{role}</p>
           </div>
-          <div className="rounded-full bg-[#eafff9] px-3 py-1 text-xs font-extrabold text-[#008c84]">Top</div>
+          <div className="rounded-full bg-[#eafff9] px-3 py-1 text-xs font-extrabold text-[#008c84]">
+            Top
+          </div>
         </div>
 
         <div className="mt-4 grid gap-2 text-sm font-bold text-[#071014]">
@@ -432,7 +587,10 @@ function FreelancerCard({ name, role, rating, city, tags, price, tone }: (typeof
             <div className="text-xs font-bold text-muted-foreground">Desde</div>
             <div className="font-display text-3xl font-extrabold leading-none">S/ {price}</div>
           </div>
-          <a href="/talent" className="grid h-14 w-14 place-items-center rounded-full bg-[#071014] text-white shadow-soft transition hover:-translate-y-0.5">
+          <a
+            href="/talent"
+            className="grid h-14 w-14 place-items-center rounded-full bg-[#071014] text-white shadow-soft transition hover:-translate-y-0.5"
+          >
             <ArrowRight className="h-6 w-6" />
           </a>
         </div>
@@ -450,19 +608,26 @@ function AudienceSection() {
         <TrendingUp className="absolute right-20 top-14 h-40 w-40 rotate-12 text-accent/45" />
         <SectionEyebrow text="PARA FREELANCERS" />
         <h2 className="relative mt-3 font-display text-4xl font-extrabold leading-tight sm:text-5xl">
-          Vende tus skills
-          <br />
-          y genera ingresos reales
+          Vende tus habilidades
+          <br />y genera ingresos reales
         </h2>
         <ul className="relative mt-7 space-y-3 text-sm font-bold text-white/88">
-          {["Publica servicios ilimitados", "Pagos protegidos con escrow", "IA que te ayuda a vender más", "Comunidad y soporte 24/7"].map((item) => (
+          {[
+            "Publica servicios ilimitados",
+            "Pagos protegidos con escrow",
+            "IA que te ayuda a vender más",
+            "Comunidad y soporte 24/7",
+          ].map((item) => (
             <li key={item} className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-accent" />
               {item}
             </li>
           ))}
         </ul>
-        <Link to="/register" className="relative mt-8 inline-flex items-center gap-3 rounded-xl bg-[#eafff9] px-6 py-3 text-sm font-extrabold text-[#061013] shadow-elegant">
+        <Link
+          to="/register"
+          className="relative mt-8 inline-flex items-center gap-3 rounded-xl bg-[#eafff9] px-6 py-3 text-sm font-extrabold text-[#061013] shadow-elegant"
+        >
           Crear mi perfil
           <ArrowRight className="h-4 w-4" />
         </Link>
@@ -482,14 +647,22 @@ function AudienceSection() {
           Encuentra talento digital confiable para tu negocio
         </h2>
         <ul className="relative mt-7 space-y-3 text-sm font-bold text-white/90">
-          {["Talento verificado y calificado", "Compara perfiles y precios", "Pagos seguros y protegidos", "Contratos y entregas claras"].map((item) => (
+          {[
+            "Talento verificado y calificado",
+            "Compara perfiles y precios",
+            "Pagos seguros y protegidos",
+            "Contratos y entregas claras",
+          ].map((item) => (
             <li key={item} className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-white" />
               {item}
             </li>
           ))}
         </ul>
-        <Link to="/talent" className="relative mt-8 inline-flex items-center gap-3 rounded-xl bg-[#071014] px-6 py-3 text-sm font-extrabold text-white shadow-elegant">
+        <Link
+          to="/talent"
+          className="relative mt-8 inline-flex items-center gap-3 rounded-xl bg-[#071014] px-6 py-3 text-sm font-extrabold text-white shadow-elegant"
+        >
           Buscar talento
           <ArrowRight className="h-4 w-4 text-accent" />
         </Link>
@@ -498,7 +671,11 @@ function AudienceSection() {
           <div className="mx-auto h-20 w-20 rounded-full bg-gradient-to-br from-accent to-white" />
           <div className="mt-4 h-3 rounded-full bg-[#071014]/20" />
           <div className="mt-2 h-3 w-2/3 rounded-full bg-[#071014]/15" />
-          <div className="mt-4 flex gap-1 text-warning">{[...Array(5)].map((_, i) => <Star key={i} className="h-4 w-4 fill-current" />)}</div>
+          <div className="mt-4 flex gap-1 text-warning">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className="h-4 w-4 fill-current" />
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -529,8 +706,13 @@ function CommunitySection() {
           </button>
           <div className="grid gap-5 md:grid-cols-3">
             {testimonials.map((testimonial, index) => (
-              <article key={testimonial.name} className="min-h-[310px] rounded-2xl border border-white/10 bg-white/[0.055] p-7 shadow-ring backdrop-blur">
-                <div className={`flex items-center gap-2 ${index === 1 ? "text-accent" : "text-primary"}`}>
+              <article
+                key={testimonial.name}
+                className="min-h-[310px] rounded-2xl border border-white/10 bg-white/[0.055] p-7 shadow-ring backdrop-blur"
+              >
+                <div
+                  className={`flex items-center gap-2 ${index === 1 ? "text-accent" : "text-primary"}`}
+                >
                   <Quote className="h-8 w-8" />
                   <div className="flex text-warning">
                     {[...Array(5)].map((_, i) => (
@@ -538,9 +720,13 @@ function CommunitySection() {
                     ))}
                   </div>
                 </div>
-                <p className="mt-5 text-sm font-semibold leading-relaxed text-white/82">{testimonial.text}</p>
+                <p className="mt-5 text-sm font-semibold leading-relaxed text-white/82">
+                  {testimonial.text}
+                </p>
                 <div className="mt-7 flex items-center gap-3">
-                  <div className={`h-12 w-12 rounded-full ring-4 ${index === 1 ? "bg-gradient-teal ring-accent/30" : "bg-gradient-primary ring-primary/25"}`} />
+                  <div
+                    className={`h-12 w-12 rounded-full ring-4 ${index === 1 ? "bg-gradient-teal ring-accent/30" : "bg-gradient-primary ring-primary/25"}`}
+                  />
                   <div>
                     <div className="font-display text-sm font-extrabold">{testimonial.name}</div>
                     <div className="text-xs font-semibold text-white/65">{testimonial.role}</div>
@@ -564,7 +750,15 @@ function CommunitySection() {
   );
 }
 
-function MiniStat({ icon: Icon, value, label }: { icon: typeof BriefcaseBusiness; value: string; label: string }) {
+function MiniStat({
+  icon: Icon,
+  value,
+  label,
+}: {
+  icon: typeof BriefcaseBusiness;
+  value: string;
+  label: string;
+}) {
   return (
     <div className="rounded-2xl border border-white/10 bg-white/[0.045] p-4 text-center shadow-ring">
       <Icon className="mx-auto h-7 w-7 text-primary" />
@@ -581,15 +775,25 @@ function FinalCtaSection() {
       <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-6 lg:grid-cols-[0.8fr_1fr_0.8fr]">
         <div className="hidden h-40 rounded-full bg-gradient-to-br from-accent/60 to-white/15 lg:block" />
         <div>
-          <h2 className="font-display text-4xl font-extrabold leading-tight sm:text-5xl">¿Listo para vivir de tus skills?</h2>
-          <p className="mt-3 max-w-xl text-sm font-semibold text-white/78">Únete a miles de jóvenes que ya están generando ingresos reales con su talento.</p>
+          <h2 className="font-display text-4xl font-extrabold leading-tight sm:text-5xl">
+            ¿Listo para vivir de tus habilidades?
+          </h2>
+          <p className="mt-3 max-w-xl text-sm font-semibold text-white/78">
+            Únete a miles de jóvenes que ya están generando ingresos reales con su talento.
+          </p>
         </div>
         <div className="flex flex-col gap-3">
-          <Link to="/register" className="inline-flex items-center justify-center gap-3 rounded-xl bg-gradient-primary px-7 py-4 text-sm font-extrabold text-white shadow-elegant">
+          <Link
+            to="/register"
+            className="inline-flex items-center justify-center gap-3 rounded-xl bg-gradient-primary px-7 py-4 text-sm font-extrabold text-white shadow-elegant"
+          >
             Soy Freelancer
             <ArrowRight className="h-5 w-5" />
           </Link>
-          <Link to="/talent" className="inline-flex items-center justify-center gap-3 rounded-xl border border-white/15 bg-[#071014] px-7 py-4 text-sm font-extrabold text-white shadow-elegant">
+          <Link
+            to="/talent"
+            className="inline-flex items-center justify-center gap-3 rounded-xl border border-white/15 bg-[#071014] px-7 py-4 text-sm font-extrabold text-white shadow-elegant"
+          >
             Buscar Talento
             <ArrowRight className="h-5 w-5 text-accent" />
           </Link>
@@ -599,11 +803,21 @@ function FinalCtaSection() {
   );
 }
 
-function SectionEyebrow({ text, tone = "white", color }: { text: string; tone?: "white" | "teal"; color?: "primary" }) {
+function SectionEyebrow({
+  text,
+  tone = "white",
+  color,
+}: {
+  text: string;
+  tone?: "white" | "teal";
+  color?: "primary";
+}) {
   const dotColor = color === "primary" ? "bg-primary" : tone === "teal" ? "bg-accent" : "bg-white";
   const textColor = tone === "teal" ? "text-accent" : "text-white";
   return (
-    <div className={`inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] ${textColor}`}>
+    <div
+      className={`inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] ${textColor}`}
+    >
       <span className={`h-2 w-2 rounded-full ${dotColor}`} />
       {text}
       <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} />

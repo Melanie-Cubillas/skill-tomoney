@@ -52,12 +52,14 @@ export function AuthLayout({
             ))}
           </div>
         </div>
-        <div className="relative text-xs text-white/45">© 2026 · Todos los derechos reservados.</div>
+        <div className="relative text-xs text-white/50">
+          MVP universitario · Hecho con dedicación en Perú
+        </div>
       </div>
       <div className="flex flex-col bg-background">
         <div className="flex justify-end p-6 lg:hidden">
-          <Link to="/" aria-label="Skill-to-Money inicio">
-            <img src="/brand/skill-to-money-logo-white.png" alt="Skill-to-Money" className="h-auto w-[150px] object-contain rounded-xl bg-[#020608] p-2" />
+          <Link to="/" className="font-display text-sm font-bold">
+            SkilltoMoney
           </Link>
         </div>
         <div className="flex flex-1 items-center justify-center px-6 py-10">
