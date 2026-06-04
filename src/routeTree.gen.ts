@@ -16,6 +16,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as FreelancerOnboardingRouteImport } from './routes/freelancer-onboarding'
 import { Route as ForgotRouteImport } from './routes/forgot'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardPaymentsRouteImport } from './routes/dashboard/payments'
@@ -59,6 +60,11 @@ const PremiumRoute = PremiumRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FreelancerOnboardingRoute = FreelancerOnboardingRouteImport.update({
+  id: '/freelancer-onboarding',
+  path: '/freelancer-onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotRoute = ForgotRouteImport.update({
@@ -112,6 +118,7 @@ const DashboardClientProjectsRoute = DashboardClientProjectsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/forgot': typeof ForgotRoute
+  '/freelancer-onboarding': typeof FreelancerOnboardingRoute
   '/login': typeof LoginRoute
   '/premium': typeof PremiumRoute
   '/register': typeof RegisterRoute
@@ -130,6 +137,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/forgot': typeof ForgotRoute
+  '/freelancer-onboarding': typeof FreelancerOnboardingRoute
   '/login': typeof LoginRoute
   '/premium': typeof PremiumRoute
   '/register': typeof RegisterRoute
@@ -149,6 +157,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/forgot': typeof ForgotRoute
+  '/freelancer-onboarding': typeof FreelancerOnboardingRoute
   '/login': typeof LoginRoute
   '/premium': typeof PremiumRoute
   '/register': typeof RegisterRoute
@@ -169,6 +178,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/forgot'
+    | '/freelancer-onboarding'
     | '/login'
     | '/premium'
     | '/register'
@@ -187,6 +197,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/forgot'
+    | '/freelancer-onboarding'
     | '/login'
     | '/premium'
     | '/register'
@@ -205,6 +216,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/forgot'
+    | '/freelancer-onboarding'
     | '/login'
     | '/premium'
     | '/register'
@@ -224,6 +236,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ForgotRoute: typeof ForgotRoute
+  FreelancerOnboardingRoute: typeof FreelancerOnboardingRoute
   LoginRoute: typeof LoginRoute
   PremiumRoute: typeof PremiumRoute
   RegisterRoute: typeof RegisterRoute
@@ -286,6 +299,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/freelancer-onboarding': {
+      id: '/freelancer-onboarding'
+      path: '/freelancer-onboarding'
+      fullPath: '/freelancer-onboarding'
+      preLoaderRoute: typeof FreelancerOnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot': {
@@ -382,6 +402,7 @@ const DashboardFreelancerRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ForgotRoute: ForgotRoute,
+  FreelancerOnboardingRoute: FreelancerOnboardingRoute,
   LoginRoute: LoginRoute,
   PremiumRoute: PremiumRoute,
   RegisterRoute: RegisterRoute,
