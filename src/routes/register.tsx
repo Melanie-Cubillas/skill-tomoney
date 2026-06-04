@@ -1,11 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Briefcase, Building2, CheckCircle2 } from "lucide-react";
-import { api } from "@/lib/api";
+import { Briefcase, Building2, CheckCircle2, Search, Loader2 } from "lucide-react";
+import { api, type DniLookupPayload, type RucLookupPayload } from "@/lib/api";
 import { saveSession } from "@/lib/auth";
 
 export const Route = createFileRoute("/register")({
@@ -17,6 +17,20 @@ export const Route = createFileRoute("/register")({
   }),
   component: Register,
 });
+
+function getPasswordStrength(password: string): { score: number; label: string; color: string } {
+  let score = 0;
+  if (password.length >= 8) score += 25;
+  if (password.length >= 12) score += 10;
+  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 20;
+  if (/\d/.test(password)) score += 20;
+  if (/[^a-zA-Z0-9]/.test(password)) score += 25;
+
+  if (score <= 25) return { score, label: "Débil", color: "bg-red-500" };
+  if (score <= 50) return { score, label: "Regular", color: "bg-orange-500" };
+  if (score <= 75) return { score, label: "Buena", color: "bg-yellow-500" };
+  return { score, label: "Segura", color: "bg-green-500" };
+}
 
 function Register() {
   const navigate = useNavigate();
@@ -30,6 +44,51 @@ function Register() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [lookingUp, setLookingUp] = useState(false);
+  const [dniLookedUp, setDniLookedUp] = useState(false);
+  const [rucLookedUp, setRucLookedUp] = useState(false);
+  const [rucState, setRucState] = useState<string | null>(null);
+  const [rucCondition, setRucCondition] = useState<string | null>(null);
+
+  const strength = getPasswordStrength(password);
+
+  const handleDniLookup = useCallback(async () => {
+    if (dni.length !== 8 || lookingUp) return;
+    setLookingUp(true);
+    setError(null);
+    try {
+      const res = await api.lookupDni(dni);
+      const data = res.data as DniLookupPayload;
+      setFirstName(data.first_name);
+      setLastName(data.last_name);
+      setDniLookedUp(true);
+    } catch (err: unknown) {
+      const payload = err as { message?: string };
+      setError(payload?.message ?? "No se pudo validar el DNI.");
+    } finally {
+      setLookingUp(false);
+    }
+  }, [dni, lookingUp]);
+
+  const handleRucLookup = useCallback(async () => {
+    if (ruc.length !== 11 || lookingUp) return;
+    setLookingUp(true);
+    setError(null);
+    try {
+      const res = await api.lookupRuc(ruc);
+      const data = res.data as RucLookupPayload;
+      setCompanyName(data.business_name);
+      setRucState(data.state);
+      setRucCondition(data.condition);
+      setRucLookedUp(true);
+    } catch (err: unknown) {
+      const payload = err as { message?: string };
+      setError(payload?.message ?? "No se pudo validar el RUC.");
+    } finally {
+      setLookingUp(false);
+    }
+  }, [ruc, lookingUp]);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -94,7 +153,19 @@ function Register() {
             <button
               key={option.v}
               type="button"
-              onClick={() => setRole(option.v)}
+              onClick={() => {
+                setRole(option.v);
+                setError(null);
+                setDniLookedUp(false);
+                setRucLookedUp(false);
+                setRucState(null);
+                setRucCondition(null);
+                setDni("");
+                setRuc("");
+                setFirstName("");
+                setLastName("");
+                setCompanyName("");
+              }}
               className={`flex min-h-12 items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold transition ${
                 role === option.v
                   ? "border-primary bg-background text-foreground shadow-soft"
@@ -116,71 +187,153 @@ function Register() {
             </p>
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
               {role === "freelancer"
-                ? "Usaremos tu DNI para validar tu cuenta como talento digital."
-                : "Validaremos tu RUC y completaremos la razón social automáticamente."}
+                ? "Ingresa tu DNI y presiona Enter para buscar tus datos automáticamente."
+                : "Ingresa tu RUC y presiona Enter para validar y completar tus datos."}
             </p>
           </div>
         </div>
       </div>
 
       <form className="space-y-4" onSubmit={onSubmit}>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <Label>Nombre</Label>
-            <Input
-              placeholder="Camila"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Apellido</Label>
-            <Input
-              placeholder="Rojas"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              required
-            />
-          </div>
-        </div>
-
-        {role === "client" ? (
+        {role === "freelancer" ? (
           <>
             <div className="space-y-1.5">
-              <Label>Empresa</Label>
-              <Input
-                placeholder="Lumen Café"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-              />
+              <Label>DNI</Label>
+              <div className="relative">
+                <Input
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={8}
+                  placeholder="8 dígitos"
+                  value={dni}
+                  onChange={(e) => {
+                    setDni(e.target.value.replace(/\D/g, "").slice(0, 8));
+                    setDniLookedUp(false);
+                    setFirstName("");
+                    setLastName("");
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && dni.length === 8) {
+                      e.preventDefault();
+                      handleDniLookup();
+                    }
+                  }}
+                  required
+                  disabled={lookingUp}
+                />
+                {dni.length === 8 && !lookingUp && !dniLookedUp && (
+                  <button
+                    type="button"
+                    onClick={handleDniLookup}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    <Search className="h-4 w-4" />
+                  </button>
+                )}
+                {lookingUp && (
+                  <Loader2 className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+                )}
+              </div>
             </div>
-            <div className="space-y-1.5">
-              <Label>RUC</Label>
-              <Input
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={11}
-                placeholder="11 dígitos"
-                value={ruc}
-                onChange={(e) => setRuc(e.target.value.replace(/\D/g, "").slice(0, 11))}
-                required
-              />
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Nombre</Label>
+                <Input
+                  placeholder="Camila"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                  disabled={dniLookedUp}
+                  className={dniLookedUp ? "bg-muted/50" : ""}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Apellido</Label>
+                <Input
+                  placeholder="Rojas"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                  disabled={dniLookedUp}
+                  className={dniLookedUp ? "bg-muted/50" : ""}
+                />
+              </div>
             </div>
           </>
         ) : (
-          <div className="space-y-1.5">
-            <Label>DNI</Label>
-            <Input
-              inputMode="numeric"
-              pattern="[0-9]*"
-              maxLength={8}
-              placeholder="8 dígitos"
-              value={dni}
-              onChange={(e) => setDni(e.target.value.replace(/\D/g, "").slice(0, 8))}
-              required
-            />
-          </div>
+          <>
+            <div className="space-y-1.5">
+              <Label>RUC</Label>
+              <div className="relative">
+                <Input
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={11}
+                  placeholder="11 dígitos"
+                  value={ruc}
+                  onChange={(e) => {
+                    setRuc(e.target.value.replace(/\D/g, "").slice(0, 11));
+                    setRucLookedUp(false);
+                    setCompanyName("");
+                    setRucState(null);
+                    setRucCondition(null);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && ruc.length === 11) {
+                      e.preventDefault();
+                      handleRucLookup();
+                    }
+                  }}
+                  required
+                  disabled={lookingUp}
+                />
+                {ruc.length === 11 && !lookingUp && !rucLookedUp && (
+                  <button
+                    type="button"
+                    onClick={handleRucLookup}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    <Search className="h-4 w-4" />
+                  </button>
+                )}
+                {lookingUp && (
+                  <Loader2 className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Razón Social</Label>
+              <Input
+                placeholder="Lumen Café E.I.R.L."
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                required
+                disabled={rucLookedUp}
+                className={rucLookedUp ? "bg-muted/50" : ""}
+              />
+            </div>
+
+            {rucLookedUp && rucState && rucCondition && (
+              <div className="flex items-start gap-3 rounded-xl border px-4 py-3 text-sm bg-muted/30 border-border">
+                <div className="flex flex-wrap gap-3">
+                  <span className="flex items-center gap-1.5 font-semibold text-foreground">
+                    <span
+                      className={`inline-block h-2 w-2 rounded-full ${rucCondition === "HABIDO" ? "bg-green-500" : "bg-red-500"}`}
+                    />
+                    {rucCondition}
+                  </span>
+                  <span className="flex items-center gap-1.5 font-semibold text-foreground">
+                    <span
+                      className={`inline-block h-2 w-2 rounded-full ${rucState === "ACTIVO" ? "bg-green-500" : "bg-red-500"}`}
+                    />
+                    {rucState}
+                  </span>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         <div className="space-y-1.5">
@@ -193,6 +346,7 @@ function Register() {
             required
           />
         </div>
+
         <div className="space-y-1.5">
           <Label>Contraseña</Label>
           <Input
@@ -203,6 +357,21 @@ function Register() {
             required
             minLength={8}
           />
+          {password.length > 0 && (
+            <div className="mt-1.5 space-y-1">
+              <div className="flex items-center gap-2">
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-primary/20">
+                  <div
+                    className={`h-full transition-all ${strength.color}`}
+                    style={{ width: `${strength.score}%` }}
+                  />
+                </div>
+                <span className={`text-xs font-semibold ${strength.color.replace("bg-", "text-")}`}>
+                  {strength.label}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
@@ -210,10 +379,16 @@ function Register() {
           className="w-full bg-gradient-primary shadow-soft"
           size="lg"
           type="submit"
-          disabled={loading}
+          disabled={loading || lookingUp || (role === "freelancer" ? !dniLookedUp : false)}
         >
           {loading ? "Creando..." : "Crear cuenta gratis"}
         </Button>
+
+        {role === "freelancer" && !dniLookedUp && dni.length > 0 && (
+          <p className="text-center text-xs text-muted-foreground">
+            Presiona Enter o el botón de buscar para validar tu DNI primero.
+          </p>
+        )}
       </form>
     </AuthLayout>
   );

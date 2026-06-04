@@ -97,6 +97,21 @@ async function apiRequest<T>(path: string, options: RequestOptions = {}): Promis
   return payload;
 }
 
+export type DniLookupPayload = {
+  dni: string;
+  first_name: string;
+  last_name: string;
+  full_name: string | null;
+};
+
+export type RucLookupPayload = {
+  ruc: string;
+  business_name: string;
+  state: string;
+  condition: string;
+  location: string | null;
+};
+
 export const api = {
   health: async (): Promise<HealthPayload> => {
     const response = await fetch(`${API_URL}/health`);
@@ -108,6 +123,8 @@ export const api = {
 
     return payload;
   },
+  lookupDni: (dni: string) => apiRequest<DniLookupPayload>(`/peru/dni/${dni}`),
+  lookupRuc: (ruc: string) => apiRequest<RucLookupPayload>(`/peru/ruc/${ruc}`),
   login: (body: { email: string; password: string }) =>
     apiRequest<AuthPayload>("/auth/login", {
       method: "POST",
