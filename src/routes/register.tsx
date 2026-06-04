@@ -1,15 +1,20 @@
-﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useMemo, useState } from "react";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Briefcase, Building2, CheckCircle2, Search, Loader2 } from "lucide-react";
+import { Briefcase, Building2, CheckCircle2, Eye, EyeOff, Search, Loader2 } from "lucide-react";
 import { api, type DniLookupPayload, type RucLookupPayload } from "@/lib/api";
 import { saveSession } from "@/lib/auth";
 
 export const Route = createFileRoute("/register")({
-  head: () => ({ meta: [{ title: "Crear cuenta · Skill-to-Money" }, { name: "description", content: "Crea tu cuenta en Skill-to-Money en menos de 2 minutos." }] }),
+  head: () => ({
+    meta: [
+      { title: "Crear cuenta · Skill-to-Money" },
+      { name: "description", content: "Crea tu cuenta en Skill-to-Money en menos de 2 minutos." },
+    ],
+  }),
   component: Register,
 });
 
@@ -27,6 +32,10 @@ function getPasswordStrength(password: string): { score: number; label: string; 
   return { score, label: "Segura", color: "bg-green-500" };
 }
 
+function normalizePasswordTerm(value: string): string {
+  return value.trim().toLowerCase();
+}
+
 function Register() {
   const navigate = useNavigate();
   const [role, setRole] = useState<"freelancer" | "mype">("freelancer");
@@ -37,36 +46,50 @@ function Register() {
   const [ruc, setRuc] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const aside = useMemo(() => role === "freelancer"
-    ? {
-        eyebrow: "Para freelancers",
-        title: "Convierte tus skills en oportunidades reales.",
-        subtitle: "Crea tu perfil, recibe recomendaciones personalizadas y conecta con MYPES que necesitan talento digital.",
-        stats: [["+3.2k", "oportunidades"], ["IA", "recomendaciones"], ["0%", "comision inicial"]] as Array<[string, string]>,
-      }
-    : {
-        eyebrow: "Para MYPES",
-        title: "Encuentra talento digital confiable para tu negocio.",
-        subtitle: "Registra tu MYPE, explora freelancers verificados y empieza a publicar oportunidades.",
-        stats: [["+3.2k", "oportunidades"], ["24/7", "soporte"], ["match", "recomendado"]] as Array<[string, string]>,
-      }, [role]);
   const [lookingUp, setLookingUp] = useState(false);
   const [dniLookedUp, setDniLookedUp] = useState(false);
   const [rucLookedUp, setRucLookedUp] = useState(false);
   const [rucState, setRucState] = useState<string | null>(null);
   const [rucCondition, setRucCondition] = useState<string | null>(null);
 
+  const aside = useMemo(
+    () =>
+      role === "freelancer"
+        ? {
+            eyebrow: "Para freelancers",
+            title: "Convierte tus skills en oportunidades reales.",
+            subtitle:
+              "Crea tu perfil, recibe recomendaciones personalizadas y conecta con MYPES que necesitan talento digital.",
+            stats: [
+              ["+3.2k", "oportunidades"],
+              ["IA", "recomendaciones"],
+              ["0%", "comision inicial"],
+            ] as Array<[string, string]>,
+          }
+        : {
+            eyebrow: "Para MYPES",
+            title: "Encuentra talento digital confiable para tu negocio.",
+            subtitle:
+              "Registra tu MYPE, explora freelancers verificados y empieza a publicar oportunidades.",
+            stats: [
+              ["+3.2k", "oportunidades"],
+              ["24/7", "soporte"],
+              ["match", "recomendado"],
+            ] as Array<[string, string]>,
+          },
+    [role],
+  );
+
   const strength = getPasswordStrength(password);
-<<<<<<< Updated upstream
-=======
   const personalTerms = [firstName, lastName, companyName, email.split("@")[0], dni, ruc]
     .map(normalizePasswordTerm)
     .filter((term) => term.length >= 3);
   const normalizedPassword = password.toLowerCase();
   const usesPersonalInfo = personalTerms.some((term) => normalizedPassword.includes(term));
+
   const passwordRequirements = [
     { label: "Mínimo 8 caracteres", met: password.length >= 8 },
     { label: "Incluye una letra mayúscula", met: /[A-Z]/.test(password) },
@@ -74,19 +97,22 @@ function Register() {
     { label: "Incluye un símbolo", met: /[^a-zA-Z0-9]/.test(password) },
     { label: "No uses tu nombre, apellido, correo, DNI, RUC o empresa", met: !usesPersonalInfo },
   ];
+
   const isPasswordValid = passwordRequirements.every((requirement) => requirement.met);
   const needsDniValidation = role === "freelancer" && !dniLookedUp;
   const needsRucValidation = role === "mype" && !rucLookedUp;
   const needsIdentityValidation = needsDniValidation || needsRucValidation;
->>>>>>> Stashed changes
 
   const handleDniLookup = useCallback(async () => {
     if (dni.length !== 8 || lookingUp) return;
+
     setLookingUp(true);
     setError(null);
+
     try {
       const res = await api.lookupDni(dni);
       const data = res.data as DniLookupPayload;
+
       setFirstName(data.first_name);
       setLastName(data.last_name);
       setDniLookedUp(true);
@@ -100,11 +126,14 @@ function Register() {
 
   const handleRucLookup = useCallback(async () => {
     if (ruc.length !== 11 || lookingUp) return;
+
     setLookingUp(true);
     setError(null);
+
     try {
       const res = await api.lookupRuc(ruc);
       const data = res.data as RucLookupPayload;
+
       setCompanyName(data.business_name);
       setRucState(data.state);
       setRucCondition(data.condition);
@@ -119,21 +148,22 @@ function Register() {
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-<<<<<<< Updated upstream
-=======
+
     if (role === "freelancer" && !dniLookedUp) {
       setError("Primero valida tu DNI para continuar con el registro.");
       return;
     }
+
     if (role === "mype" && !rucLookedUp) {
       setError("Primero valida tu RUC para continuar con el registro.");
       return;
     }
+
     if (!isPasswordValid) {
       setError("Completa los requisitos de la contraseña antes de crear la cuenta.");
       return;
     }
->>>>>>> Stashed changes
+
     setLoading(true);
     setError(null);
 
@@ -163,6 +193,7 @@ function Register() {
     } catch (err: unknown) {
       const payload = err as { message?: string; errors?: Record<string, string[]> };
       const firstError = Object.values(payload?.errors ?? {})[0]?.[0];
+
       setError(firstError ?? payload?.message ?? "No se pudo crear la cuenta.");
     } finally {
       setLoading(false);
@@ -216,7 +247,7 @@ function Register() {
               }}
               className={`flex min-h-12 items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold transition ${
                 role === option.v
-                  ? "border-primary bg-background text-foreground shadow-soft"
+                  ? "border-[#00C9BA] bg-background text-foreground shadow-soft"
                   : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
               }`}
               aria-pressed={role === option.v}
@@ -227,8 +258,8 @@ function Register() {
           ))}
         </div>
 
-        <div className="mt-3 flex items-start gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm">
-          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+        <div className="mt-3 flex items-start gap-3 rounded-xl border border-[#00C9BA]/40 bg-[#00C9BA]/10 px-4 py-3 text-sm">
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#00C9BA]" />
           <div>
             <p className="font-semibold text-foreground">
               {role === "freelancer" ? "Registro para freelancer" : "Registro para MYPE o cliente"}
@@ -286,25 +317,25 @@ function Register() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Nombre</Label>
+                <Label>Nombres</Label>
                 <Input
-                  placeholder="Camila"
+                  placeholder={dniLookedUp ? "Camila" : "Valida tu DNI primero"}
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   required
-                  disabled={dniLookedUp}
-                  className={dniLookedUp ? "bg-muted/50" : ""}
+                  disabled
+                  className="bg-muted/50"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Apellido</Label>
+                <Label>Apellidos</Label>
                 <Input
-                  placeholder="Rojas"
+                  placeholder={dniLookedUp ? "Rojas" : "Valida tu DNI primero"}
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   required
-                  disabled={dniLookedUp}
-                  className={dniLookedUp ? "bg-muted/50" : ""}
+                  disabled
+                  className="bg-muted/50"
                 />
               </div>
             </div>
@@ -354,27 +385,31 @@ function Register() {
             <div className="space-y-1.5">
               <Label>Razón Social</Label>
               <Input
-                placeholder="Lumen Café E.I.R.L."
+                placeholder={rucLookedUp ? "Lumen Café E.I.R.L." : "Valida tu RUC primero"}
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
                 required
-                disabled={rucLookedUp}
-                className={rucLookedUp ? "bg-muted/50" : ""}
+                disabled
+                className="bg-muted/50"
               />
             </div>
 
             {rucLookedUp && rucState && rucCondition && (
-              <div className="flex items-start gap-3 rounded-xl border px-4 py-3 text-sm bg-muted/30 border-border">
+              <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/30 px-4 py-3 text-sm">
                 <div className="flex flex-wrap gap-3">
                   <span className="flex items-center gap-1.5 font-semibold text-foreground">
                     <span
-                      className={`inline-block h-2 w-2 rounded-full ${rucCondition === "HABIDO" ? "bg-green-500" : "bg-red-500"}`}
+                      className={`inline-block h-2 w-2 rounded-full ${
+                        rucCondition === "HABIDO" ? "bg-green-500" : "bg-red-500"
+                      }`}
                     />
                     {rucCondition}
                   </span>
                   <span className="flex items-center gap-1.5 font-semibold text-foreground">
                     <span
-                      className={`inline-block h-2 w-2 rounded-full ${rucState === "ACTIVO" ? "bg-green-500" : "bg-red-500"}`}
+                      className={`inline-block h-2 w-2 rounded-full ${
+                        rucState === "ACTIVO" ? "bg-green-500" : "bg-red-500"
+                      }`}
                     />
                     {rucState}
                   </span>
@@ -392,19 +427,35 @@ function Register() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            disabled={needsIdentityValidation}
+            className={needsIdentityValidation ? "bg-muted/50" : ""}
           />
         </div>
 
         <div className="space-y-1.5">
           <Label>Contraseña</Label>
-          <Input
-            type="password"
-            placeholder="Mínimo 8 caracteres"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={8}
-          />
+          <div className="relative">
+            <Input
+              type={showPassword ? "text" : "password"}
+              placeholder="Mínimo 8 caracteres"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={8}
+              disabled={needsIdentityValidation}
+              className={`pr-10 ${needsIdentityValidation ? "bg-muted/50" : ""}`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((value) => !value)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground transition hover:text-foreground"
+              aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              disabled={needsIdentityValidation}
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+
           {password.length > 0 && (
             <div className="mt-1.5 space-y-1">
               <div className="flex items-center gap-2">
@@ -418,16 +469,39 @@ function Register() {
                   {strength.label}
                 </span>
               </div>
+
+              <div className="space-y-1 rounded-xl border border-border bg-muted/30 px-3 py-2">
+                {passwordRequirements.map((requirement) => (
+                  <p
+                    key={requirement.label}
+                    className={`flex items-center gap-2 text-xs ${
+                      requirement.met ? "text-green-700" : "text-red-600"
+                    }`}
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                    {requirement.met ? requirement.label : `Falta: ${requirement.label.toLowerCase()}`}
+                  </p>
+                ))}
+              </div>
             </div>
+          )}
+
+          {needsIdentityValidation && (
+            <p className="text-xs text-muted-foreground">
+              {role === "freelancer"
+                ? "Valida tu DNI para habilitar el correo y la contraseña."
+                : "Valida tu RUC para habilitar el correo y la contraseña."}
+            </p>
           )}
         </div>
 
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
+
         <Button
           className="w-full bg-gradient-primary shadow-soft"
           size="lg"
           type="submit"
-          disabled={loading || lookingUp || (role === "freelancer" ? !dniLookedUp : false)}
+          disabled={loading || lookingUp || needsIdentityValidation || !isPasswordValid}
         >
           {loading ? "Creando..." : "Crear cuenta gratis"}
         </Button>
@@ -437,14 +511,12 @@ function Register() {
             Presiona Enter o el botón de buscar para validar tu DNI primero.
           </p>
         )}
-<<<<<<< Updated upstream
-=======
+
         {role === "mype" && !rucLookedUp && ruc.length > 0 && (
           <p className="text-center text-xs text-muted-foreground">
             Presiona Enter o el botón de buscar para validar tu RUC primero.
           </p>
         )}
->>>>>>> Stashed changes
       </form>
     </AuthLayout>
   );

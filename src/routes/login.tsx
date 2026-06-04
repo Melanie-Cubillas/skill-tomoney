@@ -42,7 +42,7 @@ function LoginPage() {
         to:
           response.data.user.account_type === "mype"
             ? "/dashboard/client"
-            : "/dashboard/freelancer",
+            : "/freelancer-onboarding",
       });
     } catch (err: unknown) {
       const payload = err as { message?: string; errors?: Record<string, string[]> };

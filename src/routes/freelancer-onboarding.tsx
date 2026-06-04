@@ -110,9 +110,11 @@ function FreelancerOnboarding() {
   const [error, setError] = useState<string | null>(null);
 
   const canContinue = skills.length > 0 && tools.length > 0 && description.trim().length >= 20;
+
   const avatarLabel = useMemo(() => {
     const user = getSessionUser();
     const source = user?.name || user?.email || "YO";
+
     return source
       .split(/\s+/)
       .filter(Boolean)
@@ -123,6 +125,7 @@ function FreelancerOnboarding() {
 
   const continueWithAi = async () => {
     if (!canContinue) return;
+
     const token = getToken();
 
     if (!token) {
@@ -150,6 +153,7 @@ function FreelancerOnboarding() {
     } catch (err: unknown) {
       const payload = err as { message?: string; errors?: Record<string, string[]> };
       const firstError = Object.values(payload?.errors ?? {})[0]?.[0];
+
       setError(firstError ?? payload?.message ?? "No se pudo guardar el perfil.");
       setProcessing(false);
     }
@@ -222,21 +226,9 @@ function FreelancerOnboarding() {
 
           <ProfilePanel title="Redes Sociales">
             <div className="space-y-4">
-              <Input
-                value={linkedin}
-                onChange={(event) => setLinkedin(event.target.value)}
-                placeholder="LinkedIn"
-              />
-              <Input
-                value={instagram}
-                onChange={(event) => setInstagram(event.target.value)}
-                placeholder="Instagram"
-              />
-              <Input
-                value={website}
-                onChange={(event) => setWebsite(event.target.value)}
-                placeholder="Web site"
-              />
+              <Input value={linkedin} onChange={(event) => setLinkedin(event.target.value)} placeholder="LinkedIn" />
+              <Input value={instagram} onChange={(event) => setInstagram(event.target.value)} placeholder="Instagram" />
+              <Input value={website} onChange={(event) => setWebsite(event.target.value)} placeholder="Web site" />
             </div>
           </ProfilePanel>
 
@@ -246,11 +238,7 @@ function FreelancerOnboarding() {
               <div>
                 <div className="flex flex-wrap items-center gap-5 text-xs">
                   <span>¿Cuentas con un área de desempeño?</span>
-                  <RadioChoice
-                    checked={hasArea === "si"}
-                    label="SI"
-                    onClick={() => setHasArea("si")}
-                  />
+                  <RadioChoice checked={hasArea === "si"} label="SI" onClick={() => setHasArea("si")} />
                   <RadioChoice
                     checked={hasArea === "no"}
                     label="NO"
@@ -261,6 +249,7 @@ function FreelancerOnboarding() {
                     }}
                   />
                 </div>
+
                 <div className="mt-6">
                   <p className="mb-3 text-xs font-semibold">
                     Si tu respuesta fue “SI”, completa lo siguiente:
@@ -468,8 +457,7 @@ function ChipSelect({
                 type="button"
                 className={cn(
                   "flex w-full items-center justify-between px-3 py-1.5 text-left text-white transition hover:bg-[#00C9BA]",
-                  option === "Sin resultados" &&
-                    "cursor-default text-white/70 hover:bg-transparent",
+                  option === "Sin resultados" && "cursor-default text-white/70 hover:bg-transparent",
                 )}
                 onClick={() => option !== "Sin resultados" && addValue(option)}
               >
@@ -507,6 +495,7 @@ function ChipSelect({
           ))}
         </div>
       </div>
+
       {(disabled || isFull) && (
         <p className="mt-2 text-xs text-muted-foreground">
           {disabled

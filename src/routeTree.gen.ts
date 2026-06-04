@@ -17,6 +17,7 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as MypeOnboardingRouteImport } from './routes/mype-onboarding'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as FreelancerOnboardingRouteImport } from './routes/freelancer-onboarding'
 import { Route as ForgotRouteImport } from './routes/forgot'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardPaymentsRouteImport } from './routes/dashboard/payments'
@@ -67,6 +68,11 @@ const MypeOnboardingRoute = MypeOnboardingRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FreelancerOnboardingRoute = FreelancerOnboardingRouteImport.update({
+  id: '/freelancer-onboarding',
+  path: '/freelancer-onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotRoute = ForgotRouteImport.update({
@@ -131,6 +137,7 @@ const DashboardClientProjectsRoute = DashboardClientProjectsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/forgot': typeof ForgotRoute
+  '/freelancer-onboarding': typeof FreelancerOnboardingRoute
   '/login': typeof LoginRoute
   '/mype-onboarding': typeof MypeOnboardingRoute
   '/premium': typeof PremiumRoute
@@ -152,6 +159,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/forgot': typeof ForgotRoute
+  '/freelancer-onboarding': typeof FreelancerOnboardingRoute
   '/login': typeof LoginRoute
   '/mype-onboarding': typeof MypeOnboardingRoute
   '/premium': typeof PremiumRoute
@@ -174,6 +182,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/forgot': typeof ForgotRoute
+  '/freelancer-onboarding': typeof FreelancerOnboardingRoute
   '/login': typeof LoginRoute
   '/mype-onboarding': typeof MypeOnboardingRoute
   '/premium': typeof PremiumRoute
@@ -197,6 +206,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/forgot'
+    | '/freelancer-onboarding'
     | '/login'
     | '/mype-onboarding'
     | '/premium'
@@ -218,6 +228,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/forgot'
+    | '/freelancer-onboarding'
     | '/login'
     | '/mype-onboarding'
     | '/premium'
@@ -239,6 +250,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/forgot'
+    | '/freelancer-onboarding'
     | '/login'
     | '/mype-onboarding'
     | '/premium'
@@ -261,6 +273,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ForgotRoute: typeof ForgotRoute
+  FreelancerOnboardingRoute: typeof FreelancerOnboardingRoute
   LoginRoute: typeof LoginRoute
   MypeOnboardingRoute: typeof MypeOnboardingRoute
   PremiumRoute: typeof PremiumRoute
@@ -326,8 +339,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-<<<<<<< Updated upstream
-=======
     '/mype-onboarding': {
       id: '/mype-onboarding'
       path: '/mype-onboarding'
@@ -342,7 +353,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FreelancerOnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
->>>>>>> Stashed changes
     '/forgot': {
       id: '/forgot'
       path: '/forgot'
@@ -455,6 +465,7 @@ const DashboardFreelancerRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ForgotRoute: ForgotRoute,
+  FreelancerOnboardingRoute: FreelancerOnboardingRoute,
   LoginRoute: LoginRoute,
   MypeOnboardingRoute: MypeOnboardingRoute,
   PremiumRoute: PremiumRoute,
