@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Edit3, Eye, ExternalLink, FileText, Filter, FolderKanban, ImageIcon, LinkIcon, Plus, Save, Search, Star, Trash2 } from "lucide-react";
+import { Edit3, Eye, ExternalLink, FileText, FolderKanban, ImageIcon, LinkIcon, Save, Search, Star, Trash2 } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -170,16 +170,12 @@ function PortfolioPage() {
             <h1 className="font-display text-4xl font-extrabold tracking-normal">Portafolio de proyectos</h1>
             <p className="mt-1 text-muted-foreground">Crea, edita y organiza los proyectos que muestras en tu portafolio profesional.</p>
           </div>
-          <div className="flex gap-3">
-            <Button className="rounded-xl bg-gradient-primary shadow-soft" onClick={resetForm}><Plus className="h-4 w-4" /> Nuevo proyecto</Button>
-            <Button variant="outline" className="rounded-xl"><Filter className="h-4 w-4" /> Filtros</Button>
-          </div>
         </div>
 
         <div className="grid gap-4 xl:grid-cols-3">
-          <Metric icon={FolderKanban} label="Proyectos publicados" value={String(projects.length)} hint="+3 vs el mes pasado" />
-          <Metric icon={Star} label="Proyectos destacados" value={String(featuredCount)} hint="+1 vs el mes pasado" />
-          <Metric icon={Eye} label="Visitas al portafolio" value="1,284" hint="+18% vs el mes pasado" />
+          <Metric icon={FolderKanban} label="Proyectos publicados" value={String(projects.length)} hint="Total registrado" />
+          <Metric icon={Star} label="Proyectos destacados" value={String(featuredCount)} hint="Marcados como destacados" />
+          <Metric icon={Eye} label="Visitas al portafolio" value="N/D" hint="Requiere contador backend" />
         </div>
 
         {error ? <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">{error}</p> : null}
