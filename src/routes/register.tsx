@@ -1,5 +1,5 @@
 ﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -114,8 +114,6 @@ function Register() {
               password,
             })
           : await api.registerMype({
-              first_name: firstName,
-              last_name: lastName,
               company_name: companyName || undefined,
               ruc,
               email,
@@ -139,8 +137,16 @@ function Register() {
 
   return (
     <AuthLayout
-      title="Crea tu cuenta gratis"
-      subtitle="Empieza a vender o a contratar talento digital en minutos."
+      title={role === "freelancer" ? "Crea tu perfil freelancer" : "Registra tu MYPE"}
+      subtitle={
+        role === "freelancer"
+          ? "Completa tus datos para empezar a vender tus skills."
+          : "Valida tu RUC y registra tu empresa en minutos."
+      }
+      asideEyebrow={aside.eyebrow}
+      asideTitle={aside.title}
+      asideSubtitle={aside.subtitle}
+      asideStats={aside.stats}
       footer={
         <>
           ¿Ya tienes cuenta?{" "}
@@ -155,7 +161,7 @@ function Register() {
           {(
             [
               { v: "freelancer", l: "Freelancer", i: Briefcase },
-              { v: "client", l: "MYPE / Cliente", i: Building2 },
+              { v: "mype", l: "MYPE / Cliente", i: Building2 },
             ] as const
           ).map((option) => (
             <button

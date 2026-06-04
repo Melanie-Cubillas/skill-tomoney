@@ -143,9 +143,6 @@ export const api = {
       body: JSON.stringify(body),
     }),
   registerMype: (body: {
-    business_name: string;
-    first_name: string;
-    last_name: string;
     company_name?: string;
     ruc: string;
     email: string;
