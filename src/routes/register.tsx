@@ -1,4 +1,4 @@
-﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useMemo, useState } from "react";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,12 @@ import { api, type DniLookupPayload, type RucLookupPayload } from "@/lib/api";
 import { saveSession } from "@/lib/auth";
 
 export const Route = createFileRoute("/register")({
-  head: () => ({ meta: [{ title: "Crear cuenta · Skill-to-Money" }, { name: "description", content: "Crea tu cuenta en Skill-to-Money en menos de 2 minutos." }] }),
+  head: () => ({
+    meta: [
+      { title: "Crear cuenta · Skill-to-Money" },
+      { name: "description", content: "Crea tu cuenta en Skill-to-Money en menos de 2 minutos." },
+    ],
+  }),
   component: Register,
 });
 
@@ -44,25 +49,39 @@ function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const aside = useMemo(() => role === "freelancer"
-    ? {
-        eyebrow: "Para freelancers",
-        title: "Convierte tus skills en oportunidades reales.",
-        subtitle: "Crea tu perfil, recibe recomendaciones personalizadas y conecta con MYPES que necesitan talento digital.",
-        stats: [["+3.2k", "oportunidades"], ["IA", "recomendaciones"], ["0%", "comision inicial"]] as Array<[string, string]>,
-      }
-    : {
-        eyebrow: "Para MYPES",
-        title: "Encuentra talento digital confiable para tu negocio.",
-        subtitle: "Registra tu MYPE, explora freelancers verificados y empieza a publicar oportunidades.",
-        stats: [["+3.2k", "oportunidades"], ["24/7", "soporte"], ["match", "recomendado"]] as Array<[string, string]>,
-      }, [role]);
   const [lookingUp, setLookingUp] = useState(false);
   const [dniLookedUp, setDniLookedUp] = useState(false);
   const [rucLookedUp, setRucLookedUp] = useState(false);
   const [rucState, setRucState] = useState<string | null>(null);
   const [rucCondition, setRucCondition] = useState<string | null>(null);
+
+  const aside = useMemo(
+    () =>
+      role === "freelancer"
+        ? {
+            eyebrow: "Para freelancers",
+            title: "Convierte tus skills en oportunidades reales.",
+            subtitle:
+              "Crea tu perfil, recibe recomendaciones personalizadas y conecta con MYPES que necesitan talento digital.",
+            stats: [
+              ["+3.2k", "oportunidades"],
+              ["IA", "recomendaciones"],
+              ["0%", "comision inicial"],
+            ] as Array<[string, string]>,
+          }
+        : {
+            eyebrow: "Para MYPES",
+            title: "Encuentra talento digital confiable para tu negocio.",
+            subtitle:
+              "Registra tu MYPE, explora freelancers verificados y empieza a publicar oportunidades.",
+            stats: [
+              ["+3.2k", "oportunidades"],
+              ["24/7", "soporte"],
+              ["match", "recomendado"],
+            ] as Array<[string, string]>,
+          },
+    [role],
+  );
 
   const strength = getPasswordStrength(password);
   const personalTerms = [firstName, lastName, companyName, email.split("@")[0], dni, ruc]
@@ -70,6 +89,7 @@ function Register() {
     .filter((term) => term.length >= 3);
   const normalizedPassword = password.toLowerCase();
   const usesPersonalInfo = personalTerms.some((term) => normalizedPassword.includes(term));
+
   const passwordRequirements = [
     { label: "Mínimo 8 caracteres", met: password.length >= 8 },
     { label: "Incluye una letra mayúscula", met: /[A-Z]/.test(password) },
@@ -77,18 +97,22 @@ function Register() {
     { label: "Incluye un símbolo", met: /[^a-zA-Z0-9]/.test(password) },
     { label: "No uses tu nombre, apellido, correo, DNI, RUC o empresa", met: !usesPersonalInfo },
   ];
+
   const isPasswordValid = passwordRequirements.every((requirement) => requirement.met);
   const needsDniValidation = role === "freelancer" && !dniLookedUp;
-  const needsRucValidation = role === "client" && !rucLookedUp;
+  const needsRucValidation = role === "mype" && !rucLookedUp;
   const needsIdentityValidation = needsDniValidation || needsRucValidation;
 
   const handleDniLookup = useCallback(async () => {
     if (dni.length !== 8 || lookingUp) return;
+
     setLookingUp(true);
     setError(null);
+
     try {
       const res = await api.lookupDni(dni);
       const data = res.data as DniLookupPayload;
+
       setFirstName(data.first_name);
       setLastName(data.last_name);
       setDniLookedUp(true);
@@ -102,11 +126,14 @@ function Register() {
 
   const handleRucLookup = useCallback(async () => {
     if (ruc.length !== 11 || lookingUp) return;
+
     setLookingUp(true);
     setError(null);
+
     try {
       const res = await api.lookupRuc(ruc);
       const data = res.data as RucLookupPayload;
+
       setCompanyName(data.business_name);
       setRucState(data.state);
       setRucCondition(data.condition);
@@ -121,18 +148,22 @@ function Register() {
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     if (role === "freelancer" && !dniLookedUp) {
       setError("Primero valida tu DNI para continuar con el registro.");
       return;
     }
-    if (role === "client" && !rucLookedUp) {
+
+    if (role === "mype" && !rucLookedUp) {
       setError("Primero valida tu RUC para continuar con el registro.");
       return;
     }
+
     if (!isPasswordValid) {
       setError("Completa los requisitos de la contraseña antes de crear la cuenta.");
       return;
     }
+
     setLoading(true);
     setError(null);
 
@@ -158,10 +189,11 @@ function Register() {
       }
 
       saveSession(response.data.access_token, response.data.user);
-      navigate({ to: role === "freelancer" ? "/dashboard/freelancer" : "/dashboard/client" });
+      navigate({ to: role === "freelancer" ? "/freelancer-onboarding" : "/mype-onboarding" });
     } catch (err: unknown) {
       const payload = err as { message?: string; errors?: Record<string, string[]> };
       const firstError = Object.values(payload?.errors ?? {})[0]?.[0];
+
       setError(firstError ?? payload?.message ?? "No se pudo crear la cuenta.");
     } finally {
       setLoading(false);
@@ -363,17 +395,21 @@ function Register() {
             </div>
 
             {rucLookedUp && rucState && rucCondition && (
-              <div className="flex items-start gap-3 rounded-xl border px-4 py-3 text-sm bg-muted/30 border-border">
+              <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/30 px-4 py-3 text-sm">
                 <div className="flex flex-wrap gap-3">
                   <span className="flex items-center gap-1.5 font-semibold text-foreground">
                     <span
-                      className={`inline-block h-2 w-2 rounded-full ${rucCondition === "HABIDO" ? "bg-green-500" : "bg-red-500"}`}
+                      className={`inline-block h-2 w-2 rounded-full ${
+                        rucCondition === "HABIDO" ? "bg-green-500" : "bg-red-500"
+                      }`}
                     />
                     {rucCondition}
                   </span>
                   <span className="flex items-center gap-1.5 font-semibold text-foreground">
                     <span
-                      className={`inline-block h-2 w-2 rounded-full ${rucState === "ACTIVO" ? "bg-green-500" : "bg-red-500"}`}
+                      className={`inline-block h-2 w-2 rounded-full ${
+                        rucState === "ACTIVO" ? "bg-green-500" : "bg-red-500"
+                      }`}
                     />
                     {rucState}
                   </span>
@@ -419,6 +455,7 @@ function Register() {
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
+
           {password.length > 0 && (
             <div className="mt-1.5 space-y-1">
               <div className="flex items-center gap-2">
@@ -432,6 +469,7 @@ function Register() {
                   {strength.label}
                 </span>
               </div>
+
               <div className="space-y-1 rounded-xl border border-border bg-muted/30 px-3 py-2">
                 {passwordRequirements.map((requirement) => (
                   <p
@@ -441,14 +479,13 @@ function Register() {
                     }`}
                   >
                     <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
-                    {requirement.met
-                      ? requirement.label
-                      : `Falta: ${requirement.label.toLowerCase()}`}
+                    {requirement.met ? requirement.label : `Falta: ${requirement.label.toLowerCase()}`}
                   </p>
                 ))}
               </div>
             </div>
           )}
+
           {needsIdentityValidation && (
             <p className="text-xs text-muted-foreground">
               {role === "freelancer"
@@ -459,6 +496,7 @@ function Register() {
         </div>
 
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
+
         <Button
           className="w-full bg-gradient-primary shadow-soft"
           size="lg"
@@ -473,7 +511,8 @@ function Register() {
             Presiona Enter o el botón de buscar para validar tu DNI primero.
           </p>
         )}
-        {role === "client" && !rucLookedUp && ruc.length > 0 && (
+
+        {role === "mype" && !rucLookedUp && ruc.length > 0 && (
           <p className="text-center text-xs text-muted-foreground">
             Presiona Enter o el botón de buscar para validar tu RUC primero.
           </p>
