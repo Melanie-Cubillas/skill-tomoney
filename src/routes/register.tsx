@@ -271,7 +271,7 @@ function Register() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Nombre</Label>
+                <Label>Nombres</Label>
                 <Input
                   placeholder={dniLookedUp ? "Camila" : "Valida tu DNI primero"}
                   value={firstName}
@@ -282,7 +282,7 @@ function Register() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Apellido</Label>
+                <Label>Apellidos</Label>
                 <Input
                   placeholder={dniLookedUp ? "Rojas" : "Valida tu DNI primero"}
                   value={lastName}
