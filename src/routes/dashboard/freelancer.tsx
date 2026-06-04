@@ -94,12 +94,12 @@ function FreelancerDashboard() {
           <Card className="rounded-2xl p-6 shadow-soft">
             <h2 className="font-display text-lg font-bold tracking-normal">Tu perfil esta completo</h2>
             <div className="mt-5 flex items-center gap-5">
-              <div className="grid h-24 w-24 place-items-center rounded-full border-[8px] border-secondary text-2xl font-extrabold">78%</div>
+              <div className="grid h-24 w-24 shrink-0 aspect-square place-items-center rounded-full border-[8px] border-secondary text-2xl font-extrabold">78%</div>
               <p className="text-sm text-muted-foreground">Un perfil completo te ayuda a conseguir mas proyectos.</p>
             </div>
             <div className="mt-5 space-y-3 text-sm">
               {["Foto de perfil", "Descripcion personal", "Habilidades añadidas", "Portafolio agregado"].map((item) => (
-                <div key={item} className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-success" /> {item}</div>
+                <div key={item} className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 shrink-0 text-success" /> {item}</div>
               ))}
             </div>
             <Button asChild className="mt-5 rounded-xl bg-gradient-primary shadow-soft">
@@ -158,7 +158,7 @@ function FreelancerDashboard() {
             <div className="mt-4 space-y-4">
               {["Laura Martinez", "NutriVida", "Carlos Sanchez"].map((name, index) => (
                 <div key={name} className="flex items-center gap-3">
-                  <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-primary text-xs font-bold text-primary-foreground">{name.slice(0, 2).toUpperCase()}</div>
+                  <div className="grid h-10 w-10 shrink-0 aspect-square place-items-center rounded-full bg-gradient-primary text-xs font-bold text-primary-foreground">{name.slice(0, 2).toUpperCase()}</div>
                   <div className="min-w-0 flex-1">
                     <div className="font-bold">{name}</div>
                     <div className="truncate text-sm text-muted-foreground">{index === 0 ? "Hola Andrea! Me encanto el diseño..." : "Listo, muchas gracias!"}</div>

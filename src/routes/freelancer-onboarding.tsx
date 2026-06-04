@@ -109,7 +109,7 @@ function FreelancerOnboarding() {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const canContinue = skills.length > 0 && tools.length > 0 && description.trim().length >= 20;
+  const canContinue = skills.length > 0 && tools.length > 0 && Boolean(description.trim());
 
   const avatarLabel = useMemo(() => {
     const user = getSessionUser();
@@ -289,7 +289,7 @@ function FreelancerOnboarding() {
           <Button
             type="button"
             className="bg-gradient-primary px-6 shadow-soft"
-            disabled={!canContinue}
+            disabled={!canContinue || processing}
             onClick={continueWithAi}
           >
             Continuar con la IA

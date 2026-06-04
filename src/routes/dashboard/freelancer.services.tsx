@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
-import { CheckCircle2, Edit3, Eye, Filter, Package, Plus, Save, Search, Trash2 } from "lucide-react";
+import { CheckCircle2, Edit3, Eye, Package, Save, Search, Trash2 } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -144,16 +144,12 @@ function ServicesPage() {
             <h1 className="font-display text-4xl font-extrabold tracking-normal">Gestion de servicios</h1>
             <p className="mt-1 text-muted-foreground">Crea, edita y administra los servicios que ofreceras en la plataforma.</p>
           </div>
-          <div className="flex gap-3">
-            <Button className="rounded-xl bg-gradient-primary shadow-soft" onClick={resetForm}><Plus className="h-4 w-4" /> Nuevo servicio</Button>
-            <Button variant="outline" className="rounded-xl"><Filter className="h-4 w-4" /> Filtros</Button>
-          </div>
         </div>
 
         <div className="grid gap-4 xl:grid-cols-3">
-          <Metric icon={Package} label="Total servicios" value={String(services.length)} hint="+3 vs el mes pasado" />
-          <Metric icon={CheckCircle2} label="Servicios activos" value={String(activeServices)} hint="+2 vs el mes pasado" />
-          <Metric icon={Eye} label="Total de vistas" value={totalViews.toLocaleString()} hint="+18% vs el mes pasado" />
+          <Metric icon={Package} label="Total servicios" value={String(services.length)} hint="Total registrado" />
+          <Metric icon={CheckCircle2} label="Servicios activos" value={String(activeServices)} hint="Disponibles para clientes" />
+          <Metric icon={Eye} label="Total de vistas" value={totalViews.toLocaleString()} hint="Suma real de vistas" />
         </div>
 
         {error ? <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">{error}</p> : null}

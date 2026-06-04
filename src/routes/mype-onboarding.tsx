@@ -39,7 +39,7 @@ function MypeOnboarding() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const canSubmit = businessName.trim() && industry && description.trim().length >= 20 && location.trim();
+  const canSubmit = Boolean(businessName.trim() && industry && description.trim() && location.trim());
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

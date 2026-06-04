@@ -16,6 +16,13 @@ export const Route = createFileRoute("/dashboard/freelancer/profile")({
   component: FreelancerProfilePage,
 });
 
+const isFilled = (value: unknown) => {
+  if (typeof value !== "string") return Boolean(value);
+
+  const normalized = value.trim().toLowerCase();
+  return normalized.length > 0 && normalized !== "no especificada";
+};
+
 function FreelancerProfilePage() {
   const token = getToken();
   const user = useMemo(() => getSessionUser(), []);
@@ -23,6 +30,7 @@ function FreelancerProfilePage() {
   const [skillsText, setSkillsText] = useState("");
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,8 +69,27 @@ function FreelancerProfilePage() {
     };
   }, [profile.social_links]);
 
+  const skillNames = useMemo(() => skillsText.split(",").map((skill) => skill.trim()).filter(Boolean), [skillsText]);
   const visiblePhotoUrl = photoPreviewUrl ?? profile.photo_url ?? null;
-  const profileName = user?.name ?? "Alejandro Martinez";
+  const profileName = user?.name ?? "Tu perfil";
+  const profileCompletionFields = [
+    profile.experience_area,
+    profile.location,
+    profile.website || socialLinks.website,
+    profile.bio ?? profile.description,
+    skillNames.length > 0,
+    visiblePhotoUrl,
+    socialLinks.linkedin,
+    socialLinks.instagram,
+    socialLinks.facebook,
+    socialLinks.x,
+  ];
+  const profileCompletion = Math.round((profileCompletionFields.filter(isFilled).length / profileCompletionFields.length) * 100);
+  const completionHint = profileCompletion >= 100
+    ? "Perfil completo. Tus datos estan actualizados."
+    : profileCompletion >= 70
+      ? "Muy buen progreso. Solo falta un poco mas."
+      : "Completa tus campos para mejorar tu visibilidad.";
 
   const requireToken = () => {
     if (!token) setError("Sesion no encontrada. Inicia sesion otra vez.");
@@ -75,75 +102,46 @@ function FreelancerProfilePage() {
     return firstError ?? payload?.message ?? fallback;
   };
 
-  const saveBaseProfile = async () => {
+  const saveAll = async () => {
     const t = requireToken();
     if (!t) return;
+    setSaving(true);
     setError(null);
     setMessage(null);
 
     try {
-      const response = await api.saveProfile(t, {
-        experience_area: profile.experience_area ?? "No especificada",
+      await api.saveProfile(t, {
+        experience_area: profile.experience_area?.trim() || "No especificada",
+        bio: profile.bio ?? profile.description ?? null,
         location: profile.location ?? null,
-        website: profile.website ?? null,
+        website: profile.website || socialLinks.website || null,
+        social_links: {
+          linkedin: socialLinks.linkedin || null,
+          instagram: socialLinks.instagram || null,
+          facebook: socialLinks.facebook || null,
+          x: socialLinks.x || null,
+          website: socialLinks.website || profile.website || null,
+        },
       });
-      setProfile(response.data ?? {});
+
+      await api.updateSkills(t, skillNames);
+
+      if (selectedPhoto) {
+        await api.updatePhoto(t, selectedPhoto);
+      }
+
+      const response = await api.getProfile(t);
+      if (response.data) {
+        setProfile(response.data);
+        setSkillsText((response.data.skills ?? []).join(", "));
+      }
+      setSelectedPhoto(null);
+      setPhotoPreviewUrl(null);
       setMessage("Perfil actualizado.");
     } catch (err) {
-      setError(getErrorMessage(err, "No se pudo actualizar el perfil."));
-    }
-  };
-
-  const saveDescription = async () => {
-    const t = requireToken();
-    if (!t) return;
-    setError(null);
-    setMessage(null);
-
-    try {
-      const response = await api.updateDescription(t, profile.bio ?? profile.description ?? "");
-      if (response.data) setProfile(response.data);
-      setMessage("Descripcion actualizada.");
-    } catch (err) {
-      setError(getErrorMessage(err, "No se pudo actualizar la descripcion."));
-    }
-  };
-
-  const saveSkills = async () => {
-    const t = requireToken();
-    if (!t) return;
-    setError(null);
-    setMessage(null);
-
-    const skills = skillsText.split(",").map((skill) => skill.trim()).filter(Boolean);
-
-    try {
-      const response = await api.updateSkills(t, skills);
-      if (response.data) setProfile(response.data);
-      setMessage("Habilidades actualizadas.");
-    } catch (err) {
-      setError(getErrorMessage(err, "No se pudieron guardar las habilidades."));
-    }
-  };
-
-  const saveSocial = async () => {
-    const t = requireToken();
-    if (!t) return;
-    setError(null);
-    setMessage(null);
-
-    try {
-      const response = await api.updateSocialLinks(t, {
-        linkedin: socialLinks.linkedin || null,
-        instagram: socialLinks.instagram || null,
-        facebook: socialLinks.facebook || null,
-        x: socialLinks.x || null,
-        website: socialLinks.website || null,
-      });
-      if (response.data) setProfile(response.data);
-      setMessage("Redes sociales actualizadas.");
-    } catch (err) {
-      setError(getErrorMessage(err, "No se pudieron actualizar las redes."));
+      setError(getErrorMessage(err, "No se pudieron guardar los cambios."));
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -152,22 +150,6 @@ function FreelancerProfilePage() {
     setMessage(null);
     setError(null);
     setPhotoPreviewUrl(file ? URL.createObjectURL(file) : null);
-  };
-
-  const savePhoto = async () => {
-    const t = requireToken();
-    if (!t || !selectedPhoto) return;
-    setError(null);
-    setMessage(null);
-
-    try {
-      const response = await api.updatePhoto(t, selectedPhoto);
-      if (response.data) setProfile(response.data);
-      setSelectedPhoto(null);
-      setMessage("Foto actualizada.");
-    } catch (err) {
-      setError(getErrorMessage(err, "No se pudo subir la foto."));
-    }
   };
 
   return (
@@ -185,16 +167,18 @@ function FreelancerProfilePage() {
           <div className="absolute right-0 top-0 h-full w-80 bg-secondary/10" />
           <div className="relative grid gap-6 lg:grid-cols-[360px_1fr_320px]">
             <div className="flex items-center gap-5">
-              <div className="relative grid h-36 w-36 place-items-center rounded-full border-[7px] border-secondary/80 bg-muted">
-                {visiblePhotoUrl ? <img src={visiblePhotoUrl} alt="Foto de perfil" className="h-full w-full rounded-full object-cover" /> : <UserRound className="h-16 w-16 text-muted-foreground" />}
+              <div className="relative h-36 w-36 shrink-0">
+                <div className="grid h-full w-full aspect-square place-items-center overflow-hidden rounded-full border-[7px] border-secondary/80 bg-muted">
+                  {visiblePhotoUrl ? <img src={visiblePhotoUrl} alt="Foto de perfil" className="h-full w-full rounded-full object-cover" /> : <UserRound className="h-16 w-16 text-muted-foreground" />}
+                </div>
                 <span className="absolute bottom-2 right-1 grid h-9 w-9 place-items-center rounded-full bg-foreground text-background">
                   <Camera className="h-4 w-4" />
                 </span>
               </div>
               <div>
                 <h2 className="font-display text-2xl font-bold tracking-normal">{profileName}</h2>
-                <p className="text-muted-foreground">{profile.experience_area || "Desarrollador Frontend React"}</p>
-                <p className="mt-2 flex items-center gap-1 text-sm text-muted-foreground"><MapPin className="h-4 w-4" /> {profile.location || "Lima, Peru"}</p>
+                <p className="text-muted-foreground">{profile.experience_area || "Area sin definir"}</p>
+                <p className="mt-2 flex items-center gap-1 text-sm text-muted-foreground"><MapPin className="h-4 w-4" /> {profile.location || "Ubicacion sin definir"}</p>
                 <span className="mt-3 inline-flex rounded-lg bg-success/15 px-3 py-1 text-xs font-bold text-success">Visible al publico</span>
               </div>
             </div>
@@ -202,12 +186,12 @@ function FreelancerProfilePage() {
             <div className="border-l border-border pl-6">
               <div className="flex items-center justify-between text-sm font-bold">
                 <span>Perfil completado</span>
-                <span className="text-secondary">78%</span>
+                <span className="text-secondary">{profileCompletion}%</span>
               </div>
               <div className="mt-3 h-2 overflow-hidden rounded-full bg-border">
-                <div className="h-full w-[78%] rounded-full bg-secondary" />
+                <div className="h-full rounded-full bg-secondary" style={{ width: `${profileCompletion}%` }} />
               </div>
-              <p className="mt-4 text-sm text-muted-foreground">Muy buen progreso. Solo falta un poco mas.</p>
+              <p className="mt-4 text-sm text-muted-foreground">{completionHint}</p>
               <LinkIcon className="mt-5 h-4 w-4 text-secondary" />
             </div>
 
@@ -235,7 +219,6 @@ function FreelancerProfilePage() {
             </div>
             <div className="mt-5 flex items-center justify-between">
               <p className="flex items-center gap-2 text-xs text-muted-foreground"><ShieldCheck className="h-4 w-4" /> Esta informacion sera visible en tu perfil publico.</p>
-              <Button onClick={saveBaseProfile} className="rounded-xl bg-gradient-primary shadow-soft"><Save className="h-4 w-4" /> Guardar perfil</Button>
             </div>
           </Card>
 
@@ -244,21 +227,17 @@ function FreelancerProfilePage() {
             <Textarea value={profile.bio ?? profile.description ?? ""} onChange={(event) => setProfile((prev) => ({ ...prev, bio: event.target.value }))} placeholder="Cuéntanos sobre ti y tu propuesta de valor" className="mt-5 min-h-36 resize-none rounded-xl" />
             <div className="mt-5 flex items-center justify-between">
               <p className="text-xs text-muted-foreground">Se claro, especifico y muestra como ayudas a tus clientes.</p>
-              <Button onClick={saveDescription} className="rounded-xl bg-gradient-primary shadow-soft"><Save className="h-4 w-4" /> Guardar descripcion</Button>
             </div>
           </Card>
 
           <Card className="rounded-2xl p-5 shadow-soft">
             <PanelTitle icon={Sparkles} title="Habilidades" />
             <div className="mt-4 flex flex-wrap gap-2">
-              {skillsText.split(",").map((skill) => skill.trim()).filter(Boolean).map((skill) => (
+              {skillNames.map((skill) => (
                 <span key={skill} className="rounded-lg bg-secondary px-3 py-1 text-xs font-bold text-white">{skill}</span>
               ))}
             </div>
             <Input value={skillsText} onChange={(event) => setSkillsText(event.target.value)} placeholder="React, Next.js, TypeScript, Figma" className="mt-4 h-11 rounded-xl" />
-            <div className="mt-5 flex justify-end">
-              <Button onClick={saveSkills} className="rounded-xl bg-gradient-primary shadow-soft"><Save className="h-4 w-4" /> Guardar habilidades</Button>
-            </div>
           </Card>
 
           <Card className="rounded-2xl p-5 shadow-soft">
@@ -269,11 +248,8 @@ function FreelancerProfilePage() {
                 <span><ImageUp className="mx-auto mb-2 h-8 w-8 text-foreground" />Arrastra tu foto aqui<br />o haz clic para seleccionar</span>
               </label>
               <div className="grid place-items-center rounded-2xl bg-muted">
-                {visiblePhotoUrl ? <img src={visiblePhotoUrl} alt="Vista previa" className="h-32 w-32 rounded-full object-cover" /> : <UserRound className="h-16 w-16 text-muted-foreground" />}
+                {visiblePhotoUrl ? <img src={visiblePhotoUrl} alt="Vista previa" className="h-32 w-32 shrink-0 aspect-square rounded-full object-cover" /> : <UserRound className="h-16 w-16 text-muted-foreground" />}
               </div>
-            </div>
-            <div className="mt-5 flex justify-end">
-              <Button onClick={savePhoto} disabled={!selectedPhoto} className="rounded-xl bg-gradient-primary shadow-soft"><ImageUp className="h-4 w-4" /> Subir foto</Button>
             </div>
           </Card>
 
@@ -283,9 +259,6 @@ function FreelancerProfilePage() {
               {(["linkedin", "instagram", "facebook", "x", "website"] as const).map((key) => (
                 <Input key={key} value={socialLinks[key]} onChange={(event) => setProfile((prev) => ({ ...prev, social_links: { ...(prev.social_links ?? {}), [key]: event.target.value } }))} placeholder={key === "x" ? "X / Twitter" : key} className="h-11 rounded-xl" />
               ))}
-            </div>
-            <div className="mt-5 flex justify-end">
-              <Button onClick={saveSocial} className="rounded-xl bg-gradient-primary shadow-soft"><Save className="h-4 w-4" /> Guardar redes</Button>
             </div>
           </Card>
 
@@ -298,6 +271,14 @@ function FreelancerProfilePage() {
             </div>
           </Card>
         </div>
+
+        <Card className="flex items-center justify-between rounded-2xl p-5 shadow-soft">
+          <p className="text-sm text-muted-foreground">Guarda todos los cambios de tu perfil en una sola accion.</p>
+          <Button onClick={saveAll} disabled={saving} className="rounded-xl bg-gradient-primary shadow-soft">
+            <Save className="h-4 w-4" />
+            {saving ? "Guardando..." : "Guardar cambios"}
+          </Button>
+        </Card>
       </div>
     </DashboardShell>
   );
@@ -324,7 +305,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function Checklist({ title, detail, color }: { title: string; detail: string; color: string }) {
   return (
     <div className="flex gap-3">
-      <CheckCircle2 className={`mt-0.5 h-5 w-5 ${color}`} />
+      <CheckCircle2 className={`mt-0.5 h-5 w-5 shrink-0 ${color}`} />
       <div>
         <div className="font-bold">{title}</div>
         <div className="text-xs text-muted-foreground">{detail}</div>

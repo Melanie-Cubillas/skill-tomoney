@@ -25,12 +25,15 @@ export const Route = createFileRoute("/dashboard/client/profile")({
 
 const INDUSTRIES = ["Alimentos y bebidas", "Moda", "Servicios profesionales", "Educacion", "Salud", "Tecnologia", "Retail", "Turismo"];
 
+const isFilled = (value: unknown) => typeof value === "string" ? value.trim().length > 0 : Boolean(value);
+
 function MypeProfilePage() {
   const token = getToken();
   const user = useMemo(() => getSessionUser(), []);
   const [profile, setProfile] = useState<Partial<ProfilePayload>>({});
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,6 +59,16 @@ function MypeProfilePage() {
   }, [photoPreviewUrl]);
 
   const visiblePhotoUrl = photoPreviewUrl ?? profile.photo_url ?? null;
+  const profileCompletionFields = [
+    profile.business_name,
+    profile.ruc,
+    profile.industry,
+    profile.description,
+    profile.website,
+    profile.location,
+    visiblePhotoUrl,
+  ];
+  const profileCompletion = Math.round((profileCompletionFields.filter(isFilled).length / profileCompletionFields.length) * 100);
 
   const requireToken = () => {
     if (!token) setError("Sesion no encontrada. Inicia sesion otra vez.");
@@ -68,75 +81,36 @@ function MypeProfilePage() {
     return firstError ?? payload?.message ?? fallback;
   };
 
-  const saveBusiness = async () => {
+  const saveAll = async () => {
     const t = requireToken();
     if (!t) return;
+    setSaving(true);
     setError(null);
     setMessage(null);
 
     try {
-      const response = await api.saveProfile(t, {
+      await api.saveProfile(t, {
         business_name: profile.business_name ?? "",
         industry: profile.industry ?? null,
+        description: profile.description ?? null,
+        website: profile.website ?? null,
         location: profile.location ?? null,
       });
+
+      if (selectedPhoto) {
+        await api.updatePhoto(t, selectedPhoto);
+      }
+
+      const response = await api.getProfile(t);
       setProfile(response.data ?? {});
-      setMessage("Datos del negocio actualizados.");
-    } catch (err) {
-      setError(getErrorMessage(err, "No se pudieron guardar los datos."));
-    }
-  };
-
-  const saveDescription = async () => {
-    const t = requireToken();
-    if (!t) return;
-    setError(null);
-    setMessage(null);
-
-    try {
-      const response = await api.updateDescription(t, profile.description ?? "");
-      if (response.data) setProfile(response.data);
-      setMessage("Descripcion actualizada.");
-    } catch (err) {
-      setError(getErrorMessage(err, "No se pudo guardar la descripcion."));
-    }
-  };
-
-  const saveWebsite = async () => {
-    const t = requireToken();
-    if (!t) return;
-    setError(null);
-    setMessage(null);
-
-    try {
-      const response = await api.saveProfile(t, { website: profile.website ?? null });
-      setProfile(response.data ?? {});
-      setMessage("Enlace actualizado.");
-    } catch (err) {
-      setError(getErrorMessage(err, "No se pudo guardar el enlace."));
-    }
-  };
-
-  const savePhoto = async () => {
-    const t = requireToken();
-    if (!t || !selectedPhoto) return;
-    setError(null);
-    setMessage(null);
-
-    try {
-      const response = await api.updatePhoto(t, selectedPhoto);
-      if (response.data) setProfile(response.data);
       setSelectedPhoto(null);
-      setMessage("Logo actualizado.");
+      setPhotoPreviewUrl(null);
+      setMessage("Perfil actualizado.");
     } catch (err) {
-      setError(getErrorMessage(err, "No se pudo subir el logo."));
+      setError(getErrorMessage(err, "No se pudieron guardar los cambios."));
+    } finally {
+      setSaving(false);
     }
-  };
-
-  const saveAll = async () => {
-    await saveBusiness();
-    await saveDescription();
-    await saveWebsite();
   };
 
   return (
@@ -164,8 +138,8 @@ function MypeProfilePage() {
                   </div>
                 </div>
                 <div className="min-w-48">
-                  <div className="mb-2 flex justify-between text-sm"><span>Perfil</span><span className="font-bold text-secondary">75%</span></div>
-                  <div className="h-2 rounded-full bg-border"><div className="h-full w-3/4 rounded-full bg-secondary" /></div>
+                  <div className="mb-2 flex justify-between text-sm"><span>Perfil</span><span className="font-bold text-secondary">{profileCompletion}%</span></div>
+                  <div className="h-2 rounded-full bg-border"><div className="h-full rounded-full bg-secondary" style={{ width: `${profileCompletion}%` }} /></div>
                 </div>
               </div>
             </Card>
@@ -198,7 +172,6 @@ function MypeProfilePage() {
                   <Field label="Ubicacion">
                     <Input value={profile.location ?? ""} onChange={(event) => setProfile((prev) => ({ ...prev, location: event.target.value }))} placeholder="Ej. Lima, Peru" className="h-11 rounded-xl" />
                   </Field>
-                  <Button onClick={saveBusiness} className="rounded-xl bg-gradient-primary shadow-soft"><Save className="h-4 w-4" /> Guardar datos del negocio</Button>
                 </div>
               </Card>
 
@@ -207,13 +180,11 @@ function MypeProfilePage() {
                   <PanelTitle icon={ShieldCheck} title="Descripcion de la empresa" />
                   <Textarea value={profile.description ?? ""} onChange={(event) => setProfile((prev) => ({ ...prev, description: event.target.value.slice(0, 1000) }))} placeholder="Cuentanos brevemente sobre tu empresa, que productos o servicios ofreces..." className="mt-5 min-h-48 resize-none rounded-xl" maxLength={1000} />
                   <div className="mt-3 text-right text-xs text-muted-foreground">{(profile.description ?? "").length}/1000</div>
-                  <Button onClick={saveDescription} className="mt-2 rounded-xl bg-gradient-primary shadow-soft"><Save className="h-4 w-4" /> Guardar descripcion</Button>
                 </Card>
 
                 <Card className="rounded-2xl p-5 shadow-soft">
                   <PanelTitle icon={LinkIcon} title="Pagina web o red social del negocio" />
                   <Input value={profile.website ?? ""} onChange={(event) => setProfile((prev) => ({ ...prev, website: event.target.value }))} placeholder="Ej: https://tusitio.com o @tunegocio" className="mt-5 h-11 rounded-xl" />
-                  <Button onClick={saveWebsite} className="mt-4 rounded-xl bg-gradient-primary shadow-soft"><Save className="h-4 w-4" /> Guardar enlace</Button>
                 </Card>
               </div>
             </div>
@@ -235,7 +206,6 @@ function MypeProfilePage() {
                   <span className="mt-2 text-xs text-muted-foreground">Vista previa</span>
                 </div>
               </div>
-              <Button onClick={savePhoto} disabled={!selectedPhoto} className="mt-5 rounded-xl bg-gradient-primary shadow-soft">Guardar logo</Button>
             </Card>
 
             <Card className="flex items-center justify-between rounded-2xl border-secondary/30 bg-secondary/10 p-5 shadow-soft">
@@ -256,8 +226,7 @@ function MypeProfilePage() {
             <Card className="flex items-center justify-between rounded-2xl p-5 shadow-soft">
               <p className="text-sm text-muted-foreground">¡Vas muy bien! Completa tu perfil y empieza a recibir oportunidades.</p>
               <div className="flex gap-3">
-                <Button variant="outline">Cancelar</Button>
-                <Button onClick={saveAll} className="rounded-xl bg-gradient-primary shadow-soft"><Save className="h-4 w-4" /> Guardar cambios</Button>
+                <Button onClick={saveAll} disabled={saving} className="rounded-xl bg-gradient-primary shadow-soft"><Save className="h-4 w-4" /> {saving ? "Guardando..." : "Guardar cambios"}</Button>
               </div>
             </Card>
           </div>
