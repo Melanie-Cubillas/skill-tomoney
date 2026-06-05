@@ -216,12 +216,50 @@ export const api = {
       website: string;
       areas: string[];
       certificates: string[];
+      has_project_experience?: "si" | "no";
+      projects?: {
+        name?: string;
+        title?: string;
+        description?: string;
+        time?: string;
+        estimated_time?: string;
+      }[];
+      availability?: "si" | "no";
+      availability_time?: string;
+      freelance_goals?: string;
     },
   ) =>
     apiRequest<GeminiAnalysisPayload>("/gemini/analyze", {
       method: "POST",
       token,
       body: JSON.stringify(data),
+    }),
+
+  getCatalog: (token: string, params?: Record<string, string | number>) => {
+    const query = params
+      ? "?" + new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)])).toString()
+      : "";
+
+    return apiRequest<CatalogPayload>(`/catalog${query}`, { token });
+  },
+
+  getCatalogItem: (token: string, id: number) =>
+    apiRequest<FreelancerItem>(`/catalog/${id}`, { token }),
+
+  getFavorites: (token: string) =>
+    apiRequest<FavoritesPayload>("/favorites", { token }),
+
+  addFavorite: (token: string, freelancerProfileId: number) =>
+    apiRequest<{ favorite: FreelancerItem }>("/favorites", {
+      method: "POST",
+      token,
+      body: JSON.stringify({ freelancer_profile_id: freelancerProfileId }),
+    }),
+
+  removeFavorite: (token: string, freelancerProfileId: number) =>
+    apiRequest<null>(`/favorites/${freelancerProfileId}`, {
+      method: "DELETE",
+      token,
     }),
 };
 
@@ -230,6 +268,49 @@ export type GeminiAnalysisPayload = {
   category: string;
   suggested_rate: string;
   bio: string;
-  suggested_projects: { title: string; description: string }[];
+  profile_criteria?: {
+    positioning?: string | null;
+    target_clients?: string[];
+    service_keywords?: string[];
+    portfolio_focus?: string[];
+    pricing_notes?: string | null;
+  };
+  suggested_projects: {
+    title: string;
+    description: string;
+    estimated_time?: string | null;
+    tasks?: string[];
+  }[];
   tips: string[];
+  strengths?: string[];
+  availability_summary?: string | null;
+};
+
+export type FreelancerItem = {
+  id: number;
+  user_id: number;
+  name: string;
+  headline: string | null;
+  category: string | null;
+  bio: string | null;
+  suggested_rate: string | null;
+  location: string | null;
+  experience_area: string | null;
+  rating: number;
+  completed_jobs: number;
+  profile_photo: string | null;
+  skills: string[];
+  availability_status: string | null;
+};
+
+export type CatalogPayload = {
+  freelancers: FreelancerItem[];
+  total: number;
+  per_page: number;
+  current_page: number;
+  last_page: number;
+};
+
+export type FavoritesPayload = {
+  favorites: FreelancerItem[];
 };

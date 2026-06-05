@@ -131,12 +131,15 @@ function FreelancerOnboarding() {
   const [certificates, setCertificates] = useState<string[]>([]);
   const [stage, setStage] = useState<OnboardingStage>("profile");
   const [projects, setProjects] = useState<ProjectDraft[]>(EMPTY_PROJECTS);
+  const [projectExperience, setProjectExperience] = useState<"si" | "no" | null>(null);
   const [startedProjects, setStartedProjects] = useState<string[]>([]);
   const [analysis, setAnalysis] = useState<GeminiAnalysisPayload | null>(null);
   const [geminiError, setGeminiError] = useState<string | null>(null);
   const hasRun = useRef(false);
   const [availability, setAvailability] = useState<"si" | "no" | null>(null);
   const [availabilityTime, setAvailabilityTime] = useState("");
+  const [isFinalizing, setIsFinalizing] = useState(false);
+  const [finalizeError, setFinalizeError] = useState<string | null>(null);
 
   const canContinue = skills.length > 0 && tools.length > 0 && description.trim().length >= 20;
   const selectedSkill = skills[0] ?? "tus habilidades principales";
@@ -214,6 +217,59 @@ function FreelancerOnboarding() {
     );
   };
 
+  const finalizeProfile = async () => {
+    if (!availability || !availabilityTime.trim() || isFinalizing) return;
+
+    const token = getToken();
+
+    if (!token) {
+      setFinalizeError("Sesion no encontrada. Inicia sesion otra vez.");
+      return;
+    }
+
+    setIsFinalizing(true);
+    setFinalizeError(null);
+
+    const payloadProjects =
+      projectExperience === "si"
+        ? projects
+        : suggestedProjects.map((project) => ({
+            title: project.title,
+            description: project.description,
+            estimated_time: project.estimated_time ?? undefined,
+          }));
+
+    try {
+      const res = await api.analyzeFreelancer(token, {
+        skills,
+        tools,
+        description,
+        linkedin,
+        instagram,
+        website,
+        areas,
+        certificates,
+        has_project_experience: projectExperience ?? "no",
+        projects: payloadProjects,
+        availability,
+        availability_time: availabilityTime,
+        freelance_goals:
+          projectExperience === "si"
+            ? "Mejorar mi perfil freelance usando proyectos reales."
+            : "Empezar desde cero y construir portafolio con proyectos practicos.",
+      });
+
+      if (res.data) setAnalysis(res.data);
+
+      navigate({ to: "/dashboard/freelancer" });
+    } catch (err) {
+      const payload = err as { message?: string };
+      setFinalizeError(payload?.message ?? "No se pudo guardar el analisis final.");
+    } finally {
+      setIsFinalizing(false);
+    }
+  };
+
   if (stage === "processing") {
     return (
       <FreelancerFrame avatarLabel={avatarLabel}>
@@ -257,7 +313,10 @@ function FreelancerOnboarding() {
             <div className="mt-10 grid gap-6 md:grid-cols-2">
               <button
                 type="button"
-                onClick={() => setStage("project-form")}
+                onClick={() => {
+                  setProjectExperience("si");
+                  setStage("project-form");
+                }}
                 className="min-h-44 rounded-2xl border-2 border-[#00A884] bg-card p-8 text-center shadow-soft transition hover:-translate-y-0.5 hover:shadow-elegant"
               >
                 <Rocket className="mx-auto h-14 w-14 text-[#00A884]" />
@@ -265,7 +324,10 @@ function FreelancerOnboarding() {
               </button>
               <button
                 type="button"
-                onClick={() => setStage("starter-projects")}
+                onClick={() => {
+                  setProjectExperience("no");
+                  setStage("starter-projects");
+                }}
                 className="min-h-44 rounded-2xl border-2 border-[#D39B37] bg-card p-8 text-center shadow-soft transition hover:-translate-y-0.5 hover:shadow-elegant"
               >
                 <Sprout className="mx-auto h-14 w-14 text-[#D39B37]" />
@@ -462,12 +524,17 @@ function FreelancerOnboarding() {
             <Button
               type="button"
               className="bg-gradient-primary px-6 shadow-soft"
-              disabled={!availability || !availabilityTime.trim()}
-              onClick={() => navigate({ to: "/dashboard/freelancer" })}
+              disabled={!availability || !availabilityTime.trim() || isFinalizing}
+              onClick={finalizeProfile}
             >
-              Finalizar perfil
+              {isFinalizing ? "Guardando analisis..." : "Finalizar perfil"}
             </Button>
           </div>
+          {finalizeError ? (
+            <p className="mx-auto mt-3 max-w-4xl text-right text-sm text-red-500">
+              {finalizeError}
+            </p>
+          ) : null}
         </AiFlowShell>
       </FreelancerFrame>
     );
