@@ -205,4 +205,31 @@ export const api = {
       `/recommendations${recommendationType ? `?type=${encodeURIComponent(recommendationType)}` : ""}`,
       { token },
     ),
+  analyzeFreelancer: (
+    token: string,
+    data: {
+      skills: string[];
+      tools: string[];
+      description: string;
+      linkedin: string;
+      instagram: string;
+      website: string;
+      areas: string[];
+      certificates: string[];
+    },
+  ) =>
+    apiRequest<GeminiAnalysisPayload>("/gemini/analyze", {
+      method: "POST",
+      token,
+      body: JSON.stringify(data),
+    }),
+};
+
+export type GeminiAnalysisPayload = {
+  headline: string;
+  category: string;
+  suggested_rate: string;
+  bio: string;
+  suggested_projects: { title: string; description: string }[];
+  tips: string[];
 };

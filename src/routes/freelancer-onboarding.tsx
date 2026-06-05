@@ -23,8 +23,8 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { getSessionUser } from "@/lib/auth";
-import { analyzeFreelancerProfile, type GeminiAnalysis, type FreelancerData } from "@/lib/gemini";
+import { getSessionUser, getToken } from "@/lib/auth";
+import { api, type GeminiAnalysisPayload } from "@/lib/api";
 
 export const Route = createFileRoute("/freelancer-onboarding")({
   head: () => ({
@@ -132,10 +132,11 @@ function FreelancerOnboarding() {
   const [stage, setStage] = useState<OnboardingStage>("profile");
   const [projects, setProjects] = useState<ProjectDraft[]>(EMPTY_PROJECTS);
   const [startedProjects, setStartedProjects] = useState<string[]>([]);
-  const [analysis, setAnalysis] = useState<GeminiAnalysis | null>(null);
+  const [analysis, setAnalysis] = useState<GeminiAnalysisPayload | null>(null);
   const [geminiError, setGeminiError] = useState<string | null>(null);
   const hasRun = useRef(false);
   const [availability, setAvailability] = useState<"si" | "no" | null>(null);
+  const [availabilityTime, setAvailabilityTime] = useState("");
 
   const canContinue = skills.length > 0 && tools.length > 0 && description.trim().length >= 20;
   const selectedSkill = skills[0] ?? "tus habilidades principales";
@@ -156,7 +157,7 @@ function FreelancerOnboarding() {
       .join("");
   }, []);
   const suggestedProjects = useMemo(
-    () => analysis?.suggestedProjects ?? buildSuggestedProjects(selectedSkill, selectedArea),
+    () => analysis?.suggested_projects ?? buildSuggestedProjects(selectedSkill, selectedArea),
     [analysis, selectedArea, selectedSkill],
   );
 
@@ -164,25 +165,32 @@ function FreelancerOnboarding() {
     if (stage !== "processing" || hasRun.current) return;
     hasRun.current = true;
     setGeminiError(null);
+    const token = getToken();
 
-    const data: FreelancerData = {
-      skills,
-      tools,
-      description,
-      linkedin,
-      instagram,
-      website,
-      areas,
-      certificates,
-    };
+    if (!token) {
+      setGeminiError("Sesión no encontrada. Inicia sesión otra vez.");
+      setStage("project-choice");
+      return;
+    }
 
-    analyzeFreelancerProfile(data)
-      .then((result) => {
-        setAnalysis(result);
+    api
+      .analyzeFreelancer(token, {
+        skills,
+        tools,
+        description,
+        linkedin,
+        instagram,
+        website,
+        areas,
+        certificates,
+      })
+      .then((res) => {
+        if (res.data) setAnalysis(res.data);
         setStage("project-choice");
       })
       .catch((err) => {
-        setGeminiError(err instanceof Error ? err.message : "Error al analizar el perfil.");
+        const payload = err as { message?: string };
+        setGeminiError(payload?.message ?? "Error al analizar el perfil.");
         setStage("project-choice");
       });
   }, [stage, skills, tools, description, linkedin, instagram, website, areas, certificates]);
@@ -237,7 +245,7 @@ function FreelancerOnboarding() {
           <AiMessage>
             <strong>Gemini IA:</strong>{" "}
             {analysis
-              ? `Ya analicé tu perfil. ${analysis.bio} Basado en esto, te sugiero una tarifa de ${analysis.suggestedRate}.`
+              ? `Ya analicé tu perfil. ${analysis.bio} Basado en esto, te sugiero una tarifa de ${analysis.suggested_rate}.`
               : `Genial. Ya analicé tus habilidades en ${selectedSkill} y herramientas como ${selectedTool}.`}{" "}
             Para armar tu CV ideal y calcular tu tarifa perfecta, cuéntame:
           </AiMessage>
@@ -431,13 +439,30 @@ function FreelancerOnboarding() {
                 </p>
               </button>
             </div>
+
+            <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-border bg-card p-5 text-left shadow-soft">
+              <label htmlFor="availability-time" className="text-sm font-bold">
+                ¿Cuánto tiempo puedes invertir en proyectos?
+              </label>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Coloca tu disponibilidad estimada, por ejemplo: 10 horas por semana, fines de semana
+                o 2 horas al día.
+              </p>
+              <Input
+                id="availability-time"
+                value={availabilityTime}
+                onChange={(event) => setAvailabilityTime(event.target.value)}
+                placeholder="Ej. 10 horas por semana"
+                className="mt-4"
+              />
+            </div>
           </section>
 
           <div className="mx-auto mt-8 flex max-w-4xl justify-end">
             <Button
               type="button"
               className="bg-gradient-primary px-6 shadow-soft"
-              disabled={!availability}
+              disabled={!availability || !availabilityTime.trim()}
               onClick={() => navigate({ to: "/dashboard/freelancer" })}
             >
               Finalizar perfil
