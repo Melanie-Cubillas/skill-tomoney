@@ -1,15 +1,18 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Award,
   Bell,
+  Bot,
   Check,
   ChevronDown,
   CircleCheck,
   GraduationCap,
   Hourglass,
   Lock,
+  Rocket,
   Sparkles,
+  Sprout,
   Users,
   Wrench,
   X,
@@ -19,9 +22,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { api } from "@/lib/api";
+import { api, type GeminiAnalysisPayload } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { getSessionUser, getToken } from "@/lib/auth";
+
 
 export const Route = createFileRoute("/freelancer-onboarding")({
   head: () => ({
@@ -95,6 +99,26 @@ const EXTRA_CERTIFICATE_OPTIONS = [
   "Curso de Inteligencia Artificial Aplicada",
 ];
 
+type OnboardingStage =
+  | "profile"
+  | "processing"
+  | "project-choice"
+  | "project-form"
+  | "starter-projects"
+  | "availability";
+
+type ProjectDraft = {
+  name: string;
+  description: string;
+  time: string;
+};
+
+const EMPTY_PROJECTS: ProjectDraft[] = [
+  { name: "", description: "", time: "" },
+  { name: "", description: "", time: "" },
+  { name: "", description: "", time: "" },
+];
+
 function FreelancerOnboarding() {
   const navigate = useNavigate();
   const [skills, setSkills] = useState<string[]>([]);
@@ -106,11 +130,26 @@ function FreelancerOnboarding() {
   const [hasArea, setHasArea] = useState<"si" | "no">("no");
   const [areas, setAreas] = useState<string[]>([]);
   const [certificates, setCertificates] = useState<string[]>([]);
-  const [processing, setProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [stage, setStage] = useState<OnboardingStage>("profile");
+  const [projects, setProjects] = useState<ProjectDraft[]>(EMPTY_PROJECTS);
+  const [projectExperience, setProjectExperience] = useState<"si" | "no" | null>(null);
+  const [startedProjects, setStartedProjects] = useState<string[]>([]);
+  const [analysis, setAnalysis] = useState<GeminiAnalysisPayload | null>(null);
+  const [geminiError, setGeminiError] = useState<string | null>(null);
+  const hasRun = useRef(false);
+  const [availability, setAvailability] = useState<"si" | "no" | null>(null);
+  const [availabilityTime, setAvailabilityTime] = useState("");
+  const [isFinalizing, setIsFinalizing] = useState(false);
+  const [finalizeError, setFinalizeError] = useState<string | null>(null);
 
-  const canContinue = skills.length > 0 && tools.length > 0 && Boolean(description.trim());
-
+  const canContinue = skills.length > 0 && tools.length > 0 && description.trim().length >= 20;
+  const selectedSkill = skills[0] ?? "tus habilidades principales";
+  const selectedTool = tools[0] ?? "tus herramientas";
+  const selectedArea = areas[0] ?? skills[0] ?? "tu carrera";
+  const manualProjectsComplete = projects.every(
+    (project) =>
+      project.name.trim() && project.description.trim().length >= 20 && project.time.trim(),
+  );
   const avatarLabel = useMemo(() => {
     const user = getSessionUser();
     const source = user?.name || user?.email || "YO";
@@ -122,56 +161,383 @@ function FreelancerOnboarding() {
       .map((part) => part[0]?.toUpperCase())
       .join("");
   }, []);
+  const suggestedProjects = useMemo(
+    () => analysis?.suggested_projects ?? buildSuggestedProjects(selectedSkill, selectedArea),
+    [analysis, selectedArea, selectedSkill],
+  );
 
-  const continueWithAi = async () => {
+  useEffect(() => {
+    if (stage !== "processing" || hasRun.current) return;
+    hasRun.current = true;
+    setGeminiError(null);
+    const token = getToken();
+
+    if (!token) {
+      setGeminiError("Sesión no encontrada. Inicia sesión otra vez.");
+      setStage("project-choice");
+      return;
+    }
+
+    api
+      .analyzeFreelancer(token, {
+        skills,
+        tools,
+        description,
+        linkedin,
+        instagram,
+        website,
+        areas,
+        certificates,
+      })
+      .then((res) => {
+        if (res.data) setAnalysis(res.data);
+        setStage("project-choice");
+      })
+      .catch((err) => {
+        const payload = err as { message?: string };
+        setGeminiError(payload?.message ?? "Error al analizar el perfil.");
+        setStage("project-choice");
+      });
+  }, [stage, skills, tools, description, linkedin, instagram, website, areas, certificates]);
+
+  const continueWithAi = () => {
     if (!canContinue) return;
+    setStage("processing");
+  };
+
+  const updateProject = (index: number, field: keyof ProjectDraft, value: string) => {
+    setProjects((current) =>
+      current.map((project, projectIndex) =>
+        projectIndex === index ? { ...project, [field]: value } : project,
+      ),
+    );
+  };
+
+  const startSuggestedProject = (projectTitle: string) => {
+    setStartedProjects((current) =>
+      current.includes(projectTitle) ? current : [...current, projectTitle],
+    );
+  };
+
+  const finalizeProfile = async () => {
+    if (!availability || !availabilityTime.trim() || isFinalizing) return;
 
     const token = getToken();
 
     if (!token) {
-      setError("Sesion no encontrada. Inicia sesion otra vez.");
+      setFinalizeError("Sesion no encontrada. Inicia sesion otra vez.");
       return;
     }
 
-    setProcessing(true);
-    setError(null);
+    setIsFinalizing(true);
+    setFinalizeError(null);
+
+    const payloadProjects =
+      projectExperience === "si"
+        ? projects
+        : suggestedProjects.map((project) => ({
+            title: project.title,
+            description: project.description,
+            estimated_time: project.estimated_time ?? undefined,
+          }));
 
     try {
-      await api.saveProfile(token, {
-        experience_area: areas[0] ?? "No especificada",
-        bio: description,
-        website: website || null,
-        social_links: {
-          linkedin: linkedin || null,
-          instagram: instagram || null,
-          website: website || null,
-        },
+      const res = await api.analyzeFreelancer(token, {
+        skills,
+        tools,
+        description,
+        linkedin,
+        instagram,
+        website,
+        areas,
+        certificates,
+        has_project_experience: projectExperience ?? "no",
+        projects: payloadProjects,
+        availability,
+        availability_time: availabilityTime,
+        freelance_goals:
+          projectExperience === "si"
+            ? "Mejorar mi perfil freelance usando proyectos reales."
+            : "Empezar desde cero y construir portafolio con proyectos practicos.",
       });
 
-      await api.updateSkills(token, [...skills, ...tools, ...certificates]);
-      window.setTimeout(() => navigate({ to: "/dashboard/freelancer" }), 900);
-    } catch (err: unknown) {
-      const payload = err as { message?: string; errors?: Record<string, string[]> };
-      const firstError = Object.values(payload?.errors ?? {})[0]?.[0];
+      if (res.data) setAnalysis(res.data);
 
-      setError(firstError ?? payload?.message ?? "No se pudo guardar el perfil.");
-      setProcessing(false);
+      navigate({ to: "/dashboard/freelancer" });
+    } catch (err) {
+      const payload = err as { message?: string };
+      setFinalizeError(payload?.message ?? "No se pudo guardar el analisis final.");
+    } finally {
+      setIsFinalizing(false);
     }
   };
 
-  if (processing) {
+  if (stage === "processing") {
     return (
       <FreelancerFrame avatarLabel={avatarLabel}>
         <main className="grid min-h-[calc(100vh-57px)] place-items-center px-6">
           <div className="text-center">
             <p className="max-w-xl font-display text-xl font-bold leading-tight">
-              Procesando tus datos... Nuestra IA está preparando
+              {geminiError ? "Error al procesar" : "Procesando tus datos con Gemini IA..."}
               <br />
-              tu perfil para armar tu CV ideal
+              {geminiError
+                ? "Continuando de todos modos."
+                : "Analizando habilidades y preparando recomendaciones"}
             </p>
-            <Hourglass className="mx-auto mt-8 h-10 w-10 animate-pulse text-foreground" />
+            {geminiError ? (
+              <p className="mx-auto mt-4 max-w-md text-sm text-red-500">{geminiError}</p>
+            ) : (
+              <Hourglass className="mx-auto mt-8 h-10 w-10 animate-pulse text-foreground" />
+            )}
           </div>
         </main>
+      </FreelancerFrame>
+    );
+  }
+
+  if (stage === "project-choice") {
+    return (
+      <FreelancerFrame avatarLabel={avatarLabel}>
+        <AiFlowShell progress={35}>
+          <StatusPill>Habilidades procesadas exitosamente</StatusPill>
+          <AiMessage>
+            <strong>Gemini IA:</strong>{" "}
+            {analysis
+              ? `Ya analicé tu perfil. ${analysis.bio} Basado en esto, te sugiero una tarifa de ${analysis.suggested_rate}.`
+              : `Genial. Ya analicé tus habilidades en ${selectedSkill} y herramientas como ${selectedTool}.`}{" "}
+            Para armar tu CV ideal y calcular tu tarifa perfecta, cuéntame:
+          </AiMessage>
+
+          <section className="mx-auto mt-10 max-w-4xl text-center">
+            <h1 className="font-display text-3xl font-bold leading-tight">
+              ¿Has realizado proyectos como freelancer o de forma independiente antes?
+            </h1>
+            <div className="mt-10 grid gap-6 md:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setProjectExperience("si");
+                  setStage("project-form");
+                }}
+                className="min-h-44 rounded-2xl border-2 border-[#00A884] bg-card p-8 text-center shadow-soft transition hover:-translate-y-0.5 hover:shadow-elegant"
+              >
+                <Rocket className="mx-auto h-14 w-14 text-[#00A884]" />
+                <p className="mt-6 text-xl font-bold">Sí, he hecho proyectos</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setProjectExperience("no");
+                  setStage("starter-projects");
+                }}
+                className="min-h-44 rounded-2xl border-2 border-[#D39B37] bg-card p-8 text-center shadow-soft transition hover:-translate-y-0.5 hover:shadow-elegant"
+              >
+                <Sprout className="mx-auto h-14 w-14 text-[#D39B37]" />
+                <p className="mt-6 text-xl font-bold">No, quiero empezar desde cero</p>
+              </button>
+            </div>
+          </section>
+        </AiFlowShell>
+      </FreelancerFrame>
+    );
+  }
+
+  if (stage === "project-form") {
+    return (
+      <FreelancerFrame avatarLabel={avatarLabel}>
+        <AiFlowShell progress={45}>
+          <AiMessage>
+            <strong>SkilltoMoney AI:</strong> Genial, vamos a estructurar tu portafolio. Detalla tus
+            3 proyectos más destacados. Ingresa un nombre, una descripción breve y el tiempo total
+            que dedicaste a cada uno.
+          </AiMessage>
+
+          <section className="mx-auto mt-8 max-w-4xl rounded-2xl border border-border bg-card p-6 shadow-soft">
+            <div className="space-y-6">
+              {projects.map((project, index) => (
+                <ProjectInputGroup
+                  key={index}
+                  index={index}
+                  project={project}
+                  onChange={updateProject}
+                />
+              ))}
+            </div>
+          </section>
+
+          <div className="mx-auto mt-8 flex max-w-4xl justify-end">
+            <Button
+              type="button"
+              className="bg-gradient-primary px-6 shadow-soft"
+              disabled={!manualProjectsComplete}
+              onClick={() => setStage("availability")}
+            >
+              Continuar al análisis de tiempos y tarifa
+            </Button>
+          </div>
+        </AiFlowShell>
+      </FreelancerFrame>
+    );
+  }
+
+  if (stage === "starter-projects") {
+    const allSuggestionsStarted = startedProjects.length >= suggestedProjects.length;
+
+    return (
+      <FreelancerFrame avatarLabel={avatarLabel}>
+        <AiFlowShell progress={45}>
+          <AiMessage>
+            <strong>Gemini IA:</strong> No te preocupes. Para ayudarte a construir tu portafolio y
+            calcular tu tarifa, te he asignado 3 proyectos prácticos relacionados con{" "}
+            <strong>{selectedArea}</strong>. Complétalos para activar tu perfil.
+          </AiMessage>
+
+          <section className="mx-auto mt-8 max-w-5xl space-y-5">
+            {suggestedProjects.map((project, index) => {
+              const started = startedProjects.includes(project.title);
+
+              return (
+                <Card
+                  key={project.title}
+                  className="rounded-2xl border-border bg-card p-5 shadow-soft"
+                >
+                  <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
+                    <div className="flex gap-4">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-muted text-sm font-bold">
+                        {index + 1}
+                      </span>
+                      <div>
+                        <h2 className="font-display text-xl font-bold">{project.title}</h2>
+                        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+                          {project.description}
+                        </p>
+                        <div className="mt-4 flex items-center gap-3">
+                          <div className="h-2 w-56 max-w-full rounded-full bg-muted">
+                            <div
+                              className="h-full rounded-full bg-[#00C9BA] transition-all"
+                              style={{ width: started ? "33%" : "0%" }}
+                            />
+                          </div>
+                          <span className="text-sm font-semibold">
+                            {started ? "1/3 completados" : "0/3 completados"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      className="bg-[#061013] text-white hover:bg-[#10242a]"
+                      onClick={() => startSuggestedProject(project.title)}
+                    >
+                      {started ? "Proyecto iniciado" : "Empezar proyecto"}
+                    </Button>
+                  </div>
+                </Card>
+              );
+            })}
+          </section>
+
+          <div className="mx-auto mt-8 flex max-w-5xl flex-col items-end gap-2">
+            <Button
+              type="button"
+              className="bg-gradient-primary px-6 shadow-soft"
+              disabled={!allSuggestionsStarted}
+              onClick={() => setStage("availability")}
+            >
+              Continuar al análisis de tiempos y tarifa
+            </Button>
+            {!allSuggestionsStarted ? (
+              <p className="text-sm text-muted-foreground">Inicia tus proyectos para continuar.</p>
+            ) : null}
+          </div>
+        </AiFlowShell>
+      </FreelancerFrame>
+    );
+  }
+
+  if (stage === "availability") {
+    return (
+      <FreelancerFrame avatarLabel={avatarLabel}>
+        <AiFlowShell progress={62}>
+          <AiMessage>
+            <strong>SkilltoMoney AI:</strong> Perfecto. Ya tengo la base de tu portafolio. Para
+            mostrarte mejor ante clientes, necesito saber tu disponibilidad actual.
+          </AiMessage>
+
+          <section className="mx-auto mt-10 max-w-4xl text-center">
+            <h1 className="font-display text-3xl font-bold leading-tight">
+              ¿Estás disponible para recibir nuevos proyectos?
+            </h1>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Esta respuesta ayudará a priorizar tu perfil cuando una MYPE busque talento.
+            </p>
+
+            <div className="mt-10 grid gap-6 md:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setAvailability("si")}
+                className={cn(
+                  "min-h-40 rounded-2xl border-2 bg-card p-8 text-center shadow-soft transition hover:-translate-y-0.5 hover:shadow-elegant",
+                  availability === "si" ? "border-[#00C9BA]" : "border-border",
+                )}
+              >
+                <CircleCheck className="mx-auto h-12 w-12 text-[#00C9BA]" />
+                <p className="mt-5 text-xl font-bold">Sí, estoy disponible</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Puedo recibir propuestas y responder a clientes.
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setAvailability("no")}
+                className={cn(
+                  "min-h-40 rounded-2xl border-2 bg-card p-8 text-center shadow-soft transition hover:-translate-y-0.5 hover:shadow-elegant",
+                  availability === "no" ? "border-[#D39B37]" : "border-border",
+                )}
+              >
+                <Lock className="mx-auto h-12 w-12 text-[#D39B37]" />
+                <p className="mt-5 text-xl font-bold">No por ahora</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Mantendré mi perfil en preparación hasta estar listo.
+                </p>
+              </button>
+            </div>
+
+            <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-border bg-card p-5 text-left shadow-soft">
+              <label htmlFor="availability-time" className="text-sm font-bold">
+                ¿Cuánto tiempo puedes invertir en proyectos?
+              </label>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Coloca tu disponibilidad estimada, por ejemplo: 10 horas por semana, fines de semana
+                o 2 horas al día.
+              </p>
+              <Input
+                id="availability-time"
+                value={availabilityTime}
+                onChange={(event) => setAvailabilityTime(event.target.value)}
+                placeholder="Ej. 10 horas por semana"
+                className="mt-4"
+              />
+            </div>
+          </section>
+
+          <div className="mx-auto mt-8 flex max-w-4xl justify-end">
+            <Button
+              type="button"
+              className="bg-gradient-primary px-6 shadow-soft"
+              disabled={!availability || !availabilityTime.trim() || isFinalizing}
+              onClick={finalizeProfile}
+            >
+              {isFinalizing ? "Guardando analisis..." : "Finalizar perfil"}
+            </Button>
+          </div>
+          {finalizeError ? (
+            <p className="mx-auto mt-3 max-w-4xl text-right text-sm text-red-500">
+              {finalizeError}
+            </p>
+          ) : null}
+        </AiFlowShell>
       </FreelancerFrame>
     );
   }
@@ -342,6 +708,85 @@ function ProfilePanel({ title, children }: { title: string; children: React.Reac
   );
 }
 
+function AiFlowShell({ children, progress }: { children: React.ReactNode; progress: number }) {
+  return (
+    <main className="mx-auto w-full max-w-6xl px-5 py-5 lg:px-8">
+      <div className="h-3 overflow-hidden rounded-full border border-border bg-card">
+        <div
+          className="h-full rounded-full bg-[#2f343a] transition-all"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+      <div className="py-10">{children}</div>
+    </main>
+  );
+}
+
+function StatusPill({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mx-auto mb-8 flex w-fit items-center gap-2 rounded-2xl border border-border bg-card px-5 py-3 text-sm font-bold shadow-soft">
+      <CircleCheck className="h-5 w-5 text-muted-foreground" />
+      {children}
+    </div>
+  );
+}
+
+function AiMessage({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mx-auto flex max-w-4xl items-center gap-5">
+      <div className="grid h-20 w-20 shrink-0 place-items-center rounded-2xl border border-[#9fcfc8] bg-[#dff7f4] text-[#061013] shadow-soft">
+        <Bot className="h-11 w-11" />
+      </div>
+      <div className="rounded-2xl border border-border bg-card px-6 py-5 text-lg leading-snug shadow-soft">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function ProjectInputGroup({
+  index,
+  project,
+  onChange,
+}: {
+  index: number;
+  project: ProjectDraft;
+  onChange: (index: number, field: keyof ProjectDraft, value: string) => void;
+}) {
+  return (
+    <div className="relative pl-10">
+      <span className="absolute left-0 top-1 grid h-8 w-8 place-items-center rounded-full bg-[#061013] text-sm font-bold text-white">
+        {index + 1}
+      </span>
+      <h2 className="font-display text-xl font-bold">Proyecto {index + 1}</h2>
+      <div className="mt-3 space-y-3">
+        <Input
+          value={project.name}
+          onChange={(event) => onChange(index, "name", event.target.value)}
+          placeholder="Nombre del proyecto"
+        />
+        <div className="relative">
+          <Input
+            value={project.description}
+            onChange={(event) => onChange(index, "description", event.target.value.slice(0, 120))}
+            placeholder="Descripción breve"
+            maxLength={120}
+            className="pr-16"
+          />
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground">
+            {project.description.length}/120
+          </span>
+        </div>
+        <Input
+          value={project.time}
+          onChange={(event) => onChange(index, "time", event.target.value)}
+          placeholder="Tiempo invertido (ej. 15 horas)"
+        />
+      </div>
+    </div>
+  );
+}
+
 function RadioChoice({
   checked,
   label,
@@ -364,6 +809,76 @@ function RadioChoice({
       {label}
     </button>
   );
+}
+
+function buildSuggestedProjects(skill: string, area: string) {
+  const normalized = `${skill} ${area}`.toLowerCase();
+
+  if (normalized.includes("video")) {
+    return [
+      {
+        title: "Edición de video promocional para start-up",
+        description: "Crea un video corto para redes con guion, cortes limpios y subtítulos.",
+      },
+      {
+        title: "Reel de lanzamiento para marca local",
+        description: "Diseña una pieza vertical de 30 segundos para presentar un producto.",
+      },
+      {
+        title: "Demo visual de servicio digital",
+        description: "Arma un video explicativo breve mostrando problema, solución y beneficios.",
+      },
+    ];
+  }
+
+  if (normalized.includes("dise") || normalized.includes("branding") || normalized.includes("ux")) {
+    return [
+      {
+        title: "Diseño de logotipo para café local",
+        description: "Crea un logo, paleta de color y una breve justificación visual.",
+      },
+      {
+        title: "Rediseño de portada para red social",
+        description: "Diseña una portada profesional alineada a una marca pequeña.",
+      },
+      {
+        title: "Landing visual para servicio digital",
+        description: "Propón una estructura visual con secciones, jerarquía y llamada a la acción.",
+      },
+    ];
+  }
+
+  if (normalized.includes("web") || normalized.includes("computaci")) {
+    return [
+      {
+        title: "Creación de página de aterrizaje para e-commerce",
+        description: "Construye una landing simple con secciones, beneficios y botón principal.",
+      },
+      {
+        title: "Formulario de contacto para negocio local",
+        description: "Diseña una interfaz clara para capturar datos de clientes potenciales.",
+      },
+      {
+        title: "Panel básico de servicios",
+        description: "Crea una vista ordenada para listar servicios, precios y estados.",
+      },
+    ];
+  }
+
+  return [
+    {
+      title: "Proyecto práctico para negocio local",
+      description: "Resuelve una necesidad digital pequeña usando tus habilidades principales.",
+    },
+    {
+      title: "Caso de mejora para marca personal",
+      description: "Propón una mejora concreta y documenta el antes, proceso y resultado.",
+    },
+    {
+      title: "Entrega profesional para portafolio",
+      description: "Crea una pieza final presentable con objetivo, solución y tiempo invertido.",
+    },
+  ];
 }
 
 function ChipSelect({
@@ -450,14 +965,15 @@ function ChipSelect({
         </button>
 
         {open && !isLocked && (
-          <div className="absolute z-20 mt-1 max-h-36 w-full overflow-y-auto rounded-md border border-[#cda88d] bg-[#b5e1dc] py-1 text-sm shadow-soft">
+          <div className="absolute z-20 mt-1 max-h-40 w-full overflow-y-auto rounded-lg border border-[#00C9BA]/45 bg-white py-1.5 text-sm shadow-elegant">
             {(availableOptions.length ? availableOptions : ["Sin resultados"]).map((option) => (
               <button
                 key={option}
                 type="button"
                 className={cn(
-                  "flex w-full items-center justify-between px-3 py-1.5 text-left text-white transition hover:bg-[#00C9BA]",
-                  option === "Sin resultados" && "cursor-default text-white/70 hover:bg-transparent",
+                  "flex w-full items-center justify-between px-3 py-2 text-left font-semibold text-foreground transition hover:bg-[#00C9BA]/14 hover:text-[#061013]",
+                  option === "Sin resultados" &&
+                    "cursor-default text-muted-foreground hover:bg-transparent hover:text-muted-foreground",
                 )}
                 onClick={() => option !== "Sin resultados" && addValue(option)}
               >

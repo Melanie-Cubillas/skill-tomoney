@@ -302,4 +302,155 @@ export const api = {
       `/recommendations${recommendationType ? `?type=${encodeURIComponent(recommendationType)}` : ""}`,
       { token },
     ),
+  analyzeFreelancer: (
+    token: string,
+    data: {
+      skills: string[];
+      tools: string[];
+      description: string;
+      linkedin: string;
+      instagram: string;
+      website: string;
+      areas: string[];
+      certificates: string[];
+      has_project_experience?: "si" | "no";
+      projects?: {
+        name?: string;
+        title?: string;
+        description?: string;
+        time?: string;
+        estimated_time?: string;
+      }[];
+      availability?: "si" | "no";
+      availability_time?: string;
+      freelance_goals?: string;
+    },
+  ) =>
+    apiRequest<GeminiAnalysisPayload>("/gemini/analyze", {
+      method: "POST",
+      token,
+      body: JSON.stringify(data),
+    }),
+
+  getCatalog: (token: string, params?: Record<string, string | number>) => {
+    const query = params
+      ? "?" + new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)])).toString()
+      : "";
+
+    return apiRequest<CatalogPayload>(`/catalog${query}`, { token });
+  },
+
+  getCatalogItem: (token: string, id: number) =>
+    apiRequest<FreelancerItem>(`/catalog/${id}`, { token }),
+
+  getServices: (token: string, params?: Record<string, string | number>) => {
+    const query = params
+      ? "?" + new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)])).toString()
+      : "";
+
+    return apiRequest<ServicesPayload>(`/services${query}`, { token });
+  },
+
+  getServiceItem: (token: string, id: number) =>
+    apiRequest<ServiceItem>(`/services/${id}`, { token }),
+
+  getFavorites: (token: string) =>
+    apiRequest<FavoritesPayload>("/favorites", { token }),
+
+  addFavorite: (token: string, freelancerProfileId: number) =>
+    apiRequest<{ favorite: FreelancerItem }>("/favorites", {
+      method: "POST",
+      token,
+      body: JSON.stringify({ freelancer_profile_id: freelancerProfileId }),
+    }),
+
+  removeFavorite: (token: string, freelancerProfileId: number) =>
+    apiRequest<null>(`/favorites/${freelancerProfileId}`, {
+      method: "DELETE",
+      token,
+    }),
+};
+
+export type GeminiAnalysisPayload = {
+  headline: string;
+  category: string;
+  suggested_rate: string;
+  bio: string;
+  profile_criteria?: {
+    positioning?: string | null;
+    target_clients?: string[];
+    service_keywords?: string[];
+    portfolio_focus?: string[];
+    pricing_notes?: string | null;
+  };
+  suggested_projects: {
+    title: string;
+    description: string;
+    estimated_time?: string | null;
+    tasks?: string[];
+  }[];
+  tips: string[];
+  strengths?: string[];
+  availability_summary?: string | null;
+};
+
+export type FreelancerItem = {
+  id: number;
+  user_id: number;
+  name: string;
+  headline: string | null;
+  category: string | null;
+  bio: string | null;
+  suggested_rate: string | null;
+  rate_amount: number | null;
+  location: string | null;
+  experience_area: string | null;
+  rating: number;
+  completed_jobs: number;
+  profile_photo: string | null;
+  skills: string[];
+  availability_status: string | null;
+};
+
+export type CatalogPayload = {
+  freelancers: FreelancerItem[];
+  total: number;
+  per_page: number;
+  current_page: number;
+  last_page: number;
+};
+
+export type FavoritesPayload = {
+  favorites: FreelancerItem[];
+};
+
+export type ServiceItem = {
+  id: number;
+  title: string;
+  description: string;
+  price: number;
+  currency: string;
+  delivery_days: number;
+  status: string;
+  views_count: number;
+  category: string | null;
+  freelancer: {
+    id: number | null;
+    user_id: number | null;
+    name: string;
+    headline: string | null;
+    rating: number | string | null;
+    completed_jobs: number | null;
+    profile_photo: string | null;
+    skills: string[];
+  };
+  created_at: string;
+};
+
+export type ServicesPayload = {
+  services: ServiceItem[];
+  total: number;
+  per_page: number;
+  current_page: number;
+  last_page: number;
 };
