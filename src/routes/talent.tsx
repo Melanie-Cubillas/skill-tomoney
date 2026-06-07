@@ -50,22 +50,30 @@ function TalentPage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
+  const [minRate, setMinRate] = useState("");
+  const [maxRate, setMaxRate] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
   const [favLoading, setFavLoading] = useState<number | null>(null);
 
   const loadFreelancers = useCallback(async () => {
+    if (!token) {
+      setFreelancers([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const params: Record<string, string | number> = {};
       if (search) params.search = search;
       if (category) params.category = category;
       if (locationFilter) params.location = locationFilter;
+      if (minRate) params.min_rate = minRate;
+      if (maxRate) params.max_rate = maxRate;
       params.per_page = 50;
 
-      const res = token
-        ? await api.getCatalog(token, params)
-        : await api.getCatalog(token ?? "", params);
+      const res = await api.getCatalog(token, params);
 
       setFreelancers(res.data?.freelancers ?? []);
     } catch {
@@ -73,7 +81,7 @@ function TalentPage() {
     } finally {
       setLoading(false);
     }
-  }, [search, category, locationFilter, token]);
+  }, [search, category, locationFilter, minRate, maxRate, token]);
 
   const loadFavorites = useCallback(async () => {
     if (!token || !isMype) return;
@@ -122,9 +130,11 @@ function TalentPage() {
     setSearch("");
     setCategory("");
     setLocationFilter("");
+    setMinRate("");
+    setMaxRate("");
   };
 
-  const hasFilters = search || category || locationFilter;
+  const hasFilters = search || category || locationFilter || minRate || maxRate;
 
   return (
     <Shell>
@@ -203,6 +213,32 @@ function TalentPage() {
                     onChange={(e) => setLocationFilter(e.target.value)}
                   />
                 </div>
+                <div className="flex-1">
+                  <label className="mb-1 block text-xs font-semibold text-white/70">
+                    Precio minimo / hora
+                  </label>
+                  <Input
+                    type="number"
+                    min="0"
+                    className="border-white/20 bg-white/10 text-primary-foreground placeholder:text-white/50 focus-visible:ring-white/30"
+                    placeholder="Ej. 30"
+                    value={minRate}
+                    onChange={(e) => setMinRate(e.target.value)}
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="mb-1 block text-xs font-semibold text-white/70">
+                    Precio maximo / hora
+                  </label>
+                  <Input
+                    type="number"
+                    min="0"
+                    className="border-white/20 bg-white/10 text-primary-foreground placeholder:text-white/50 focus-visible:ring-white/30"
+                    placeholder="Ej. 80"
+                    value={maxRate}
+                    onChange={(e) => setMaxRate(e.target.value)}
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -224,7 +260,17 @@ function TalentPage() {
           </div>
         )}
 
-        {loading ? (
+        {!token ? (
+          <div className="py-20 text-center">
+            <Search className="mx-auto h-12 w-12 text-muted-foreground/50" />
+            <h3 className="mt-4 font-display text-xl font-semibold">
+              Inicia sesion para buscar freelancers
+            </h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Esta vista usa freelancers reales registrados y requiere una sesion activa.
+            </p>
+          </div>
+        ) : loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
@@ -329,9 +375,9 @@ function TalentPage() {
                         {f.rating}
                       </span>
                     </div>
-                    {f.suggested_rate && (
+                    {formatHourlyRate(f.suggested_rate, f.rate_amount) && (
                       <div className="font-display font-bold">
-                        S/ {f.suggested_rate}
+                        {formatHourlyRate(f.suggested_rate, f.rate_amount)}
                         <span className="text-xs font-normal text-muted-foreground">
                           /h
                         </span>
@@ -350,4 +396,12 @@ function TalentPage() {
       </section>
     </Shell>
   );
+}
+
+function formatHourlyRate(rate: string | null, amount?: number | null): string | null {
+  const value = rate?.trim() || (amount !== null && amount !== undefined ? String(amount) : "");
+
+  if (!value) return null;
+
+  return /^s\/?\s*/i.test(value) ? value : `S/ ${value}`;
 }

@@ -246,6 +246,17 @@ export const api = {
   getCatalogItem: (token: string, id: number) =>
     apiRequest<FreelancerItem>(`/catalog/${id}`, { token }),
 
+  getServices: (token: string, params?: Record<string, string | number>) => {
+    const query = params
+      ? "?" + new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)])).toString()
+      : "";
+
+    return apiRequest<ServicesPayload>(`/services${query}`, { token });
+  },
+
+  getServiceItem: (token: string, id: number) =>
+    apiRequest<ServiceItem>(`/services/${id}`, { token }),
+
   getFavorites: (token: string) =>
     apiRequest<FavoritesPayload>("/favorites", { token }),
 
@@ -294,6 +305,7 @@ export type FreelancerItem = {
   category: string | null;
   bio: string | null;
   suggested_rate: string | null;
+  rate_amount: number | null;
   location: string | null;
   experience_area: string | null;
   rating: number;
@@ -313,4 +325,35 @@ export type CatalogPayload = {
 
 export type FavoritesPayload = {
   favorites: FreelancerItem[];
+};
+
+export type ServiceItem = {
+  id: number;
+  title: string;
+  description: string;
+  price: number;
+  currency: string;
+  delivery_days: number;
+  status: string;
+  views_count: number;
+  category: string | null;
+  freelancer: {
+    id: number | null;
+    user_id: number | null;
+    name: string;
+    headline: string | null;
+    rating: number | string | null;
+    completed_jobs: number | null;
+    profile_photo: string | null;
+    skills: string[];
+  };
+  created_at: string;
+};
+
+export type ServicesPayload = {
+  services: ServiceItem[];
+  total: number;
+  per_page: number;
+  current_page: number;
+  last_page: number;
 };
