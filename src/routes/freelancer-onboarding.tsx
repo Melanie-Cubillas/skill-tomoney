@@ -22,9 +22,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { api, type GeminiAnalysisPayload } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { getSessionUser, getToken } from "@/lib/auth";
-import { api, type GeminiAnalysisPayload } from "@/lib/api";
+
 
 export const Route = createFileRoute("/freelancer-onboarding")({
   head: () => ({
@@ -152,6 +153,7 @@ function FreelancerOnboarding() {
   const avatarLabel = useMemo(() => {
     const user = getSessionUser();
     const source = user?.name || user?.email || "YO";
+
     return source
       .split(/\s+/)
       .filter(Boolean)
@@ -590,21 +592,9 @@ function FreelancerOnboarding() {
 
           <ProfilePanel title="Redes Sociales">
             <div className="space-y-4">
-              <Input
-                value={linkedin}
-                onChange={(event) => setLinkedin(event.target.value)}
-                placeholder="LinkedIn"
-              />
-              <Input
-                value={instagram}
-                onChange={(event) => setInstagram(event.target.value)}
-                placeholder="Instagram"
-              />
-              <Input
-                value={website}
-                onChange={(event) => setWebsite(event.target.value)}
-                placeholder="Web site"
-              />
+              <Input value={linkedin} onChange={(event) => setLinkedin(event.target.value)} placeholder="LinkedIn" />
+              <Input value={instagram} onChange={(event) => setInstagram(event.target.value)} placeholder="Instagram" />
+              <Input value={website} onChange={(event) => setWebsite(event.target.value)} placeholder="Web site" />
             </div>
           </ProfilePanel>
 
@@ -614,11 +604,7 @@ function FreelancerOnboarding() {
               <div>
                 <div className="flex flex-wrap items-center gap-5 text-xs">
                   <span>¿Cuentas con un área de desempeño?</span>
-                  <RadioChoice
-                    checked={hasArea === "si"}
-                    label="SI"
-                    onClick={() => setHasArea("si")}
-                  />
+                  <RadioChoice checked={hasArea === "si"} label="SI" onClick={() => setHasArea("si")} />
                   <RadioChoice
                     checked={hasArea === "no"}
                     label="NO"
@@ -629,6 +615,7 @@ function FreelancerOnboarding() {
                     }}
                   />
                 </div>
+
                 <div className="mt-6">
                   <p className="mb-3 text-xs font-semibold">
                     Si tu respuesta fue “SI”, completa lo siguiente:
@@ -664,10 +651,11 @@ function FreelancerOnboarding() {
         </div>
 
         <div className="mt-8 flex justify-end">
+          {error ? <p className="mr-4 self-center text-sm text-red-600">{error}</p> : null}
           <Button
             type="button"
             className="bg-gradient-primary px-6 shadow-soft"
-            disabled={!canContinue}
+            disabled={!canContinue || processing}
             onClick={continueWithAi}
           >
             Continuar con la IA
@@ -1023,6 +1011,7 @@ function ChipSelect({
           ))}
         </div>
       </div>
+
       {(disabled || isFull) && (
         <p className="mt-2 text-xs text-muted-foreground">
           {disabled

@@ -1,242 +1,213 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import type { LucideIcon } from "lucide-react";
+import { ArrowRight, Briefcase, CheckCircle2, ClipboardCheck, Send, Star, Wallet } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
-import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { api, type ProfilePayload, type RecommendationPayload } from "@/lib/api";
-import { getToken } from "@/lib/auth";
+import { Card } from "@/components/ui/card";
+import { api, type ProfilePayload } from "@/lib/api";
+import { getSessionUser, getToken } from "@/lib/auth";
 
 export const Route = createFileRoute("/dashboard/freelancer")({
   head: () => ({ meta: [{ title: "Dashboard Freelancer · SkilltoMoney" }] }),
-  component: FreelancerDashboard,
+  component: FreelancerRoute,
 });
+
+function FreelancerRoute() {
+  const path = useRouterState({ select: (state) => state.location.pathname });
+
+  if (path !== "/dashboard/freelancer") {
+    return <Outlet />;
+  }
+
+  return <FreelancerDashboard />;
+}
 
 function FreelancerDashboard() {
   const token = getToken();
+  const user = useMemo(() => getSessionUser(), []);
   const [profile, setProfile] = useState<Partial<ProfilePayload>>({});
-  const [skillsText, setSkillsText] = useState("");
-  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
-  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
-  const [recommendations, setRecommendations] = useState<RecommendationPayload[]>([]);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) return;
 
     const load = async () => {
       try {
-        const profileResponse = await api.getProfile(token);
-        if (profileResponse.data) {
-          setProfile(profileResponse.data);
-          setSkillsText((profileResponse.data.skills ?? []).join(", "));
-        }
-
-        const recResponse = await api.getRecommendations(token, "profile_improvement");
-        setRecommendations(recResponse.data ?? []);
+        const response = await api.getProfile(token);
+        setProfile(response.data ?? {});
       } catch {
-        setError("No se pudo cargar la informacion del perfil.");
+        setProfile({});
       }
     };
 
     void load();
   }, [token]);
 
-  useEffect(() => {
-    return () => {
-      if (photoPreviewUrl) {
-        URL.revokeObjectURL(photoPreviewUrl);
-      }
-    };
-  }, [photoPreviewUrl]);
-
-  const socialLinks = useMemo(() => {
-    const raw = profile.social_links ?? {};
-    return {
-      linkedin: raw.linkedin ?? "",
-      instagram: raw.instagram ?? "",
-      facebook: raw.facebook ?? "",
-      x: raw.x ?? "",
-      website: raw.website ?? "",
-    };
-  }, [profile.social_links]);
-
-  const requireToken = (): string | null => {
-    if (!token) {
-      setError("Sesion no encontrada. Inicia sesion otra vez.");
-      return null;
-    }
-    return token;
-  };
-
-  const getErrorMessage = (err: unknown, fallback: string): string => {
-    const payload = err as { message?: string; errors?: Record<string, string[]> };
-    const firstErrorGroup = payload?.errors ? Object.values(payload.errors)[0] : undefined;
-
-    return firstErrorGroup?.[0] ?? payload?.message ?? fallback;
-  };
-
-  const saveBaseProfile = async () => {
-    const t = requireToken();
-    if (!t) return;
-    setError(null);
-    setMessage(null);
-    try {
-      const response = await api.saveProfile(t, {
-        headline: profile.headline ?? null,
-        category: profile.category ?? null,
-        bio: profile.bio ?? null,
-        location: profile.location ?? null,
-        hourly_rate: profile.hourly_rate ?? null,
-      });
-      setProfile(response.data ?? {});
-      setMessage("Perfil actualizado.");
-    } catch (err) {
-      setError(getErrorMessage(err, "No se pudo actualizar el perfil."));
-    }
-  };
-
-  const saveDescription = async () => {
-    const t = requireToken();
-    if (!t) return;
-    setError(null);
-    setMessage(null);
-    try {
-      const response = await api.updateDescription(t, profile.description ?? "");
-      if (response.data) setProfile(response.data);
-      setMessage("Descripcion actualizada.");
-    } catch (err) {
-      setError(getErrorMessage(err, "No se pudo actualizar la descripcion."));
-    }
-  };
-
-  const saveSkills = async () => {
-    const t = requireToken();
-    if (!t) return;
-    setError(null);
-    setMessage(null);
-    const skills = skillsText
-      .split(",")
-      .map((skill) => skill.trim())
-      .filter(Boolean);
-
-    try {
-      await api.updateSkills(t, skills);
-      setMessage("Habilidades actualizadas.");
-    } catch (err) {
-      setError(getErrorMessage(err, "No se pudieron guardar las habilidades."));
-    }
-  };
-
-  const saveSocial = async () => {
-    const t = requireToken();
-    if (!t) return;
-    setError(null);
-    setMessage(null);
-    try {
-      await api.updateSocialLinks(t, {
-        linkedin: socialLinks.linkedin || null,
-        instagram: socialLinks.instagram || null,
-        facebook: socialLinks.facebook || null,
-        x: socialLinks.x || null,
-        website: socialLinks.website || null,
-      });
-      setMessage("Redes sociales actualizadas.");
-    } catch (err) {
-      setError(getErrorMessage(err, "No se pudieron actualizar las redes."));
-    }
-  };
-
-  const selectPhoto = (file: File | null) => {
-    setSelectedPhoto(file);
-    setMessage(null);
-    setError(null);
-    setPhotoPreviewUrl(file ? URL.createObjectURL(file) : null);
-  };
-
-  const savePhoto = async () => {
-    const t = requireToken();
-    if (!t || !selectedPhoto) return;
-    setError(null);
-    setMessage(null);
-    try {
-      const response = await api.updatePhoto(t, selectedPhoto);
-      if (response.data) setProfile(response.data);
-      setSelectedPhoto(null);
-      setMessage("Foto actualizada.");
-    } catch (err) {
-      setError(getErrorMessage(err, "No se pudo subir la foto."));
-    }
-  };
-
-  const visiblePhotoUrl = photoPreviewUrl ?? profile.photo_url ?? null;
+  const firstName = (user?.name ?? "Andrea").split(" ")[0] || "Andrea";
 
   return (
-    <DashboardShell role="freelancer" profilePhotoUrl={visiblePhotoUrl}>
-      <div>
-        <h1 className="font-display text-3xl font-bold">Perfil freelancer</h1>
-        <p className="text-muted-foreground">Gestiona tu perfil real conectado al backend.</p>
-      </div>
-      {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
-      {message ? <p className="mt-3 text-sm text-emerald-600">{message}</p> : null}
+    <DashboardShell role="freelancer" profilePhotoUrl={profile.photo_url ?? null}>
+      <div className="space-y-6">
+        <div>
+          <h1 className="font-display text-4xl font-extrabold tracking-normal">¡Hola, {firstName}! 👋</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Este es tu resumen profesional. Sigue asi, vas por buen camino.</p>
+        </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <Card className="space-y-3 p-5">
-          <h2 className="font-semibold">Datos base</h2>
-          <Input placeholder="Titulo profesional" value={profile.headline ?? ""} onChange={(e) => setProfile((prev) => ({ ...prev, headline: e.target.value }))} />
-          <Input placeholder="Categoria" value={profile.category ?? ""} onChange={(e) => setProfile((prev) => ({ ...prev, category: e.target.value }))} />
-          <Input placeholder="Ubicacion" value={profile.location ?? ""} onChange={(e) => setProfile((prev) => ({ ...prev, location: e.target.value }))} />
-          <Input placeholder="Tarifa por hora" value={profile.hourly_rate ?? ""} onChange={(e) => setProfile((prev) => ({ ...prev, hourly_rate: e.target.value }))} />
-          <Button onClick={saveBaseProfile}>Guardar perfil</Button>
-        </Card>
+        <div className="grid gap-4 xl:grid-cols-4">
+          <Metric icon={Wallet} label="Ganancias totales" value="S/ 3,250.00" hint="+12% vs el mes pasado" tint="teal" />
+          <Metric icon={ClipboardCheck} label="Proyectos completados" value={`${profile.completed_jobs ?? 18}`} hint="+3 este mes" tint="blue" />
+          <Metric icon={Star} label="Valoracion promedio" value={`${profile.rating ?? "4.8"}`} hint="Excelente" tint="amber" />
+          <Metric icon={Send} label="Propuestas enviadas" value="26" hint="+6 esta semana" tint="red" />
+        </div>
 
-        <Card className="space-y-3 p-5">
-          <h2 className="font-semibold">Descripcion personal</h2>
-          <Textarea placeholder="Cuenta brevemente tu propuesta de valor" value={profile.description ?? ""} onChange={(e) => setProfile((prev) => ({ ...prev, description: e.target.value }))} />
-          <Button onClick={saveDescription}>Guardar descripcion</Button>
-        </Card>
+        <div className="grid gap-5 xl:grid-cols-[1.7fr_0.85fr_0.85fr]">
+          <Card className="rounded-2xl p-6 shadow-soft">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="font-display text-lg font-bold tracking-normal">Ganancias en los ultimos 30 dias</h2>
+              <Button variant="outline" size="sm">Este mes</Button>
+            </div>
+            <div className="relative h-72">
+              <div className="absolute inset-0 grid grid-rows-4 text-xs text-muted-foreground">
+                {["S/ 1,000", "S/ 750", "S/ 500", "S/ 250"].map((label) => (
+                  <div key={label} className="border-b border-dashed border-border">
+                    <span>{label}</span>
+                  </div>
+                ))}
+              </div>
+              <svg viewBox="0 0 720 250" className="absolute inset-x-0 bottom-0 h-60 w-full overflow-visible">
+                <defs>
+                  <linearGradient id="earningsFill" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stopColor="#00c9ba" stopOpacity="0.28" />
+                    <stop offset="100%" stopColor="#00c9ba" stopOpacity="0.03" />
+                  </linearGradient>
+                </defs>
+                <path d="M0 230 L55 210 L110 120 L165 82 L220 135 L275 112 L330 102 L385 45 L440 130 L495 90 L550 82 L605 24 L665 42 L720 5 L720 250 L0 250 Z" fill="url(#earningsFill)" />
+                <path d="M0 230 L55 210 L110 120 L165 82 L220 135 L275 112 L330 102 L385 45 L440 130 L495 90 L550 82 L605 24 L665 42 L720 5" fill="none" stroke="#00a99d" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+                {[0, 55, 110, 165, 220, 275, 330, 385, 440, 495, 550, 605, 665, 720].map((x, index) => (
+                  <circle key={x} cx={x} cy={[230, 210, 120, 82, 135, 112, 102, 45, 130, 90, 82, 24, 42, 5][index]} r="5" fill="#00a99d" stroke="#fff" strokeWidth="3" />
+                ))}
+              </svg>
+            </div>
+          </Card>
 
-        <Card className="space-y-3 p-5">
-          <h2 className="font-semibold">Habilidades</h2>
-          <Input placeholder="React, Branding, Copywriting" value={skillsText} onChange={(e) => setSkillsText(e.target.value)} />
-          <Button onClick={saveSkills}>Guardar habilidades</Button>
-        </Card>
+          <Card className="rounded-2xl p-6 shadow-soft">
+            <h2 className="font-display text-lg font-bold tracking-normal">Tu perfil esta completo</h2>
+            <div className="mt-5 flex items-center gap-5">
+              <div className="grid h-24 w-24 shrink-0 aspect-square place-items-center rounded-full border-[8px] border-secondary text-2xl font-extrabold">78%</div>
+              <p className="text-sm text-muted-foreground">Un perfil completo te ayuda a conseguir mas proyectos.</p>
+            </div>
+            <div className="mt-5 space-y-3 text-sm">
+              {["Foto de perfil", "Descripcion personal", "Habilidades añadidas", "Portafolio agregado"].map((item) => (
+                <div key={item} className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 shrink-0 text-success" /> {item}</div>
+              ))}
+            </div>
+            <Button asChild className="mt-5 rounded-xl bg-gradient-primary shadow-soft">
+              <Link to="/dashboard/freelancer/profile">Mejorar perfil</Link>
+            </Button>
+          </Card>
 
-        <Card className="space-y-3 p-5">
-          <h2 className="font-semibold">Foto de perfil</h2>
-          {visiblePhotoUrl ? (
-            <img src={visiblePhotoUrl} alt="Foto de perfil" className="h-24 w-24 rounded-full object-cover ring-2 ring-primary/20" />
-          ) : null}
-          <Input type="file" accept="image/*" onChange={(e) => selectPhoto(e.target.files?.[0] ?? null)} />
-          <Button onClick={savePhoto} disabled={!selectedPhoto}>Guardar foto</Button>
-          {profile.photo_url ? <a href={profile.photo_url} target="_blank" rel="noreferrer" className="text-sm text-primary underline">Ver foto actual</a> : null}
-        </Card>
-
-        <Card className="space-y-3 p-5 lg:col-span-2">
-          <h2 className="font-semibold">Redes sociales</h2>
-          <div className="grid gap-3 md:grid-cols-2">
-            <Input placeholder="LinkedIn" value={socialLinks.linkedin} onChange={(e) => setProfile((prev) => ({ ...prev, social_links: { ...(prev.social_links ?? {}), linkedin: e.target.value } }))} />
-            <Input placeholder="Instagram" value={socialLinks.instagram} onChange={(e) => setProfile((prev) => ({ ...prev, social_links: { ...(prev.social_links ?? {}), instagram: e.target.value } }))} />
-            <Input placeholder="Facebook" value={socialLinks.facebook} onChange={(e) => setProfile((prev) => ({ ...prev, social_links: { ...(prev.social_links ?? {}), facebook: e.target.value } }))} />
-            <Input placeholder="X/Twitter" value={socialLinks.x} onChange={(e) => setProfile((prev) => ({ ...prev, social_links: { ...(prev.social_links ?? {}), x: e.target.value } }))} />
-            <Input placeholder="Website" value={socialLinks.website} onChange={(e) => setProfile((prev) => ({ ...prev, social_links: { ...(prev.social_links ?? {}), website: e.target.value } }))} />
+          <div className="space-y-5">
+            <Card className="rounded-2xl border-secondary/30 bg-secondary/10 p-5 shadow-soft">
+              <h2 className="font-display text-lg font-bold tracking-normal">Consejo para hoy ✨</h2>
+              <p className="mt-3 text-sm text-muted-foreground">Los perfiles con portafolio reciben 3x mas visitas de clientes potenciales.</p>
+              <Link to="/dashboard/freelancer/portfolio" className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-secondary">
+                Ver recomendaciones <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Card>
+            <Card className="rounded-2xl p-5 shadow-soft">
+              <h2 className="font-display text-lg font-bold tracking-normal">Actividad reciente</h2>
+              <div className="mt-4 space-y-4 text-sm">
+                <Activity icon={Wallet} title="Pago recibido" detail="S/ 250.00 de Laura Martinez" />
+                <Activity icon={Star} title="Nueva valoracion" detail="5 estrellas de NutriVida" />
+                <Activity icon={Briefcase} title="Propuesta aceptada" detail="Edicion de video promocional" />
+              </div>
+            </Card>
           </div>
-          <Button onClick={saveSocial}>Guardar redes</Button>
-        </Card>
+        </div>
 
-        <Card className="p-5 lg:col-span-2">
-          <h2 className="font-semibold">Recomendaciones de mejora</h2>
-          <ul className="mt-3 list-disc pl-5 text-sm text-muted-foreground">
-            {(recommendations.length ? recommendations : [{ id: 0, title: "Sin recomendaciones", description: "Aun no hay recomendaciones para tu cuenta." }]).map((rec) => (
-              <li key={rec.id} className="mb-1">
-                <span className="font-medium text-foreground">{rec.title}:</span> {rec.description}
-              </li>
-            ))}
-          </ul>
-        </Card>
+        <div className="grid gap-5 xl:grid-cols-2">
+          <Card className="rounded-2xl p-5 shadow-soft">
+            <div className="flex items-center justify-between">
+              <h2 className="font-display text-lg font-bold tracking-normal">Proyectos activos</h2>
+              <Link to="/dashboard/freelancer/portfolio" className="text-xs font-semibold text-primary">Ver todos</Link>
+            </div>
+            <div className="mt-4 space-y-3">
+              {[
+                ["Diseño de logo para marca", "Laura Martinez", "En progreso", "S/ 250.00"],
+                ["Edicion de video promocional", "NutriVida", "En progreso", "S/ 450.00"],
+                ["Banners para redes sociales", "Beauty Care", "Pendiente", "S/ 150.00"],
+              ].map(([title, client, status, amount]) => (
+                <div key={title} className="flex items-center justify-between rounded-xl border border-border px-4 py-3">
+                  <div>
+                    <div className="font-bold">{title}</div>
+                    <div className="text-xs text-muted-foreground">{client}</div>
+                  </div>
+                  <Badge variant="outline" className={status === "Pendiente" ? "border-warning/40 text-orange-600" : "border-blue-300 text-blue-600"}>{status}</Badge>
+                  <div className="text-right text-sm font-bold">{amount}</div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          <Card className="rounded-2xl p-5 shadow-soft">
+            <div className="flex items-center justify-between">
+              <h2 className="font-display text-lg font-bold tracking-normal">Mensajes recientes</h2>
+              <Link to="/dashboard/messages" className="text-xs font-semibold text-primary">Ver todos</Link>
+            </div>
+            <div className="mt-4 space-y-4">
+              {["Laura Martinez", "NutriVida", "Carlos Sanchez"].map((name, index) => (
+                <div key={name} className="flex items-center gap-3">
+                  <div className="grid h-10 w-10 shrink-0 aspect-square place-items-center rounded-full bg-gradient-primary text-xs font-bold text-primary-foreground">{name.slice(0, 2).toUpperCase()}</div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-bold">{name}</div>
+                    <div className="truncate text-sm text-muted-foreground">{index === 0 ? "Hola Andrea! Me encanto el diseño..." : "Listo, muchas gracias!"}</div>
+                  </div>
+                  <span className="text-xs text-muted-foreground">{index === 0 ? "10:30 AM" : "Ayer"}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
       </div>
     </DashboardShell>
+  );
+}
+
+function Metric({ icon: Icon, label, value, hint, tint }: { icon: LucideIcon; label: string; value: string; hint: string; tint: "teal" | "blue" | "amber" | "red" }) {
+  const colors = {
+    teal: "bg-secondary/15 text-secondary",
+    blue: "bg-blue-100 text-blue-600",
+    amber: "bg-amber-100 text-amber-600",
+    red: "bg-red-100 text-primary",
+  };
+
+  return (
+    <Card className="rounded-2xl p-5 shadow-soft">
+      <div className="flex items-center gap-4">
+        <span className={`grid h-14 w-14 place-items-center rounded-2xl ${colors[tint]}`}>
+          <Icon className="h-6 w-6" />
+        </span>
+        <div>
+          <div className="text-sm text-muted-foreground">{label}</div>
+          <div className="mt-1 font-display text-2xl font-extrabold tracking-normal">{value}</div>
+          <div className="mt-1 text-xs font-semibold text-success">{hint}</div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function Activity({ icon: Icon, title, detail }: { icon: LucideIcon; title: string; detail: string }) {
+  return (
+    <div className="flex gap-3">
+      <span className="grid h-9 w-9 place-items-center rounded-xl bg-secondary/15 text-secondary">
+        <Icon className="h-4 w-4" />
+      </span>
+      <div>
+        <div className="font-bold">{title}</div>
+        <div className="text-xs text-muted-foreground">{detail}</div>
+      </div>
+    </div>
   );
 }
