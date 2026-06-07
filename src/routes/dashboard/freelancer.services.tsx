@@ -53,7 +53,7 @@ function ServicesPage() {
     try {
       const [categoryResponse, serviceResponse] = await Promise.all([
         api.getCategories(token),
-        api.getServices(token),
+        api.getFreelancerServices(token),
       ]);
       setCategories(categoryResponse.data ?? []);
       setServices(serviceResponse.data ?? []);

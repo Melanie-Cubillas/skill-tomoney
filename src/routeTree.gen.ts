@@ -27,8 +27,8 @@ import { Route as DashboardClientRouteImport } from './routes/dashboard/client'
 import { Route as DashboardFreelancerServicesRouteImport } from './routes/dashboard/freelancer.services'
 import { Route as DashboardFreelancerProfileRouteImport } from './routes/dashboard/freelancer.profile'
 import { Route as DashboardFreelancerPortfolioRouteImport } from './routes/dashboard/freelancer.portfolio'
-import { Route as DashboardClientProfileRouteImport } from './routes/dashboard/client.profile'
 import { Route as DashboardClientProjectsRouteImport } from './routes/dashboard/client.projects'
+import { Route as DashboardClientProfileRouteImport } from './routes/dashboard/client.profile'
 
 const TalentRoute = TalentRouteImport.update({
   id: '/talent',
@@ -123,14 +123,14 @@ const DashboardFreelancerPortfolioRoute =
     path: '/portfolio',
     getParentRoute: () => DashboardFreelancerRoute,
   } as any)
-const DashboardClientProfileRoute = DashboardClientProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => DashboardClientRoute,
-} as any)
 const DashboardClientProjectsRoute = DashboardClientProjectsRouteImport.update({
   id: '/projects',
   path: '/projects',
+  getParentRoute: () => DashboardClientRoute,
+} as any)
+const DashboardClientProfileRoute = DashboardClientProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => DashboardClientRoute,
 } as any)
 
@@ -150,10 +150,10 @@ export interface FileRoutesByFullPath {
   '/dashboard/freelancer': typeof DashboardFreelancerRouteWithChildren
   '/dashboard/messages': typeof DashboardMessagesRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
-  '/dashboard/client/projects': typeof DashboardClientProjectsRoute
   '/dashboard/client/profile': typeof DashboardClientProfileRoute
-  '/dashboard/freelancer/profile': typeof DashboardFreelancerProfileRoute
+  '/dashboard/client/projects': typeof DashboardClientProjectsRoute
   '/dashboard/freelancer/portfolio': typeof DashboardFreelancerPortfolioRoute
+  '/dashboard/freelancer/profile': typeof DashboardFreelancerProfileRoute
   '/dashboard/freelancer/services': typeof DashboardFreelancerServicesRoute
 }
 export interface FileRoutesByTo {
@@ -172,10 +172,10 @@ export interface FileRoutesByTo {
   '/dashboard/freelancer': typeof DashboardFreelancerRouteWithChildren
   '/dashboard/messages': typeof DashboardMessagesRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
-  '/dashboard/client/projects': typeof DashboardClientProjectsRoute
   '/dashboard/client/profile': typeof DashboardClientProfileRoute
-  '/dashboard/freelancer/profile': typeof DashboardFreelancerProfileRoute
+  '/dashboard/client/projects': typeof DashboardClientProjectsRoute
   '/dashboard/freelancer/portfolio': typeof DashboardFreelancerPortfolioRoute
+  '/dashboard/freelancer/profile': typeof DashboardFreelancerProfileRoute
   '/dashboard/freelancer/services': typeof DashboardFreelancerServicesRoute
 }
 export interface FileRoutesById {
@@ -195,10 +195,10 @@ export interface FileRoutesById {
   '/dashboard/freelancer': typeof DashboardFreelancerRouteWithChildren
   '/dashboard/messages': typeof DashboardMessagesRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
-  '/dashboard/client/projects': typeof DashboardClientProjectsRoute
   '/dashboard/client/profile': typeof DashboardClientProfileRoute
-  '/dashboard/freelancer/profile': typeof DashboardFreelancerProfileRoute
+  '/dashboard/client/projects': typeof DashboardClientProjectsRoute
   '/dashboard/freelancer/portfolio': typeof DashboardFreelancerPortfolioRoute
+  '/dashboard/freelancer/profile': typeof DashboardFreelancerProfileRoute
   '/dashboard/freelancer/services': typeof DashboardFreelancerServicesRoute
 }
 export interface FileRouteTypes {
@@ -219,10 +219,10 @@ export interface FileRouteTypes {
     | '/dashboard/freelancer'
     | '/dashboard/messages'
     | '/dashboard/payments'
-    | '/dashboard/client/projects'
     | '/dashboard/client/profile'
-    | '/dashboard/freelancer/profile'
+    | '/dashboard/client/projects'
     | '/dashboard/freelancer/portfolio'
+    | '/dashboard/freelancer/profile'
     | '/dashboard/freelancer/services'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -241,10 +241,10 @@ export interface FileRouteTypes {
     | '/dashboard/freelancer'
     | '/dashboard/messages'
     | '/dashboard/payments'
-    | '/dashboard/client/projects'
     | '/dashboard/client/profile'
-    | '/dashboard/freelancer/profile'
+    | '/dashboard/client/projects'
     | '/dashboard/freelancer/portfolio'
+    | '/dashboard/freelancer/profile'
     | '/dashboard/freelancer/services'
   id:
     | '__root__'
@@ -263,10 +263,10 @@ export interface FileRouteTypes {
     | '/dashboard/freelancer'
     | '/dashboard/messages'
     | '/dashboard/payments'
-    | '/dashboard/client/projects'
     | '/dashboard/client/profile'
-    | '/dashboard/freelancer/profile'
+    | '/dashboard/client/projects'
     | '/dashboard/freelancer/portfolio'
+    | '/dashboard/freelancer/profile'
     | '/dashboard/freelancer/services'
   fileRoutesById: FileRoutesById
 }
@@ -332,18 +332,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PremiumRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/mype-onboarding': {
       id: '/mype-onboarding'
       path: '/mype-onboarding'
       fullPath: '/mype-onboarding'
       preLoaderRoute: typeof MypeOnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/freelancer-onboarding': {
@@ -416,13 +416,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardFreelancerPortfolioRouteImport
       parentRoute: typeof DashboardFreelancerRoute
     }
-    '/dashboard/client/profile': {
-      id: '/dashboard/client/profile'
-      path: '/profile'
-      fullPath: '/dashboard/client/profile'
-      preLoaderRoute: typeof DashboardClientProfileRouteImport
-      parentRoute: typeof DashboardClientRoute
-    }
     '/dashboard/client/projects': {
       id: '/dashboard/client/projects'
       path: '/projects'
@@ -430,17 +423,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardClientProjectsRouteImport
       parentRoute: typeof DashboardClientRoute
     }
+    '/dashboard/client/profile': {
+      id: '/dashboard/client/profile'
+      path: '/profile'
+      fullPath: '/dashboard/client/profile'
+      preLoaderRoute: typeof DashboardClientProfileRouteImport
+      parentRoute: typeof DashboardClientRoute
+    }
   }
 }
 
 interface DashboardClientRouteChildren {
-  DashboardClientProjectsRoute: typeof DashboardClientProjectsRoute
   DashboardClientProfileRoute: typeof DashboardClientProfileRoute
+  DashboardClientProjectsRoute: typeof DashboardClientProjectsRoute
 }
 
 const DashboardClientRouteChildren: DashboardClientRouteChildren = {
-  DashboardClientProjectsRoute: DashboardClientProjectsRoute,
   DashboardClientProfileRoute: DashboardClientProfileRoute,
+  DashboardClientProjectsRoute: DashboardClientProjectsRoute,
 }
 
 const DashboardClientRouteWithChildren = DashboardClientRoute._addFileChildren(
