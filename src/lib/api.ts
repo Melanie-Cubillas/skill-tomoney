@@ -112,14 +112,7 @@ export type PortfolioProjectPayload = {
 };
 
 export type RecommendationPayload = {
-  id: number;
-  user_id: number;
-  recommendation_type: string;
-  title: string;
-  description: string;
-  score: string | null;
-  data: Record<string, unknown> | null;
-  status: string;
+  recommendations: RecommendedFreelancerItem[];
 };
 
 type RequestOptions = RequestInit & {
@@ -260,7 +253,8 @@ export const api = {
     });
   },
   getCategories: (token: string) => apiRequest<CategoryPayload[]>("/catalog/categories", { token }),
-  getServices: (token: string) => apiRequest<ServicePayload[]>("/freelancer/services", { token }),
+  getFreelancerServices: (token: string) =>
+    apiRequest<ServicePayload[]>("/freelancer/services", { token }),
   createService: (token: string, body: ServiceInput) =>
     apiRequest<ServicePayload>("/freelancer/services", {
       method: "POST",
@@ -297,11 +291,19 @@ export const api = {
       method: "DELETE",
       token,
     }),
-  getRecommendations: (token: string, recommendationType?: string) =>
-    apiRequest<RecommendationPayload[]>(
-      `/recommendations${recommendationType ? `?type=${encodeURIComponent(recommendationType)}` : ""}`,
-      { token },
-    ),
+  getFreelancerRecommendations: (token: string, params?: Record<string, string | number>) => {
+    const queryParams = new URLSearchParams({ type: "freelancer" });
+
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== "") queryParams.set(key, String(value));
+      });
+    }
+
+    return apiRequest<RecommendationPayload>(`/recommendations?${queryParams.toString()}`, {
+      token,
+    });
+  },
   analyzeFreelancer: (
     token: string,
     data: {
@@ -343,7 +345,7 @@ export const api = {
   getCatalogItem: (token: string, id: number) =>
     apiRequest<FreelancerItem>(`/catalog/${id}`, { token }),
 
-  getServices: (token: string, params?: Record<string, string | number>) => {
+  getMarketplaceServices: (token: string, params?: Record<string, string | number>) => {
     const query = params
       ? "?" + new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)])).toString()
       : "";
@@ -410,6 +412,11 @@ export type FreelancerItem = {
   profile_photo: string | null;
   skills: string[];
   availability_status: string | null;
+};
+
+export type RecommendedFreelancerItem = FreelancerItem & {
+  score: number;
+  reasons: string[];
 };
 
 export type CatalogPayload = {

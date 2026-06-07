@@ -15,7 +15,7 @@ import {
   SlidersHorizontal,
   X,
 } from "lucide-react";
-import { api, type FreelancerItem } from "@/lib/api";
+import { api, type FreelancerItem, type RecommendedFreelancerItem } from "@/lib/api";
 import { getToken, getSessionUser } from "@/lib/auth";
 
 export const Route = createFileRoute("/talent")({
@@ -52,7 +52,11 @@ function TalentPage() {
   const [locationFilter, setLocationFilter] = useState("");
   const [minRate, setMinRate] = useState("");
   const [maxRate, setMaxRate] = useState("");
+  const [minRating, setMinRating] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [recommendations, setRecommendations] = useState<RecommendedFreelancerItem[]>([]);
+  const [recommendationLoading, setRecommendationLoading] = useState(false);
+  const [recommendationError, setRecommendationError] = useState<string | null>(null);
   const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
   const [favLoading, setFavLoading] = useState<number | null>(null);
 
@@ -71,6 +75,7 @@ function TalentPage() {
       if (locationFilter) params.location = locationFilter;
       if (minRate) params.min_rate = minRate;
       if (maxRate) params.max_rate = maxRate;
+      if (minRating) params.min_rating = minRating;
       params.per_page = 50;
 
       const res = await api.getCatalog(token, params);
@@ -81,7 +86,7 @@ function TalentPage() {
     } finally {
       setLoading(false);
     }
-  }, [search, category, locationFilter, minRate, maxRate, token]);
+  }, [search, category, locationFilter, minRate, maxRate, minRating, token]);
 
   const loadFavorites = useCallback(async () => {
     if (!token || !isMype) return;
@@ -132,9 +137,37 @@ function TalentPage() {
     setLocationFilter("");
     setMinRate("");
     setMaxRate("");
+    setMinRating("");
+    setRecommendations([]);
+    setRecommendationError(null);
   };
 
-  const hasFilters = search || category || locationFilter || minRate || maxRate;
+  const loadRecommendations = async () => {
+    if (!token) return;
+
+    setRecommendationLoading(true);
+    setRecommendationError(null);
+
+    try {
+      const params: Record<string, string | number> = {
+        search,
+        category,
+        max_rate: maxRate,
+        min_rating: minRating,
+        limit: 6,
+      };
+
+      const res = await api.getFreelancerRecommendations(token, params);
+      setRecommendations(res.data?.recommendations ?? []);
+    } catch {
+      setRecommendationError("No se pudieron cargar recomendaciones.");
+      setRecommendations([]);
+    } finally {
+      setRecommendationLoading(false);
+    }
+  };
+
+  const hasFilters = search || category || locationFilter || minRate || maxRate || minRating;
 
   return (
     <Shell>
@@ -177,8 +210,17 @@ function TalentPage() {
               <SlidersHorizontal className="mr-1.5 h-4 w-4" />
               Filtros
             </Button>
-            <Button className="bg-gradient-primary shadow-glow">
-              <Sparkles className="mr-1.5 h-4 w-4" /> Buscar con IA
+            <Button
+              className="bg-gradient-primary shadow-glow"
+              disabled={!token || recommendationLoading}
+              onClick={loadRecommendations}
+            >
+              {recommendationLoading ? (
+                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="mr-1.5 h-4 w-4" />
+              )}
+              Buscar con IA
             </Button>
           </div>
 
@@ -239,6 +281,21 @@ function TalentPage() {
                     onChange={(e) => setMaxRate(e.target.value)}
                   />
                 </div>
+                <div className="flex-1">
+                  <label className="mb-1 block text-xs font-semibold text-white/70">
+                    Reputacion minima
+                  </label>
+                  <select
+                    value={minRating}
+                    onChange={(e) => setMinRating(e.target.value)}
+                    className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white backdrop-blur focus:outline-none focus:ring-1 focus:ring-white/30"
+                  >
+                    <option value="" className="bg-background text-foreground">Cualquiera</option>
+                    <option value="4" className="bg-background text-foreground">4.0+</option>
+                    <option value="4.5" className="bg-background text-foreground">4.5+</option>
+                    <option value="4.8" className="bg-background text-foreground">4.8+</option>
+                  </select>
+                </div>
               </div>
             </div>
           )}
@@ -246,6 +303,58 @@ function TalentPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-8">
+        {recommendations.length > 0 && token ? (
+          <div className="mb-8 rounded-2xl border border-secondary/30 bg-secondary/10 p-5">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="font-display text-xl font-bold">Freelancers recomendados</h2>
+                <p className="text-sm text-muted-foreground">
+                  Ordenados segun tu busqueda, categoria, presupuesto y reputacion.
+                </p>
+              </div>
+              <Sparkles className="h-5 w-5 text-secondary" />
+            </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              {recommendations.map((item) => (
+                <Card key={item.id} className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="font-display font-bold">{item.name}</div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {item.headline ?? item.category ?? "Freelancer"}
+                      </p>
+                    </div>
+                    <Badge className="bg-secondary text-secondary-foreground">
+                      {Math.round(item.score)}%
+                    </Badge>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {(item.skills ?? []).slice(0, 3).map((skill) => (
+                      <span key={skill} className="rounded-full bg-muted px-2 py-0.5 text-[11px]">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                  <ul className="mt-3 space-y-1 text-xs text-muted-foreground">
+                    {(item.reasons ?? []).slice(0, 2).map((reason) => (
+                      <li key={reason}>- {reason}</li>
+                    ))}
+                  </ul>
+                  <Button
+                    className="mt-4 w-full bg-gradient-primary shadow-soft"
+                    onClick={() => toggleFavorite(item.id)}
+                    disabled={!isMype || favLoading === item.id}
+                  >
+                    {favoriteIds.has(item.id) ? "Guardado" : "Guardar favorito"}
+                  </Button>
+                </Card>
+              ))}
+            </div>
+          </div>
+        ) : recommendationError ? (
+          <p className="mb-6 text-sm text-red-500">{recommendationError}</p>
+        ) : null}
+
         {hasFilters && (
           <div className="mb-6 flex items-center gap-3 text-sm text-muted-foreground">
             <span>

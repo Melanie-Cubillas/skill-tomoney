@@ -55,7 +55,7 @@ function ServicesPage() {
       if (maxPrice) params.max_price = maxPrice;
       if (maxDeliveryDays) params.max_delivery_days = maxDeliveryDays;
 
-      const res = await api.getServices(token, params);
+      const res = await api.getMarketplaceServices(token, params);
       setServices(res.data?.services ?? []);
     } catch {
       setServices([]);
