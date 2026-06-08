@@ -141,6 +141,8 @@ function FreelancerOnboarding() {
   const [availabilityTime, setAvailabilityTime] = useState("");
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [finalizeError, setFinalizeError] = useState<string | null>(null);
+  const processing = stage === "processing";
+  const error = geminiError;
 
   const canContinue = skills.length > 0 && tools.length > 0 && description.trim().length >= 20;
   const selectedSkill = skills[0] ?? "tus habilidades principales";
