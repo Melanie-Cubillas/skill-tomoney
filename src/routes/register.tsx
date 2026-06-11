@@ -9,6 +9,9 @@ import { api, type DniLookupPayload, type RucLookupPayload } from "@/lib/api";
 import { saveSession } from "@/lib/auth";
 
 export const Route = createFileRoute("/register")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    role: search.role === "mype" ? "mype" : search.role === "freelancer" ? "freelancer" : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Crear cuenta · Skill-to-Money" },
@@ -38,7 +41,8 @@ function normalizePasswordTerm(value: string): string {
 
 function Register() {
   const navigate = useNavigate();
-  const [role, setRole] = useState<"freelancer" | "mype">("freelancer");
+  const search = Route.useSearch();
+  const [role, setRole] = useState<"freelancer" | "mype">(search.role ?? "freelancer");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [companyName, setCompanyName] = useState("");

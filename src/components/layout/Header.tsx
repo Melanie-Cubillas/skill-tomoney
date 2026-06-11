@@ -6,11 +6,11 @@ import { api } from "@/lib/api";
 import { clearSession, getSessionUser, getToken, type SessionUser } from "@/lib/auth";
 
 const navItems = [
-  { href: "/", label: "Inicio" },
+  { href: "/#inicio", label: "Inicio" },
   { href: "/#como-funciona", label: "Cómo funciona" },
   { href: "/#categorias", label: "Categorías" },
-  { href: "/talent", label: "Freelancers" },
-  { href: "/register", label: "MYPES" },
+  { href: "/#freelancers", label: "Freelancers" },
+  { href: "/#mypes", label: "MYPES" },
   { href: "/#comunidad", label: "Comunidad" },
 ];
 

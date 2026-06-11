@@ -2,8 +2,8 @@
 import { ArrowRight, Instagram, Linkedin, Music2, Play } from "lucide-react";
 
 const footerColumns = [
-  { title: "Producto", links: [["Servicios", "/services"], ["Categorías", "/#categorias"], ["Freelancers", "/talent"], ["Precios", "/premium"]] },
-  { title: "Cuenta", links: [["Soy Freelancer", "/register"], ["Soy Cliente", "/register"], ["Iniciar sesión", "/login"], ["Registro", "/register"]] },
+  { title: "Producto", links: [["Servicios", "/#categorias"], ["Categorías", "/#categorias"], ["Freelancers", "/#freelancers"], ["Precios", "/premium"]] },
+  { title: "Cuenta", links: [["Soy Freelancer", "/register?role=freelancer"], ["Soy Cliente", "/register?role=mype"], ["Iniciar sesión", "/login"], ["Registro", "/register"]] },
   { title: "Recursos", links: [["Blog", "/"], ["Centro de ayuda", "/"], ["IA para freelancers", "/premium"], ["Comunidad", "/#comunidad"]] },
   { title: "Legal", links: [["Términos", "/"], ["Privacidad", "/"], ["Cookies", "/"], ["Política de pagos", "/"]] },
 ];
