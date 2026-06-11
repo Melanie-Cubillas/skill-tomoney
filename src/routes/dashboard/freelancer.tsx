@@ -1,12 +1,12 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
-import { ArrowRight, CheckCircle2, ClipboardCheck, FolderKanban, Package, Star } from "lucide-react";
+import { ArrowRight, CheckCircle2, ClipboardCheck, FolderKanban, Package, Star, TrendingUp } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { api, type PortfolioProjectPayload, type ProfilePayload, type ServicePayload } from "@/lib/api";
+import { api, type MarketTrendItem, type PortfolioProjectPayload, type PriceSuggestionPayload, type ProfilePayload, type ServicePayload } from "@/lib/api";
 import { getSessionUser, getToken } from "@/lib/auth";
 
 export const Route = createFileRoute("/dashboard/freelancer")({
@@ -30,6 +30,8 @@ function FreelancerDashboard() {
   const [profile, setProfile] = useState<Partial<ProfilePayload>>({});
   const [services, setServices] = useState<ServicePayload[]>([]);
   const [portfolio, setPortfolio] = useState<PortfolioProjectPayload[]>([]);
+  const [marketTrends, setMarketTrends] = useState<MarketTrendItem[]>([]);
+  const [priceSuggestion, setPriceSuggestion] = useState<PriceSuggestionPayload | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,19 +41,29 @@ function FreelancerDashboard() {
       setLoading(true);
 
       try {
-        const [profileResponse, serviceResponse, portfolioResponse] = await Promise.all([
-          api.getProfile(token),
+        const profileResponse = await api.getProfile(token);
+        const profileData = profileResponse.data ?? {};
+        const priceCategory = profileData.category ?? profileData.experience_area ?? "";
+        const priceSearch = (profileData.skills ?? []).join(" ");
+
+        const [serviceResponse, portfolioResponse, trendsResponse, priceResponse] = await Promise.all([
           api.getFreelancerServices(token),
           api.getPortfolioProjects(token),
+          api.getMarketTrends(token).catch(() => ({ data: { trends: [], has_data: false, keywords: [] } })),
+          api.getPriceSuggestion(token, { category: priceCategory, search: priceSearch }).catch(() => ({ data: null })),
         ]);
 
-        setProfile(profileResponse.data ?? {});
+        setProfile(profileData);
         setServices(serviceResponse.data ?? []);
         setPortfolio(portfolioResponse.data ?? []);
+        setMarketTrends(trendsResponse.data?.trends ?? []);
+        setPriceSuggestion(priceResponse.data ?? null);
       } catch {
         setProfile({});
         setServices([]);
         setPortfolio([]);
+        setMarketTrends([]);
+        setPriceSuggestion(null);
       } finally {
         setLoading(false);
       }
@@ -178,6 +190,54 @@ function FreelancerDashboard() {
           </div>
         </div>
 
+        <div className="grid gap-5 xl:grid-cols-[1fr_0.8fr]">
+          <Card className="rounded-2xl p-5 shadow-soft">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h2 className="font-display text-lg font-bold tracking-normal">Tendencias de mercado</h2>
+                <p className="text-sm text-muted-foreground">Calculado con publicaciones reales de MYPES, sin IA.</p>
+              </div>
+              <TrendingUp className="h-5 w-5 text-secondary" />
+            </div>
+            <div className="mt-4 space-y-3">
+              {marketTrends.slice(0, 4).map((trend) => (
+                <div key={trend.label} className="rounded-xl border border-border px-4 py-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <div className="font-bold">{trend.label}</div>
+                      <div className="text-xs text-muted-foreground">{trend.demand_count} solicitud{trend.demand_count === 1 ? "" : "es"} similares</div>
+                    </div>
+                    <Badge variant="outline" className="border-secondary/40 text-secondary">
+                      {formatMarketPrice(trend.average_budget)}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+              {marketTrends.length === 0 ? (
+                <EmptyState text={loading ? "Cargando tendencias..." : "Aun no hay suficientes publicaciones MYPE relacionadas con tu perfil."} />
+              ) : null}
+            </div>
+          </Card>
+
+          <Card className="rounded-2xl p-5 shadow-soft">
+            <h2 className="font-display text-lg font-bold tracking-normal">Rango de precio del mercado</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Promedio interno segun publicaciones MYPE relacionadas con tus habilidades.</p>
+            {priceSuggestion?.has_data ? (
+              <div className="mt-5 rounded-2xl border border-secondary/30 bg-secondary/10 p-4">
+                <div className="text-sm text-muted-foreground">Rango sugerido</div>
+                <div className="mt-1 font-display text-3xl font-extrabold">
+                  S/ {priceSuggestion.recommended_min?.toFixed(0)} - S/ {priceSuggestion.recommended_max?.toFixed(0)}
+                </div>
+                <div className="mt-2 text-xs text-muted-foreground">
+                  Promedio S/ {priceSuggestion.average_price?.toFixed(0)} basado en {priceSuggestion.sample_count} publicacion{priceSuggestion.sample_count === 1 ? "" : "es"}.
+                </div>
+              </div>
+            ) : (
+              <EmptyState text="Aun no hay datos suficientes para calcular un rango real." />
+            )}
+          </Card>
+        </div>
+
         <div className="grid gap-5 xl:grid-cols-2">
           <Card className="rounded-2xl p-5 shadow-soft">
             <div className="flex items-center justify-between">
@@ -282,4 +342,9 @@ function Activity({ icon: Icon, title, detail }: { icon: LucideIcon; title: stri
       </div>
     </div>
   );
+}
+
+function formatMarketPrice(value: number | null): string {
+  if (!value) return "Sin precio";
+  return `Prom. S/ ${Number(value).toFixed(0)}`;
 }

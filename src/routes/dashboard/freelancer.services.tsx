@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { api, type CategoryPayload, type ServiceInput, type ServicePayload } from "@/lib/api";
+import { api, type CategoryPayload, type PriceSuggestionPayload, type ServiceInput, type ServicePayload } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 
 export const Route = createFileRoute("/dashboard/freelancer/services")({
@@ -45,6 +45,7 @@ function ServicesPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [priceSuggestion, setPriceSuggestion] = useState<PriceSuggestionPayload | null>(null);
 
   const load = async () => {
     if (!token) return;
@@ -80,6 +81,7 @@ function ServicesPage() {
     setEditingId(null);
     setMessage(null);
     setError(null);
+    setPriceSuggestion(null);
   };
 
   const editService = (service: ServicePayload) => {
@@ -93,6 +95,28 @@ function ServicesPage() {
       delivery_days: service.delivery_days,
       status: service.status,
     });
+    setPriceSuggestion(null);
+  };
+
+  const calculatePriceSuggestion = async () => {
+    if (!token) return;
+
+    setError(null);
+    setPriceSuggestion(null);
+
+    const categoryName = categories.find((category) => category.id === form.category_id)?.name ?? "";
+
+    try {
+      const response = await api.getPriceSuggestion(token, {
+        category: categoryName,
+        search: `${form.title} ${form.description}`.trim(),
+      });
+      setPriceSuggestion(response.data);
+    } catch (err: unknown) {
+      const payload = err as { message?: string; errors?: Record<string, string[]> };
+      const firstError = Object.values(payload?.errors ?? {})[0]?.[0];
+      setError(firstError ?? payload?.message ?? "No se pudo calcular el rango sugerido.");
+    }
   };
 
   const saveService = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -211,9 +235,13 @@ function ServicesPage() {
               </Field>
             </div>
             <div className="mt-5 flex justify-end gap-3">
+              <Button type="button" variant="outline" onClick={() => void calculatePriceSuggestion()} className="rounded-xl">
+                Calcular rango sugerido
+              </Button>
               <Button type="button" variant="outline" onClick={resetForm} className="rounded-xl">Limpiar</Button>
               <Button type="submit" disabled={loading} className="rounded-xl bg-gradient-primary shadow-soft"><Save className="h-4 w-4" /> {editingId ? "Actualizar" : "Guardar servicio"}</Button>
             </div>
+            {priceSuggestion ? <PriceSuggestionBox suggestion={priceSuggestion} /> : null}
           </form>
         </Card>
 
@@ -314,4 +342,26 @@ function StatusBadge({ status }: { status: ServicePayload["status"] }) {
   };
 
   return <Badge className={`${styles[status]} border-transparent shadow-none`}>{labels[status]}</Badge>;
+}
+
+function PriceSuggestionBox({ suggestion }: { suggestion: PriceSuggestionPayload }) {
+  return (
+    <div className="mt-5 rounded-2xl border border-secondary/30 bg-secondary/10 p-4">
+      <div className="font-display text-lg font-bold">Rango sugerido por mercado</div>
+      {suggestion.has_data ? (
+        <>
+          <div className="mt-2 font-display text-3xl font-extrabold">
+            S/ {suggestion.recommended_min?.toFixed(0)} - S/ {suggestion.recommended_max?.toFixed(0)}
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Promedio S/ {suggestion.average_price?.toFixed(0)} basado en {suggestion.sample_count} publicacion{suggestion.sample_count === 1 ? "" : "es"} MYPE relacionada{suggestion.sample_count === 1 ? "" : "s"}.
+          </p>
+        </>
+      ) : (
+        <p className="mt-2 text-sm text-muted-foreground">
+          Aun no hay datos suficientes de publicaciones MYPE para recomendar un precio real.
+        </p>
+      )}
+    </div>
+  );
 }

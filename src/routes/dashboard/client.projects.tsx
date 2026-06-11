@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Edit3, FileText, Loader2, Plus, Save, Trash2 } from "lucide-react";
+import { Edit3, FileText, Loader2, Plus, Save, Star, Trash2, Users } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { api, type ClientProjectInput, type ClientProjectPayload } from "@/lib/api";
+import { api, type ClientProjectInput, type ClientProjectPayload, type PriceSuggestionPayload, type RecommendedFreelancerItem } from "@/lib/api";
 import { getSessionUser, getToken } from "@/lib/auth";
 
 export const Route = createFileRoute("/dashboard/client/projects")({
@@ -49,6 +49,10 @@ function ClientProjectsPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<ClientProjectInput>(EMPTY_FORM);
+  const [insightProjectId, setInsightProjectId] = useState<number | null>(null);
+  const [projectPriceSuggestion, setProjectPriceSuggestion] = useState<PriceSuggestionPayload | null>(null);
+  const [projectRecommendations, setProjectRecommendations] = useState<RecommendedFreelancerItem[]>([]);
+  const [draftPriceSuggestion, setDraftPriceSuggestion] = useState<PriceSuggestionPayload | null>(null);
 
   const loadProjects = useCallback(async () => {
     if (!token || !isMype) {
@@ -63,7 +67,8 @@ function ClientProjectsPage() {
 
     try {
       const response = await api.getClientProjects(token);
-      setProjects(response.data?.projects ?? []);
+      const loadedProjects = response.data?.projects ?? [];
+      setProjects(loadedProjects);
       setCanCreate(Boolean(response.data?.limits.can_create));
     } catch (err: unknown) {
       setError(getErrorMessage(err, "No se pudieron cargar tus proyectos."));
@@ -73,6 +78,32 @@ function ClientProjectsPage() {
       setLoading(false);
     }
   }, [isMype, token]);
+
+  const loadProjectInsights = useCallback(async (projectId: number) => {
+    if (!token) return;
+
+    setInsightProjectId(projectId);
+
+    const [priceResponse, recommendationsResponse] = await Promise.all([
+      api.getPriceSuggestion(token, { project_id: projectId }).catch(() => ({ data: null })),
+      api.getFreelancerRecommendations(token, { project_id: projectId, limit: 3 }).catch(() => ({ data: { recommendations: [] } })),
+    ]);
+
+    setProjectPriceSuggestion(priceResponse.data ?? null);
+    setProjectRecommendations(recommendationsResponse.data?.recommendations ?? []);
+  }, [token]);
+
+  useEffect(() => {
+    if (projects[0] && insightProjectId === null) {
+      void loadProjectInsights(projects[0].id);
+    }
+
+    if (projects.length === 0) {
+      setInsightProjectId(null);
+      setProjectPriceSuggestion(null);
+      setProjectRecommendations([]);
+    }
+  }, [insightProjectId, loadProjectInsights, projects]);
 
   useEffect(() => {
     void loadProjects();
@@ -92,6 +123,7 @@ function ClientProjectsPage() {
   const startCreate = () => {
     setMessage(null);
     setError(null);
+    setDraftPriceSuggestion(null);
 
     if (!canCreate) {
       setError("Tu plan Free permite crear 1 proyecto. Actualiza a Pro para publicar mas proyectos.");
@@ -106,6 +138,7 @@ function ClientProjectsPage() {
   const startEdit = (project: ClientProjectPayload) => {
     setMessage(null);
     setError(null);
+    setDraftPriceSuggestion(null);
     setEditingId(project.id);
     setForm({
       title: project.title,
@@ -153,6 +186,23 @@ function ClientProjectsPage() {
       setError(getErrorMessage(err, "No se pudo guardar el proyecto."));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const calculateDraftPrice = async () => {
+    if (!token) return;
+
+    setError(null);
+    setDraftPriceSuggestion(null);
+
+    try {
+      const response = await api.getPriceSuggestion(token, {
+        category: form.category ?? "",
+        search: `${form.title} ${form.description}`.trim(),
+      });
+      setDraftPriceSuggestion(response.data);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "No se pudo calcular el rango sugerido."));
     }
   };
 
@@ -275,6 +325,9 @@ function ClientProjectsPage() {
               </Field>
 
               <div className="flex flex-wrap justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => void calculateDraftPrice()} disabled={saving}>
+                  Calcular rango sugerido
+                </Button>
                 <Button type="button" variant="outline" onClick={resetForm} disabled={saving}>
                   Cancelar
                 </Button>
@@ -283,6 +336,8 @@ function ClientProjectsPage() {
                   {editingId ? "Guardar cambios" : "Crear proyecto"}
                 </Button>
               </div>
+
+              {draftPriceSuggestion ? <PriceSuggestionBox suggestion={draftPriceSuggestion} /> : null}
             </form>
           </Card>
         ) : null}
@@ -315,6 +370,35 @@ function ClientProjectsPage() {
                   <Info label="Entrega" value={project.expected_delivery_days ? `${project.expected_delivery_days} dias` : "No definida"} />
                   <Info label="Origen" value={project.ai_generated ? "Creado con IA" : "Creado manualmente"} />
                 </div>
+                {insightProjectId === project.id ? (
+                  <div className="mt-4 grid gap-3 lg:grid-cols-[0.8fr_1fr]">
+                    <PriceSuggestionBox suggestion={projectPriceSuggestion} />
+                    <Card className="rounded-xl border-secondary/20 bg-secondary/5 p-4 shadow-none">
+                      <div className="mb-3 flex items-center gap-2 font-bold">
+                        <Users className="h-4 w-4 text-secondary" />
+                        Freelancers compatibles
+                      </div>
+                      {projectRecommendations.length > 0 ? (
+                        <div className="space-y-2">
+                          {projectRecommendations.map((freelancer) => (
+                            <div key={freelancer.id} className="flex items-center justify-between gap-3 rounded-lg bg-background px-3 py-2 text-sm">
+                              <div>
+                                <div className="font-semibold">{freelancer.name}</div>
+                                <div className="text-xs text-muted-foreground">{freelancer.headline ?? freelancer.category ?? "Freelancer"}</div>
+                              </div>
+                              <span className="flex items-center gap-1 text-xs font-semibold text-secondary">
+                                <Star className="h-3.5 w-3.5 fill-current" />
+                                {Math.round(freelancer.score)}%
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">Aun no hay freelancers compatibles con datos suficientes.</p>
+                      )}
+                    </Card>
+                  </div>
+                ) : null}
                 <div className="mt-5">
                   <div className="mb-1 flex justify-between text-xs text-muted-foreground">
                     <span>Avance</span>
@@ -325,6 +409,9 @@ function ClientProjectsPage() {
                   </div>
                 </div>
                 <div className="mt-4 flex justify-end gap-2">
+                  <Button size="sm" variant="outline" onClick={() => void loadProjectInsights(project.id)}>
+                    Ver match
+                  </Button>
                   <Button size="sm" variant="outline" onClick={() => startEdit(project)}>
                     <Edit3 className="h-4 w-4" />
                     Editar
@@ -368,6 +455,26 @@ function Info({ label, value }: { label: string; value: string }) {
       <div className="text-xs text-muted-foreground">{label}</div>
       <div className="font-semibold">{value}</div>
     </div>
+  );
+}
+
+function PriceSuggestionBox({ suggestion }: { suggestion: PriceSuggestionPayload | null }) {
+  return (
+    <Card className="rounded-xl border-secondary/20 bg-secondary/5 p-4 shadow-none">
+      <div className="font-bold">Rango sugerido por mercado</div>
+      {suggestion?.has_data ? (
+        <>
+          <div className="mt-2 font-display text-2xl font-extrabold">
+            S/ {suggestion.recommended_min?.toFixed(0)} - S/ {suggestion.recommended_max?.toFixed(0)}
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Promedio S/ {suggestion.average_price?.toFixed(0)} basado en {suggestion.sample_count} publicacion{suggestion.sample_count === 1 ? "" : "es"} real{suggestion.sample_count === 1 ? "" : "es"}.
+          </p>
+        </>
+      ) : (
+        <p className="mt-2 text-sm text-muted-foreground">Aun no hay datos suficientes para calcular un rango real.</p>
+      )}
+    </Card>
   );
 }
 
