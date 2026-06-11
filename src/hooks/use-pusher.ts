@@ -1,9 +1,8 @@
 import { useEffect, useRef } from "react";
-import Pusher from "pusher-js";
 import { getToken } from "@/lib/auth";
 
 const PUSHER_KEY = import.meta.env.VITE_PUSHER_APP_KEY ?? "";
-const PUSHER_CLUSTER = import.meta.env.VITE_PUSHER_APP_CLUSTER ?? "mt1";
+const PUSHER_CLUSTER = import.meta.env.VITE_PUSHER_APP_CLUSTER ?? "sa1";
 
 type PusherEvent = {
   channel: string;
@@ -16,38 +15,56 @@ export function usePusher(
   onEvent: (event: PusherEvent) => void,
   enabled = true,
 ) {
-  const pusherRef = useRef<Pusher | null>(null);
+  const pusherRef = useRef<{ disconnect: () => void; unsubscribe: (name: string) => void } | null>(null);
+  const channelsRef = useRef(channels);
+
+  channelsRef.current = channels;
 
   useEffect(() => {
-    if (!enabled || !PUSHER_KEY) return;
+    if (!enabled || !PUSHER_KEY || typeof window === "undefined") return;
 
-    const pusher = new Pusher(PUSHER_KEY, {
-      cluster: PUSHER_CLUSTER,
-      authEndpoint: `${import.meta.env.VITE_API_URL ?? "/api"}/broadcasting/auth`,
-      auth: {
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
+    let pusherInstance: {
+      subscribe: (name: string) => { bind_global: (fn: (event: string, data: unknown) => void) => void };
+      unsubscribe: (name: string) => void;
+      disconnect: () => void;
+    } | null = null;
+
+    const init = async () => {
+      const PusherModule = await import("pusher-js");
+      const Pusher = PusherModule.default;
+
+      const pusher = new Pusher(PUSHER_KEY, {
+        cluster: PUSHER_CLUSTER,
+        authEndpoint: `${import.meta.env.VITE_API_URL ?? "/api"}/broadcasting/auth`,
+        auth: {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
         },
-      },
-    });
-
-    pusherRef.current = pusher;
-
-    channels.forEach((channelName) => {
-      const channel = pusher.subscribe(channelName);
-      channel.bind_global((event: string, data: unknown) => {
-        onEvent({ channel: channelName, event, data });
       });
-    });
+
+      pusherInstance = pusher;
+
+      const currentChannels = channelsRef.current;
+      currentChannels.forEach((channelName) => {
+        const channel = pusher.subscribe(channelName);
+        channel.bind_global((event: string, data: unknown) => {
+          onEvent({ channel: channelName, event, data });
+        });
+      });
+    };
+
+    void init();
 
     return () => {
-      channels.forEach((channelName) => {
-        pusher.unsubscribe(channelName);
-      });
-      pusher.disconnect();
-      pusherRef.current = null;
+      if (pusherInstance) {
+        channelsRef.current.forEach((channelName) => {
+          pusherInstance!.unsubscribe(channelName);
+        });
+        pusherInstance.disconnect();
+      }
     };
-  }, [channels.join(","), enabled]);
+  }, [enabled]);
 }
 
 export function getPusherKey(): string {
