@@ -20,6 +20,8 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as FreelancerOnboardingRouteImport } from './routes/freelancer-onboarding'
 import { Route as ForgotRouteImport } from './routes/forgot'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TalentFreelancerIdRouteImport } from './routes/talent.$freelancerId'
+import { Route as FreelancerPortfolioFreelancerIdRouteImport } from './routes/freelancer-portfolio.$freelancerId'
 import { Route as DashboardPaymentsRouteImport } from './routes/dashboard/payments'
 import { Route as DashboardMessagesRouteImport } from './routes/dashboard/messages'
 import { Route as DashboardFreelancerRouteImport } from './routes/dashboard/freelancer'
@@ -85,6 +87,17 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TalentFreelancerIdRoute = TalentFreelancerIdRouteImport.update({
+  id: '/$freelancerId',
+  path: '/$freelancerId',
+  getParentRoute: () => TalentRoute,
+} as any)
+const FreelancerPortfolioFreelancerIdRoute =
+  FreelancerPortfolioFreelancerIdRouteImport.update({
+    id: '/freelancer-portfolio/$freelancerId',
+    path: '/freelancer-portfolio/$freelancerId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const DashboardPaymentsRoute = DashboardPaymentsRouteImport.update({
   id: '/dashboard/payments',
   path: '/dashboard/payments',
@@ -145,11 +158,13 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/talent': typeof TalentRoute
+  '/talent': typeof TalentRouteWithChildren
   '/dashboard/client': typeof DashboardClientRouteWithChildren
   '/dashboard/freelancer': typeof DashboardFreelancerRouteWithChildren
   '/dashboard/messages': typeof DashboardMessagesRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
+  '/freelancer-portfolio/$freelancerId': typeof FreelancerPortfolioFreelancerIdRoute
+  '/talent/$freelancerId': typeof TalentFreelancerIdRoute
   '/dashboard/client/profile': typeof DashboardClientProfileRoute
   '/dashboard/client/projects': typeof DashboardClientProjectsRoute
   '/dashboard/freelancer/portfolio': typeof DashboardFreelancerPortfolioRoute
@@ -167,11 +182,13 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/talent': typeof TalentRoute
+  '/talent': typeof TalentRouteWithChildren
   '/dashboard/client': typeof DashboardClientRouteWithChildren
   '/dashboard/freelancer': typeof DashboardFreelancerRouteWithChildren
   '/dashboard/messages': typeof DashboardMessagesRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
+  '/freelancer-portfolio/$freelancerId': typeof FreelancerPortfolioFreelancerIdRoute
+  '/talent/$freelancerId': typeof TalentFreelancerIdRoute
   '/dashboard/client/profile': typeof DashboardClientProfileRoute
   '/dashboard/client/projects': typeof DashboardClientProjectsRoute
   '/dashboard/freelancer/portfolio': typeof DashboardFreelancerPortfolioRoute
@@ -190,11 +207,13 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/talent': typeof TalentRoute
+  '/talent': typeof TalentRouteWithChildren
   '/dashboard/client': typeof DashboardClientRouteWithChildren
   '/dashboard/freelancer': typeof DashboardFreelancerRouteWithChildren
   '/dashboard/messages': typeof DashboardMessagesRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
+  '/freelancer-portfolio/$freelancerId': typeof FreelancerPortfolioFreelancerIdRoute
+  '/talent/$freelancerId': typeof TalentFreelancerIdRoute
   '/dashboard/client/profile': typeof DashboardClientProfileRoute
   '/dashboard/client/projects': typeof DashboardClientProjectsRoute
   '/dashboard/freelancer/portfolio': typeof DashboardFreelancerPortfolioRoute
@@ -219,6 +238,8 @@ export interface FileRouteTypes {
     | '/dashboard/freelancer'
     | '/dashboard/messages'
     | '/dashboard/payments'
+    | '/freelancer-portfolio/$freelancerId'
+    | '/talent/$freelancerId'
     | '/dashboard/client/profile'
     | '/dashboard/client/projects'
     | '/dashboard/freelancer/portfolio'
@@ -241,6 +262,8 @@ export interface FileRouteTypes {
     | '/dashboard/freelancer'
     | '/dashboard/messages'
     | '/dashboard/payments'
+    | '/freelancer-portfolio/$freelancerId'
+    | '/talent/$freelancerId'
     | '/dashboard/client/profile'
     | '/dashboard/client/projects'
     | '/dashboard/freelancer/portfolio'
@@ -263,6 +286,8 @@ export interface FileRouteTypes {
     | '/dashboard/freelancer'
     | '/dashboard/messages'
     | '/dashboard/payments'
+    | '/freelancer-portfolio/$freelancerId'
+    | '/talent/$freelancerId'
     | '/dashboard/client/profile'
     | '/dashboard/client/projects'
     | '/dashboard/freelancer/portfolio'
@@ -281,11 +306,12 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  TalentRoute: typeof TalentRoute
+  TalentRoute: typeof TalentRouteWithChildren
   DashboardClientRoute: typeof DashboardClientRouteWithChildren
   DashboardFreelancerRoute: typeof DashboardFreelancerRouteWithChildren
   DashboardMessagesRoute: typeof DashboardMessagesRoute
   DashboardPaymentsRoute: typeof DashboardPaymentsRoute
+  FreelancerPortfolioFreelancerIdRoute: typeof FreelancerPortfolioFreelancerIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -367,6 +393,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/talent/$freelancerId': {
+      id: '/talent/$freelancerId'
+      path: '/$freelancerId'
+      fullPath: '/talent/$freelancerId'
+      preLoaderRoute: typeof TalentFreelancerIdRouteImport
+      parentRoute: typeof TalentRoute
+    }
+    '/freelancer-portfolio/$freelancerId': {
+      id: '/freelancer-portfolio/$freelancerId'
+      path: '/freelancer-portfolio/$freelancerId'
+      fullPath: '/freelancer-portfolio/$freelancerId'
+      preLoaderRoute: typeof FreelancerPortfolioFreelancerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/payments': {
       id: '/dashboard/payments'
       path: '/dashboard/payments'
@@ -433,6 +473,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface TalentRouteChildren {
+  TalentFreelancerIdRoute: typeof TalentFreelancerIdRoute
+}
+
+const TalentRouteChildren: TalentRouteChildren = {
+  TalentFreelancerIdRoute: TalentFreelancerIdRoute,
+}
+
+const TalentRouteWithChildren =
+  TalentRoute._addFileChildren(TalentRouteChildren)
+
 interface DashboardClientRouteChildren {
   DashboardClientProfileRoute: typeof DashboardClientProfileRoute
   DashboardClientProjectsRoute: typeof DashboardClientProjectsRoute
@@ -473,11 +524,12 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  TalentRoute: TalentRoute,
+  TalentRoute: TalentRouteWithChildren,
   DashboardClientRoute: DashboardClientRouteWithChildren,
   DashboardFreelancerRoute: DashboardFreelancerRouteWithChildren,
   DashboardMessagesRoute: DashboardMessagesRoute,
   DashboardPaymentsRoute: DashboardPaymentsRoute,
+  FreelancerPortfolioFreelancerIdRoute: FreelancerPortfolioFreelancerIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { api, type GeminiAnalysisPayload } from "@/lib/api";
+import { api, type GeminiAnalysisPayload, type SkillOptionPayload } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { getSessionUser, getToken } from "@/lib/auth";
 
@@ -121,6 +121,7 @@ const EMPTY_PROJECTS: ProjectDraft[] = [
 
 function FreelancerOnboarding() {
   const navigate = useNavigate();
+  const token = getToken();
   const [skills, setSkills] = useState<string[]>([]);
   const [tools, setTools] = useState<string[]>([]);
   const [description, setDescription] = useState("");
@@ -141,11 +142,35 @@ function FreelancerOnboarding() {
   const [availabilityTime, setAvailabilityTime] = useState("");
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [finalizeError, setFinalizeError] = useState<string | null>(null);
+  const [skillCatalog, setSkillCatalog] = useState<SkillOptionPayload[]>([]);
+  const processing = stage === "processing";
+  const error = geminiError;
 
   const canContinue = skills.length > 0 && tools.length > 0 && description.trim().length >= 20;
   const selectedSkill = skills[0] ?? "tus habilidades principales";
   const selectedTool = tools[0] ?? "tus herramientas";
   const selectedArea = areas[0] ?? skills[0] ?? "tu carrera";
+  const skillOptions = useMemo(
+    () =>
+      skillCatalog.filter((item) => item.group === "skills").map((item) => item.name).length > 0
+        ? skillCatalog.filter((item) => item.group === "skills").map((item) => item.name)
+        : SKILL_OPTIONS,
+    [skillCatalog],
+  );
+  const toolOptions = useMemo(
+    () =>
+      skillCatalog.filter((item) => item.group === "tools").map((item) => item.name).length > 0
+        ? skillCatalog.filter((item) => item.group === "tools").map((item) => item.name)
+        : TOOL_OPTIONS,
+    [skillCatalog],
+  );
+  const areaOptions = useMemo(
+    () =>
+      skillCatalog.filter((item) => item.group === "areas").map((item) => item.name).length > 0
+        ? skillCatalog.filter((item) => item.group === "areas").map((item) => item.name)
+        : AREA_OPTIONS,
+    [skillCatalog],
+  );
   const manualProjectsComplete = projects.every(
     (project) =>
       project.name.trim() && project.description.trim().length >= 20 && project.time.trim(),
@@ -167,10 +192,24 @@ function FreelancerOnboarding() {
   );
 
   useEffect(() => {
+    if (!token) return;
+
+    api
+      .getSkillOptions(token)
+      .then((response) => {
+        if (response.data?.items) {
+          setSkillCatalog(response.data.items);
+        }
+      })
+      .catch(() => {
+        setSkillCatalog([]);
+      });
+  }, [token]);
+
+  useEffect(() => {
     if (stage !== "processing" || hasRun.current) return;
     hasRun.current = true;
     setGeminiError(null);
-    const token = getToken();
 
     if (!token) {
       setGeminiError("Sesión no encontrada. Inicia sesión otra vez.");
@@ -198,7 +237,7 @@ function FreelancerOnboarding() {
         setGeminiError(payload?.message ?? "Error al analizar el perfil.");
         setStage("project-choice");
       });
-  }, [stage, skills, tools, description, linkedin, instagram, website, areas, certificates]);
+  }, [stage, token, skills, tools, description, linkedin, instagram, website, areas, certificates]);
 
   const continueWithAi = () => {
     if (!canContinue) return;
@@ -556,7 +595,7 @@ function FreelancerOnboarding() {
           <ProfilePanel title="Skills">
             <ChipSelect
               placeholder="Agrega tus habilidades"
-              options={SKILL_OPTIONS}
+              options={skillOptions}
               values={skills}
               onChange={setSkills}
               maxValues={5}
@@ -582,7 +621,7 @@ function FreelancerOnboarding() {
           <ProfilePanel title="Herramientas y/o Tecnologías">
             <ChipSelect
               placeholder="Agrega las herramientas que más domines"
-              options={TOOL_OPTIONS}
+              options={toolOptions}
               values={tools}
               onChange={setTools}
               maxValues={5}
@@ -622,7 +661,7 @@ function FreelancerOnboarding() {
                   </p>
                   <ChipSelect
                     placeholder="Agrega el nombre del área donde te desempeñas"
-                    options={AREA_OPTIONS}
+                    options={areaOptions}
                     values={areas}
                     onChange={setAreas}
                     disabled={hasArea === "no"}
