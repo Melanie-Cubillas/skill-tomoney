@@ -18,7 +18,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { api, type CategoryPayload, type PortfolioProjectPayload } from "@/lib/api";
+import { api, resolveAssetUrl, type CategoryPayload, type PortfolioProjectPayload } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 
 export const Route = createFileRoute("/dashboard/freelancer/portfolio")({
@@ -55,6 +55,7 @@ function PortfolioPage() {
   const [form, setForm] = useState<PortfolioForm>(emptyForm);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("Todas");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -80,10 +81,23 @@ function PortfolioPage() {
     void load();
   }, [token]);
 
-  const filteredProjects = useMemo(
-    () => projects.filter((project) => project.title.toLowerCase().includes(search.toLowerCase())),
-    [projects, search],
-  );
+  const availableCategoryFilters = useMemo(() => {
+    const names = Array.from(
+      new Set(projects.map((project) => project.category?.trim() || "Sin categoria")),
+    ).sort((a, b) => a.localeCompare(b));
+
+    return ["Todas", ...names];
+  }, [projects]);
+
+  const filteredProjects = useMemo(() => {
+    return projects.filter((project) => {
+      const matchesSearch = project.title.toLowerCase().includes(search.toLowerCase());
+      const projectCategory = project.category?.trim() || "Sin categoria";
+      const matchesCategory = categoryFilter === "Todas" || projectCategory === categoryFilter;
+
+      return matchesSearch && matchesCategory;
+    });
+  }, [projects, search, categoryFilter]);
 
   const featuredCount = projects.filter((project) => project.is_featured).length;
 
@@ -238,9 +252,23 @@ function PortfolioPage() {
               <span className="grid h-8 w-8 place-items-center rounded-lg bg-secondary/15 text-secondary"><FolderKanban className="h-4 w-4" /></span>
               Lista de proyectos
             </h2>
-            <div className="relative w-full max-w-xs">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar proyecto..." className="rounded-xl pl-9" />
+            <div className="flex w-full flex-col gap-3 md:w-auto md:flex-row">
+              <div className="relative w-full md:w-72">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar proyecto..." className="rounded-xl pl-9" />
+              </div>
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="w-full rounded-xl md:w-56">
+                  <SelectValue placeholder="Filtrar por categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableCategoryFilters.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -263,8 +291,13 @@ function PortfolioPage() {
                 <TableRow key={project.id}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>
-                    {project.image_url ? (
-                      <img src={project.image_url} alt={project.title} className="h-12 w-20 rounded-lg object-cover" />
+                    {resolveAssetUrl(project.image_url) ? (
+                      <img
+                        src={resolveAssetUrl(project.image_url) ?? undefined}
+                        alt={project.title}
+                        loading="lazy"
+                        className="h-12 w-20 rounded-lg object-cover"
+                      />
                     ) : (
                       <div className="grid h-12 w-20 place-items-center rounded-lg bg-muted text-muted-foreground"><ImageIcon className="h-5 w-5" /></div>
                     )}
