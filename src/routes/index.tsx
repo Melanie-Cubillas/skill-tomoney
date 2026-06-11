@@ -195,13 +195,15 @@ function HeroSection() {
             <div className="mt-8 flex flex-wrap gap-4">
               <Link
                 to="/register"
+                search={{ role: "freelancer" }}
                 className="inline-flex items-center gap-3 rounded-xl bg-gradient-primary px-6 py-4 text-sm font-extrabold text-white shadow-[0_22px_50px_-24px_#ff442f] transition hover:-translate-y-0.5"
               >
                 Empieza como Freelancer
                 <ArrowRight className="h-5 w-5" />
               </Link>
               <Link
-                to="/talent"
+                to="/register"
+                search={{ role: "mype" }}
                 className="inline-flex items-center gap-3 rounded-xl border border-accent/70 bg-accent/5 px-6 py-4 text-sm font-extrabold text-accent transition hover:-translate-y-0.5 hover:bg-accent/10"
               >
                 Buscar talento
@@ -347,7 +349,7 @@ function CategoriesSection() {
             Explora oportunidades reales en las habilidades que las MYPES están buscando hoy.
           </p>
           <a
-            href="/services"
+            href="/register?role=mype"
             className="mt-8 inline-flex w-fit items-center gap-3 rounded-full bg-[#071014] px-7 py-3.5 text-sm font-extrabold text-white shadow-elegant"
           >
             Ver todas las categorías
@@ -359,7 +361,7 @@ function CategoriesSection() {
           {categories.map((category) => (
             <a
               key={category.title}
-              href="/services"
+              href="/register?role=mype"
               className={`group relative min-h-[168px] overflow-hidden rounded-[1.35rem] bg-gradient-to-br ${category.tone} p-6 shadow-elegant ring-1 ring-black/5 transition hover:-translate-y-1`}
             >
               <Sparkles
@@ -493,7 +495,7 @@ function StepCard({
 
 function FreelancersSection() {
   return (
-    <section className="relative overflow-hidden bg-[#eafbf6] py-16 text-[#071014]">
+    <section id="freelancers" className="relative overflow-hidden bg-[#eafbf6] py-16 text-[#071014]">
       <div className="absolute right-12 top-16 h-36 w-24 dot-field opacity-55" />
       <div className="absolute -left-20 bottom-16 h-56 w-56 rounded-full border border-accent/50" />
       <div className="mx-auto grid max-w-7xl gap-8 px-6 lg:grid-cols-[0.52fr_1.48fr]">
@@ -507,7 +509,7 @@ function FreelancersSection() {
             tu proyecto
           </h2>
           <a
-            href="/talent"
+            href="/register?role=mype"
             className="mt-8 inline-flex w-fit items-center gap-3 rounded-full bg-[#071014] px-6 py-3 text-sm font-extrabold text-white shadow-elegant"
           >
             Ver todos los freelancers
@@ -588,7 +590,7 @@ function FreelancerCard({
             <div className="font-display text-3xl font-extrabold leading-none">S/ {price}</div>
           </div>
           <a
-            href="/talent"
+            href="/register?role=mype"
             className="grid h-14 w-14 place-items-center rounded-full bg-[#071014] text-white shadow-soft transition hover:-translate-y-0.5"
           >
             <ArrowRight className="h-6 w-6" />
@@ -601,7 +603,7 @@ function FreelancerCard({
 
 function AudienceSection() {
   return (
-    <section className="grid border-y-4 border-[#071014] lg:grid-cols-2">
+    <section id="mypes" className="grid border-y-4 border-[#071014] lg:grid-cols-2">
       <div className="relative min-h-[430px] overflow-hidden bg-gradient-to-br from-[#008c84] via-[#01756f] to-[#05272c] px-6 py-16 text-white lg:px-[max(1.5rem,calc((100vw-80rem)/2+1.5rem))]">
         <div className="absolute right-12 top-10 h-44 w-44 rounded-full bg-accent/20 blur-3xl" />
         <div className="absolute bottom-10 right-16 h-28 w-28 rounded-full border border-accent/40" />
@@ -626,6 +628,7 @@ function AudienceSection() {
         </ul>
         <Link
           to="/register"
+          search={{ role: "freelancer" }}
           className="relative mt-8 inline-flex items-center gap-3 rounded-xl bg-[#eafff9] px-6 py-3 text-sm font-extrabold text-[#061013] shadow-elegant"
         >
           Crear mi perfil
@@ -660,7 +663,8 @@ function AudienceSection() {
           ))}
         </ul>
         <Link
-          to="/talent"
+          to="/register"
+          search={{ role: "mype" }}
           className="relative mt-8 inline-flex items-center gap-3 rounded-xl bg-[#071014] px-6 py-3 text-sm font-extrabold text-white shadow-elegant"
         >
           Buscar talento
@@ -785,13 +789,15 @@ function FinalCtaSection() {
         <div className="flex flex-col gap-3">
           <Link
             to="/register"
+            search={{ role: "freelancer" }}
             className="inline-flex items-center justify-center gap-3 rounded-xl bg-gradient-primary px-7 py-4 text-sm font-extrabold text-white shadow-elegant"
           >
             Soy Freelancer
             <ArrowRight className="h-5 w-5" />
           </Link>
           <Link
-            to="/talent"
+            to="/register"
+            search={{ role: "mype" }}
             className="inline-flex items-center justify-center gap-3 rounded-xl border border-white/15 bg-[#071014] px-7 py-4 text-sm font-extrabold text-white shadow-elegant"
           >
             Buscar Talento
