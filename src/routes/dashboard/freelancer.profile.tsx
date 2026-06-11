@@ -1,15 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Briefcase, Camera, CheckCircle2, Globe2, ImageUp, LinkIcon, MapPin, Save, Send, ShieldCheck, Sparkles, Star, UserRound } from "lucide-react";
+import { Briefcase, Camera, CheckCircle2, ChevronDown, Globe2, ImageUp, LinkIcon, MapPin, Save, Send, ShieldCheck, Sparkles, Star, UserRound, X } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { api, type ProfilePayload } from "@/lib/api";
+import { api, type ProfilePayload, type SkillOptionPayload } from "@/lib/api";
 import { getSessionUser, getToken } from "@/lib/auth";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/dashboard/freelancer/profile")({
   head: () => ({ meta: [{ title: "Perfil Freelancer · SkilltoMoney" }] }),
@@ -27,7 +28,8 @@ function FreelancerProfilePage() {
   const token = getToken();
   const user = useMemo(() => getSessionUser(), []);
   const [profile, setProfile] = useState<Partial<ProfilePayload>>({});
-  const [skillsText, setSkillsText] = useState("");
+  const [skillOptions, setSkillOptions] = useState<SkillOptionPayload[]>([]);
+  const [selectedSkills, setSelectedSkills] = useState<SkillOptionPayload[]>([]);
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -39,10 +41,39 @@ function FreelancerProfilePage() {
 
     const load = async () => {
       try {
-        const response = await api.getProfile(token);
-        if (response.data) {
-          setProfile(response.data);
-          setSkillsText((response.data.skills ?? []).join(", "));
+        const [profileResponse, skillOptionsResponse] = await Promise.all([
+          api.getProfile(token),
+          api.getSkillOptions(token),
+        ]);
+
+        if (profileResponse.data) {
+          setProfile(profileResponse.data);
+        }
+
+        if (skillOptionsResponse.data?.items) {
+          setSkillOptions(skillOptionsResponse.data.items);
+        }
+
+        if (profileResponse.data?.skill_items) {
+          const catalogById = new Map(
+            (skillOptionsResponse.data?.items ?? []).map((item) => [item.id, item]),
+          );
+
+          setSelectedSkills(
+            profileResponse.data.skill_items.map((item) => {
+              const catalogItem = catalogById.get(item.id);
+
+              return (
+                catalogItem ?? {
+                  id: item.id,
+                  name: item.name,
+                  category: item.category,
+                  group: "skills",
+                  subcategory: null,
+                }
+              );
+            }),
+          );
         }
       } catch {
         setError("No se pudo cargar la informacion del perfil.");
@@ -69,7 +100,15 @@ function FreelancerProfilePage() {
     };
   }, [profile.social_links]);
 
-  const skillNames = useMemo(() => skillsText.split(",").map((skill) => skill.trim()).filter(Boolean), [skillsText]);
+  const areaOptions = useMemo(
+    () => skillOptions.filter((item) => item.group === "areas"),
+    [skillOptions],
+  );
+  const availableSkillOptions = useMemo(
+    () => skillOptions.filter((item) => item.group === "skills"),
+    [skillOptions],
+  );
+  const skillNames = useMemo(() => selectedSkills.map((skill) => skill.name), [selectedSkills]);
   const visiblePhotoUrl = photoPreviewUrl ?? profile.photo_url ?? null;
   const profileName = user?.name ?? "Tu perfil";
   const profileCompletionFields = [
@@ -124,7 +163,10 @@ function FreelancerProfilePage() {
         },
       });
 
-      await api.updateSkills(t, skillNames);
+      await api.updateSkills(
+        t,
+        selectedSkills.map((skill) => ({ id: skill.id })),
+      );
 
       if (selectedPhoto) {
         await api.updatePhoto(t, selectedPhoto);
@@ -133,7 +175,22 @@ function FreelancerProfilePage() {
       const response = await api.getProfile(t);
       if (response.data) {
         setProfile(response.data);
-        setSkillsText((response.data.skills ?? []).join(", "));
+
+        setSelectedSkills(
+          (response.data.skill_items ?? []).map((item) => {
+            const catalogItem = skillOptions.find((option) => option.id === item.id);
+
+            return (
+              catalogItem ?? {
+                id: item.id,
+                name: item.name,
+                category: item.category,
+                group: "skills",
+                subcategory: null,
+              }
+            );
+          }),
+        );
       }
       setSelectedPhoto(null);
       setPhotoPreviewUrl(null);
@@ -208,7 +265,20 @@ function FreelancerProfilePage() {
             <PanelTitle icon={UserRound} title="Datos base" />
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               <Field label="Area de experiencia">
-                <Input value={profile.experience_area ?? ""} onChange={(event) => setProfile((prev) => ({ ...prev, experience_area: event.target.value }))} placeholder="Desarrollo Web y Software" className="h-11 rounded-xl" />
+                <select
+                  value={profile.experience_area ?? ""}
+                  onChange={(event) =>
+                    setProfile((prev) => ({ ...prev, experience_area: event.target.value }))
+                  }
+                  className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm"
+                >
+                  <option value="">Selecciona un area</option>
+                  {areaOptions.map((option) => (
+                    <option key={`${option.category}-${option.name}`} value={option.name}>
+                      {option.name}
+                    </option>
+                  ))}
+                </select>
               </Field>
               <Field label="Website">
                 <Input value={profile.website ?? ""} onChange={(event) => setProfile((prev) => ({ ...prev, website: event.target.value }))} placeholder="alejandro.dev" className="h-11 rounded-xl" />
@@ -237,7 +307,14 @@ function FreelancerProfilePage() {
                 <span key={skill} className="rounded-lg bg-secondary px-3 py-1 text-xs font-bold text-white">{skill}</span>
               ))}
             </div>
-            <Input value={skillsText} onChange={(event) => setSkillsText(event.target.value)} placeholder="React, Next.js, TypeScript, Figma" className="mt-4 h-11 rounded-xl" />
+            <div className="mt-4">
+              <SkillMultiSelect
+                options={availableSkillOptions}
+                values={selectedSkills}
+                onChange={setSelectedSkills}
+                placeholder="Selecciona habilidades reales de tu catalogo"
+              />
+            </div>
           </Card>
 
           <Card className="rounded-2xl p-5 shadow-soft">
@@ -322,6 +399,112 @@ function Suggestion({ icon: Icon, title }: { icon: LucideIcon; title: string }) 
         <span className="font-bold">{title}</span>
       </div>
       <Send className="h-4 w-4 text-muted-foreground" />
+    </div>
+  );
+}
+
+function SkillMultiSelect({
+  options,
+  values,
+  onChange,
+  placeholder,
+}: {
+  options: SkillOptionPayload[];
+  values: SkillOptionPayload[];
+  onChange: (values: SkillOptionPayload[]) => void;
+  placeholder: string;
+}) {
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+
+  const filteredOptions = useMemo(
+    () =>
+      options.filter(
+        (option) =>
+          !values.some((value) => value.id === option.id) &&
+          `${option.name} ${option.subcategory ?? ""}`.toLowerCase().includes(query.toLowerCase()),
+      ),
+    [options, query, values],
+  );
+
+  const addValue = (option: SkillOptionPayload) => {
+    if (values.some((value) => value.id === option.id)) return;
+    onChange([...values, option]);
+    setQuery("");
+    setOpen(false);
+  };
+
+  const removeValue = (id: number) => {
+    onChange(values.filter((value) => value.id !== id));
+  };
+
+  return (
+    <div>
+      <div className="relative">
+        <Input
+          value={query}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            setOpen(true);
+          }}
+          onFocus={() => setOpen(true)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && filteredOptions[0]) {
+              event.preventDefault();
+              addValue(filteredOptions[0]);
+            }
+          }}
+          placeholder={placeholder}
+          className="h-11 rounded-xl pr-10"
+        />
+        <button
+          type="button"
+          onClick={() => setOpen((current) => !current)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          aria-label="Mostrar habilidades"
+        >
+          <ChevronDown className={cn("h-4 w-4 transition-transform", open && "rotate-180")} />
+        </button>
+
+        {open && (
+          <div className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-border bg-background py-2 shadow-elegant">
+            {(filteredOptions.length ? filteredOptions : []).map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => addValue(option)}
+                className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-secondary/10"
+              >
+                <span>{option.name}</span>
+                <span className="text-xs text-muted-foreground">{option.subcategory ?? option.category}</span>
+              </button>
+            ))}
+
+            {filteredOptions.length === 0 ? (
+              <div className="px-3 py-2 text-sm text-muted-foreground">Sin resultados</div>
+            ) : null}
+          </div>
+        )}
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        {values.map((value) => (
+          <span
+            key={value.id}
+            className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-xs font-bold text-white"
+          >
+            {value.name}
+            <button
+              type="button"
+              onClick={() => removeValue(value.id)}
+              className="rounded-full bg-white/20 p-0.5 hover:bg-white/30"
+              aria-label={`Quitar ${value.name}`}
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
