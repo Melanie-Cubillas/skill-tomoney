@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Button } from "@/components/ui/button";
@@ -38,12 +38,18 @@ function LoginPage() {
       }
 
       saveSession(response.data.access_token, response.data.user);
-      navigate({
-        to:
-          response.data.user.account_type === "mype"
-            ? "/dashboard/client"
-            : "/freelancer-onboarding",
-      });
+
+      if (response.data.user.account_type === "freelancer") {
+        const profileResponse = await api.getProfile(response.data.access_token).catch(() => ({ data: null }));
+        const profile = profileResponse.data;
+
+        navigate({
+          to: profile?.headline || profile?.gemini_analysis ? "/dashboard/freelancer" : "/freelancer-onboarding",
+        });
+        return;
+      }
+
+      navigate({ to: "/dashboard/client" });
     } catch (err: unknown) {
       const payload = err as { message?: string; errors?: Record<string, string[]> };
       setError(payload?.errors?.email?.[0] ?? payload?.message ?? "No se pudo iniciar sesión.");
@@ -117,3 +123,5 @@ function LoginPage() {
     </AuthLayout>
   );
 }
+
+

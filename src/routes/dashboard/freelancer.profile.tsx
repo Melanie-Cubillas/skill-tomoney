@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+﻿import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import { Briefcase, Camera, CheckCircle2, ChevronDown, Globe2, ImageUp, LinkIcon, MapPin, Save, Send, ShieldCheck, Sparkles, Star, UserRound, X } from "lucide-react";
@@ -13,7 +13,7 @@ import { getSessionUser, getToken } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/dashboard/freelancer/profile")({
-  head: () => ({ meta: [{ title: "Perfil Freelancer · SkilltoMoney" }] }),
+  head: () => ({ meta: [{ title: "Dashboard Freelancer · SkilltoMoney" }] }),
   component: FreelancerProfilePage,
 });
 
@@ -76,7 +76,7 @@ function FreelancerProfilePage() {
           );
         }
       } catch {
-        setError("No se pudo cargar la informacion del perfil.");
+        setError("No se pudo cargar la información del perfil.");
       }
     };
 
@@ -127,7 +127,7 @@ function FreelancerProfilePage() {
   const completionHint = profileCompletion >= 100
     ? "Perfil completo. Tus datos estan actualizados."
     : profileCompletion >= 70
-      ? "Muy buen progreso. Solo falta un poco mas."
+      ? "Muy buen progreso. Solo falta un poco más."
       : "Completa tus campos para mejorar tu visibilidad.";
 
   const requireToken = () => {
@@ -213,7 +213,7 @@ function FreelancerProfilePage() {
     <DashboardShell role="freelancer" profilePhotoUrl={visiblePhotoUrl}>
       <div className="space-y-5">
         <div>
-          <h1 className="font-display text-4xl font-extrabold tracking-normal">Perfil freelancer</h1>
+          <h1 className="font-display text-4xl font-extrabold tracking-normal">Dashboard freelancer</h1>
           <p className="mt-1 text-muted-foreground">Gestiona tu perfil profesional, habilidades y presencia digital.</p>
         </div>
 
@@ -235,8 +235,8 @@ function FreelancerProfilePage() {
               <div>
                 <h2 className="font-display text-2xl font-bold tracking-normal">{profileName}</h2>
                 <p className="text-muted-foreground">{profile.experience_area || "Area sin definir"}</p>
-                <p className="mt-2 flex items-center gap-1 text-sm text-muted-foreground"><MapPin className="h-4 w-4" /> {profile.location || "Ubicacion sin definir"}</p>
-                <span className="mt-3 inline-flex rounded-lg bg-success/15 px-3 py-1 text-xs font-bold text-success">Visible al publico</span>
+                <p className="mt-2 flex items-center gap-1 text-sm text-muted-foreground"><MapPin className="h-4 w-4" /> {profile.location || "Ubicación sin definir"}</p>
+                <span className="mt-3 inline-flex rounded-lg bg-success/15 px-3 py-1 text-xs font-bold text-success">Visible al público</span>
               </div>
             </div>
 
@@ -283,12 +283,12 @@ function FreelancerProfilePage() {
               <Field label="Website">
                 <Input value={profile.website ?? ""} onChange={(event) => setProfile((prev) => ({ ...prev, website: event.target.value }))} placeholder="alejandro.dev" className="h-11 rounded-xl" />
               </Field>
-              <Field label="Ubicacion">
+              <Field label="Ubicación">
                 <Input value={profile.location ?? ""} onChange={(event) => setProfile((prev) => ({ ...prev, location: event.target.value }))} placeholder="Lima, Peru" className="h-11 rounded-xl" />
               </Field>
             </div>
             <div className="mt-5 flex items-center justify-between">
-              <p className="flex items-center gap-2 text-xs text-muted-foreground"><ShieldCheck className="h-4 w-4" /> Esta informacion sera visible en tu perfil publico.</p>
+              <p className="flex items-center gap-2 text-xs text-muted-foreground"><ShieldCheck className="h-4 w-4" /> Esta información sera visible en tu perfil público.</p>
             </div>
           </Card>
 
@@ -322,7 +322,7 @@ function FreelancerProfilePage() {
             <div className="mt-5 grid gap-5 md:grid-cols-[1fr_180px]">
               <label className="grid min-h-40 cursor-pointer place-items-center rounded-2xl border border-dashed border-muted-foreground/40 bg-background/50 text-center text-sm text-muted-foreground">
                 <input type="file" accept="image/*" className="hidden" onChange={(event) => selectPhoto(event.target.files?.[0] ?? null)} />
-                <span><ImageUp className="mx-auto mb-2 h-8 w-8 text-foreground" />Arrastra tu foto aqui<br />o haz clic para seleccionar</span>
+                <span><ImageUp className="mx-auto mb-2 h-8 w-8 text-foreground" />Arrastra tu foto aquí<br />o haz clic para seleccionar</span>
               </label>
               <div className="grid place-items-center rounded-2xl bg-muted">
                 {visiblePhotoUrl ? <img src={visiblePhotoUrl} alt="Vista previa" className="h-32 w-32 shrink-0 aspect-square rounded-full object-cover" /> : <UserRound className="h-16 w-16 text-muted-foreground" />}
@@ -344,13 +344,13 @@ function FreelancerProfilePage() {
             <div className="mt-5 space-y-3">
               <Suggestion icon={Briefcase} title="Agrega 2 proyectos a tu portafolio" />
               <Suggestion icon={Sparkles} title="Completa tus redes profesionales" />
-              <Suggestion icon={Send} title="Publica tu perfil para recibir mas solicitudes" />
+              <Suggestion icon={Send} title="Publica tu perfil para recibir más solicitudes" />
             </div>
           </Card>
         </div>
 
         <Card className="flex items-center justify-between rounded-2xl p-5 shadow-soft">
-          <p className="text-sm text-muted-foreground">Guarda todos los cambios de tu perfil en una sola accion.</p>
+          <p className="text-sm text-muted-foreground">Guarda todos los cambios de tu perfil en una sola acción.</p>
           <Button onClick={saveAll} disabled={saving} className="rounded-xl bg-gradient-primary shadow-soft">
             <Save className="h-4 w-4" />
             {saving ? "Guardando..." : "Guardar cambios"}
@@ -508,3 +508,5 @@ function SkillMultiSelect({
     </div>
   );
 }
+
+

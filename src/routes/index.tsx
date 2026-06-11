@@ -1,4 +1,5 @@
-﻿import { createFileRoute, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import {
   ArrowRight,
   BadgeCheck,
@@ -29,6 +30,7 @@ import {
   WandSparkles,
 } from "lucide-react";
 import { Shell } from "@/components/layout/Shell";
+import { getSessionUser, getToken } from "@/lib/auth";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -43,7 +45,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Plataforma para freelancers, MYPES y talento digital con pagos seguros e IA incluida.",
+          "Plataforma para freelancers, MYPES y talento digital con pagos seguros e Skill Bot incluido.",
       },
     ],
   }),
@@ -91,7 +93,7 @@ const categories = [
   },
   {
     icon: Bot,
-    title: "IA & Automatización",
+    title: "Skill Bot & Automatización",
     count: "53",
     tone: "from-[#ccecff] to-[#eaf7ff]",
     iconTone: "bg-[#5b8cff]",
@@ -131,7 +133,7 @@ const freelancers = [
 
 const testimonials = [
   {
-    text: "En 2 semanas conseguí 4 clientes. La IA me ayudó a fijar mejores precios y mi portafolio se ve mucho más pro.",
+    text: "En 2 semanas conseguí 4 clientes. La Skill Bot me ayudó a fijar mejores precios y mi portafolio se ve mucho más pro.",
     name: "Camila R.",
     role: "Diseñadora Gráfica",
     city: "Lima, Perú",
@@ -151,6 +153,20 @@ const testimonials = [
 ];
 
 function Landing() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const user = getSessionUser();
+    const token = getToken();
+
+    if (!user || !token) return;
+
+    void navigate({
+      to: user.account_type === "mype" ? "/dashboard/client" : "/dashboard/freelancer",
+      replace: true,
+    });
+  }, [navigate]);
+
   return (
     <Shell>
       <HeroSection />
@@ -213,7 +229,7 @@ function HeroSection() {
             <div className="mt-8 flex flex-wrap gap-3">
               <HeroPill icon={Gift} text="Recomendaciones personalizadas" />
               <HeroPill icon={ShieldCheck} text="Pagos protegidos" />
-              <HeroPill icon={Clock3} text="IA incluida" />
+              <HeroPill icon={Clock3} text="Skill Bot incluido" />
             </div>
           </div>
 
@@ -296,7 +312,7 @@ function HeroVisual() {
           <span className="grid h-9 w-9 place-items-center rounded-lg bg-accent text-[#061013]">
             <Bot className="h-5 w-5" />
           </span>
-          <span className="font-display text-lg font-extrabold">Asistente IA</span>
+          <span className="font-display text-lg font-extrabold">Skill Bot</span>
         </div>
         <p className="mt-4 text-sm font-semibold leading-relaxed text-[#38484d]">
           Te sugiero ajustar tus precios y mejorar tu visibilidad.
@@ -430,7 +446,7 @@ function HowItWorksSection() {
             number="02"
             icon={Rocket}
             title="Publica tu servicio"
-            text="Define qué ofreces, tu precio y tiempo de entrega. La IA te ayuda a optimizarlo."
+            text="Define qué ofreces, tu precio y tiempo de entrega. Skill Bot te ayuda a optimizarlo."
           />
           <StepCard
             number="03"
@@ -617,7 +633,7 @@ function AudienceSection() {
           {[
             "Publica servicios ilimitados",
             "Pagos protegidos con escrow",
-            "IA que te ayuda a vender más",
+            "Skill Bot te ayuda a vender más",
             "Comunidad y soporte 24/7",
           ].map((item) => (
             <li key={item} className="flex items-center gap-2">
@@ -830,3 +846,6 @@ function SectionEyebrow({
     </div>
   );
 }
+
+
+

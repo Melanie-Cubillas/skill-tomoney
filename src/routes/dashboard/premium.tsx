@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+﻿import { createFileRoute } from "@tanstack/react-router";
 import { CheckCircle2, Crown, Sparkles } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/badge";
@@ -45,7 +45,7 @@ function DashboardPremiumPage() {
           name: "Pro",
           price: "S/ 29",
           desc: "Para vender mejor tus servicios.",
-          features: ["Servicios ilimitados", "Mas visibilidad", "IA Assistant ampliada", "Mentorias y mejoras de perfil"],
+          features: ["Servicios ilimitados", "Mas visibilidad", "Skill Bot ampliado", "Mentorias y mejoras de perfil"],
           current: false,
         },
       ];
@@ -99,3 +99,4 @@ function DashboardPremiumPage() {
     </DashboardShell>
   );
 }
+

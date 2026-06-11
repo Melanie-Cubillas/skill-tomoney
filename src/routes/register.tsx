@@ -1,12 +1,11 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useMemo, useState } from "react";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Briefcase, Building2, CheckCircle2, Eye, EyeOff, Search, Loader2 } from "lucide-react";
+import { Briefcase, Building2, CheckCircle2, Eye, EyeOff, Search, Loader2, MailCheck } from "lucide-react";
 import { api, type DniLookupPayload, type RucLookupPayload } from "@/lib/api";
-import { saveSession } from "@/lib/auth";
 
 export const Route = createFileRoute("/register")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -40,7 +39,6 @@ function normalizePasswordTerm(value: string): string {
 }
 
 function Register() {
-  const navigate = useNavigate();
   const search = Route.useSearch();
   const [role, setRole] = useState<"freelancer" | "mype">(search.role ?? "freelancer");
   const [firstName, setFirstName] = useState("");
@@ -58,6 +56,7 @@ function Register() {
   const [rucLookedUp, setRucLookedUp] = useState(false);
   const [rucState, setRucState] = useState<string | null>(null);
   const [rucCondition, setRucCondition] = useState<string | null>(null);
+  const [verificationEmail, setVerificationEmail] = useState<string | null>(null);
 
   const aside = useMemo(
     () =>
@@ -69,7 +68,7 @@ function Register() {
               "Crea tu perfil, recibe recomendaciones personalizadas y conecta con MYPES que necesitan talento digital.",
             stats: [
               ["+3.2k", "oportunidades"],
-              ["IA", "recomendaciones"],
+              ["Skill Bot", "recomendaciones"],
               ["0%", "comision inicial"],
             ] as Array<[string, string]>,
           }
@@ -189,11 +188,10 @@ function Register() {
             });
 
       if (!response.data) {
-        throw new Error("No se recibió sesión.");
+        throw new Error("No se recibió respuesta del registro.");
       }
 
-      saveSession(response.data.access_token, response.data.user);
-      navigate({ to: role === "freelancer" ? "/freelancer-onboarding" : "/mype-onboarding" });
+      setVerificationEmail(email);
     } catch (err: unknown) {
       const payload = err as { message?: string; errors?: Record<string, string[]> };
       const firstError = Object.values(payload?.errors ?? {})[0]?.[0];
@@ -225,6 +223,25 @@ function Register() {
         </>
       }
     >
+      {verificationEmail ? (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 px-4">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 text-center shadow-elegant">
+            <MailCheck className="mx-auto h-12 w-12 text-[#00C9BA]" />
+            <h2 className="mt-4 font-display text-2xl font-bold">Revisa tu correo</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Te enviamos un enlace de verificación a <strong>{verificationEmail}</strong>. Debes
+              abrir ese enlace para continuar con tu formulario.
+            </p>
+            <p className="mt-4 rounded-xl border border-[#00C9BA]/30 bg-[#00C9BA]/10 px-4 py-3 text-xs text-foreground">
+              Si no verificas tu correo, el proceso de registro no continuará.
+            </p>
+            <Button asChild className="mt-5 w-full bg-gradient-primary">
+              <Link to="/login">Entendido</Link>
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
       <div className="mb-6 rounded-2xl border border-border bg-muted/30 p-2 shadow-soft">
         <div className="grid grid-cols-2 gap-2">
           {(
@@ -525,3 +542,8 @@ function Register() {
     </AuthLayout>
   );
 }
+
+
+
+
+

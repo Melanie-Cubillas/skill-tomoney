@@ -32,6 +32,7 @@ function MessagesPage() {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
   const [filter, setFilter] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
   const selectedConv = conversations.find((c) => c.id === selectedId);
@@ -39,11 +40,14 @@ function MessagesPage() {
   const loadConversations = useCallback(async () => {
     if (!token) return;
     setLoadingList(true);
+    setError(null);
     try {
       const res = await api.getConversations(token);
       setConversations(res.data?.conversations ?? []);
-    } catch {
+    } catch (err) {
       setConversations([]);
+      const payload = err as { message?: string };
+      setError(payload?.message ?? "No se pudieron cargar tus conversaciones.");
     } finally {
       setLoadingList(false);
     }
@@ -53,11 +57,14 @@ function MessagesPage() {
     async (convId: number) => {
       if (!token) return;
       setLoadingMessages(true);
+      setError(null);
       try {
         const res = await api.getConversation(token, convId);
         setMessages(res.data?.messages ?? []);
-      } catch {
+      } catch (err) {
         setMessages([]);
+        const payload = err as { message?: string };
+        setError(payload?.message ?? "No se pudo abrir esta conversacion.");
       } finally {
         setLoadingMessages(false);
       }
@@ -117,6 +124,7 @@ function MessagesPage() {
     if (!msg || !token || !selectedId || sending) return;
     setSending(true);
     setText("");
+    setError(null);
 
     const optimistic: MessageItem = {
       id: Date.now(),
@@ -133,8 +141,11 @@ function MessagesPage() {
     try {
       await api.sendMessage(token, selectedId, msg);
       void loadConversations();
-    } catch {
+    } catch (err) {
       setMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
+      setText(msg);
+      const payload = err as { message?: string };
+      setError(payload?.message ?? "No se pudo enviar el mensaje.");
     } finally {
       setSending(false);
     }
@@ -220,6 +231,12 @@ function MessagesPage() {
         </div>
 
         <div className="flex flex-col">
+          {error ? (
+            <div className="border-b border-destructive/20 bg-destructive/10 px-5 py-2 text-sm text-destructive">
+              {error}
+            </div>
+          ) : null}
+
           {!selectedConv ? (
             <div className="grid flex-1 place-items-center text-sm text-muted-foreground">
               <div className="text-center">

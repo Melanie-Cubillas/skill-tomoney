@@ -126,6 +126,7 @@ export type AuthUser = {
   company_name: string | null;
   account_type: "freelancer" | "mype";
   email: string;
+  email_verified_at?: string | null;
 };
 
 export type AuthPayload = {
@@ -297,6 +298,11 @@ export type MypeSummaryPayload = {
 
 export type ClientProjectDetailPayload = ClientProjectPayload & {
   mype: MypeSummaryPayload;
+};
+
+export type PublicClientProjectsPayload = {
+  projects: ClientProjectDetailPayload[];
+  total: number;
 };
 
 export type MypeDetailPayload = MypeSummaryPayload & {
@@ -514,6 +520,11 @@ export const api = {
   lookupRuc: (ruc: string) => apiRequest<RucLookupPayload>(`/peru/ruc/${ruc}`),
   login: (body: { email: string; password: string }) =>
     apiRequest<AuthPayload>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  verifyEmail: (body: { email: string; token: string }) =>
+    apiRequest<AuthPayload>("/auth/verify-email", {
       method: "POST",
       body: JSON.stringify(body),
     }),
@@ -826,6 +837,18 @@ export const api = {
       token,
       skipCache: true,
     }),
+
+  getPublicClientProjects: (token: string, params?: Record<string, string | number>) => {
+    const query = params
+      ? "?" + new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)])).toString()
+      : "";
+
+    return apiRequest<PublicClientProjectsPayload>(`/client-projects${query}`, {
+      token,
+      cacheKey: `client-projects${query}:${token.slice(-12)}`,
+      cacheTtlMs: 60 * 1000,
+    });
+  },
 
   getClientProjects: (token: string) =>
     apiRequest<ClientProjectsPayload>("/client/projects", {

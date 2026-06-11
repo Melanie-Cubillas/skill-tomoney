@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+﻿import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Award,
@@ -30,8 +30,8 @@ import { getSessionUser, getToken } from "@/lib/auth";
 export const Route = createFileRoute("/freelancer-onboarding")({
   head: () => ({
     meta: [
-      { title: "Crear Perfil Freelancer · SkilltoMoney" },
-      { name: "description", content: "Completa tu perfil freelancer inicial." },
+      { title: "Crear Dashboard Freelancer · SkilltoMoney" },
+      { name: "description", content: "Completa tu dashboard freelancer inicial." },
     ],
   }),
   component: FreelancerOnboarding,
@@ -40,7 +40,7 @@ export const Route = createFileRoute("/freelancer-onboarding")({
 const SKILL_OPTIONS = [
   "Edición de videos",
   "Diseño de branding",
-  "Automatización con IA",
+  "Automatización con Skill Bot",
   "Desarrollo de Landing Page",
   "Diseño UX/UI",
   "Community Management",
@@ -138,7 +138,6 @@ function FreelancerOnboarding() {
   const [analysis, setAnalysis] = useState<GeminiAnalysisPayload | null>(null);
   const [geminiError, setGeminiError] = useState<string | null>(null);
   const hasRun = useRef(false);
-  const [availability, setAvailability] = useState<"si" | "no" | null>(null);
   const [availabilityTime, setAvailabilityTime] = useState("");
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [finalizeError, setFinalizeError] = useState<string | null>(null);
@@ -146,7 +145,8 @@ function FreelancerOnboarding() {
   const processing = stage === "processing";
   const error = geminiError;
 
-  const canContinue = skills.length > 0 && tools.length > 0 && description.trim().length >= 10;
+  const descriptionReady = description.trim().length >= 80;
+  const canContinue = skills.length > 0 && tools.length > 0 && descriptionReady;
   const selectedSkill = skills[0] ?? "tus habilidades principales";
   const selectedTool = tools[0] ?? "tus herramientas";
   const selectedArea = areas[0] ?? skills[0] ?? "tu carrera";
@@ -244,12 +244,12 @@ function FreelancerOnboarding() {
   };
 
   const finalizeProfile = async () => {
-    if (!availability || !availabilityTime.trim() || isFinalizing) return;
+    if (!availabilityTime.trim() || isFinalizing) return;
 
     const token = getToken();
 
     if (!token) {
-      setFinalizeError("Sesion no encontrada. Inicia sesion otra vez.");
+      setFinalizeError("Sesión no encontrada. Inicia sesión otra vez.");
       return;
     }
 
@@ -277,7 +277,7 @@ function FreelancerOnboarding() {
         certificates,
         has_project_experience: projectExperience ?? "no",
         projects: payloadProjects,
-        availability,
+        availability: "si",
         availability_time: availabilityTime,
         freelance_goals:
           projectExperience === "si"
@@ -290,7 +290,7 @@ function FreelancerOnboarding() {
       navigate({ to: "/dashboard/freelancer" });
     } catch (err) {
       const payload = err as { message?: string };
-      setFinalizeError(payload?.message ?? "No se pudo guardar el analisis final.");
+      setFinalizeError(payload?.message ?? "No se pudo guardar el análisis final.");
     } finally {
       setIsFinalizing(false);
     }
@@ -302,7 +302,7 @@ function FreelancerOnboarding() {
         <main className="grid min-h-[calc(100vh-57px)] place-items-center px-6">
           <div className="text-center">
             <p className="max-w-xl font-display text-xl font-bold leading-tight">
-              {geminiError ? "Error al procesar" : "Preparando tu perfil freelancer..."}
+              {geminiError ? "Error al procesar" : "Preparando tu dashboard freelancer..."}
               <br />
               {geminiError
                 ? "Continuando de todos modos."
@@ -325,7 +325,7 @@ function FreelancerOnboarding() {
         <AiFlowShell progress={35}>
           <StatusPill>Habilidades procesadas exitosamente</StatusPill>
           <AiMessage>
-            <strong>Gemini IA:</strong>{" "}
+            <strong>Skill Bot:</strong>{" "}
             {analysis
               ? `Ya analicé tu perfil. ${analysis.bio} Basado en esto, te sugiero una tarifa de ${analysis.suggested_rate}.`
               : `Genial. Ya analicé tus habilidades en ${selectedSkill} y herramientas como ${selectedTool}.`}{" "}
@@ -371,7 +371,7 @@ function FreelancerOnboarding() {
       <FreelancerFrame avatarLabel={avatarLabel}>
         <AiFlowShell progress={45}>
           <AiMessage>
-            <strong>SkilltoMoney AI:</strong> Genial, vamos a estructurar tu portafolio. Detalla tus
+            <strong>Skill Bot:</strong> Genial, vamos a estructurar tu portafolio. Detalla tus
             3 proyectos más destacados. Ingresa un nombre, una descripción breve y el tiempo total
             que dedicaste a cada uno.
           </AiMessage>
@@ -411,7 +411,7 @@ function FreelancerOnboarding() {
       <FreelancerFrame avatarLabel={avatarLabel}>
         <AiFlowShell progress={45}>
           <AiMessage>
-            <strong>Gemini IA:</strong> No te preocupes. Para ayudarte a construir tu portafolio y
+            <strong>Skill Bot:</strong> No te preocupes. Para ayudarte a construir tu portafolio y
             calcular tu tarifa, te he asignado 3 proyectos prácticos relacionados con{" "}
             <strong>{selectedArea}</strong>. Complétalos para activar tu perfil.
           </AiMessage>
@@ -484,53 +484,22 @@ function FreelancerOnboarding() {
       <FreelancerFrame avatarLabel={avatarLabel}>
         <AiFlowShell progress={62}>
           <AiMessage>
-            <strong>SkilltoMoney AI:</strong> Perfecto. Ya tengo la base de tu portafolio. Para
-            mostrarte mejor ante clientes, necesito saber tu disponibilidad actual.
+            <strong>Skill Bot:</strong> Perfecto. Ya tengo la base de tu portafolio. Para
+            mostrarte mejor ante clientes, necesito conocer tu tiempo disponible.
           </AiMessage>
 
           <section className="mx-auto mt-10 max-w-4xl text-center">
             <h1 className="font-display text-3xl font-bold leading-tight">
-              ¿Estás disponible para recibir nuevos proyectos?
+              Ingresa tu tiempo disponible para recibir nuevos proyectos
             </h1>
             <p className="mt-3 text-sm text-muted-foreground">
-              Esta respuesta ayudará a priorizar tu perfil cuando una MYPE busque talento.
+              Coloca tu disponibilidad estimada, por ejemplo: 10 horas por semana, fines de semana
+              o 2 horas al día.
             </p>
-
-            <div className="mt-10 grid gap-6 md:grid-cols-2">
-              <button
-                type="button"
-                onClick={() => setAvailability("si")}
-                className={cn(
-                  "min-h-40 rounded-2xl border-2 bg-card p-8 text-center shadow-soft transition hover:-translate-y-0.5 hover:shadow-elegant",
-                  availability === "si" ? "border-[#00C9BA]" : "border-border",
-                )}
-              >
-                <CircleCheck className="mx-auto h-12 w-12 text-[#00C9BA]" />
-                <p className="mt-5 text-xl font-bold">Sí, estoy disponible</p>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Puedo recibir propuestas y responder a clientes.
-                </p>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setAvailability("no")}
-                className={cn(
-                  "min-h-40 rounded-2xl border-2 bg-card p-8 text-center shadow-soft transition hover:-translate-y-0.5 hover:shadow-elegant",
-                  availability === "no" ? "border-[#D39B37]" : "border-border",
-                )}
-              >
-                <Lock className="mx-auto h-12 w-12 text-[#D39B37]" />
-                <p className="mt-5 text-xl font-bold">No por ahora</p>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Mantendré mi perfil en preparación hasta estar listo.
-                </p>
-              </button>
-            </div>
 
             <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-border bg-card p-5 text-left shadow-soft">
               <label htmlFor="availability-time" className="text-sm font-bold">
-                ¿Cuánto tiempo puedes invertir en proyectos?
+                Tiempo disponible
               </label>
               <p className="mt-1 text-xs text-muted-foreground">
                 Coloca tu disponibilidad estimada, por ejemplo: 10 horas por semana, fines de semana
@@ -550,10 +519,10 @@ function FreelancerOnboarding() {
             <Button
               type="button"
               className="bg-gradient-primary px-6 shadow-soft"
-              disabled={!availability || !availabilityTime.trim() || isFinalizing}
+              disabled={!availabilityTime.trim() || isFinalizing}
               onClick={finalizeProfile}
             >
-              {isFinalizing ? "Guardando analisis..." : "Finalizar perfil"}
+              {isFinalizing ? "Guardando análisis..." : "Finalizar perfil"}
             </Button>
           </div>
           {finalizeError ? (
@@ -570,7 +539,7 @@ function FreelancerOnboarding() {
     <FreelancerFrame avatarLabel={avatarLabel}>
       <main className="mx-auto w-full max-w-[1240px] px-5 py-6 lg:px-8">
         <div>
-          <h1 className="font-display text-3xl font-bold">Crear Perfil Freelancer</h1>
+          <h1 className="font-display text-3xl font-bold">Crear Dashboard Freelancer</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Gestiona tu perfil real conectado al backend.
           </p>
@@ -594,12 +563,25 @@ function FreelancerOnboarding() {
                 value={description}
                 onChange={(event) => setDescription(event.target.value.slice(0, 450))}
                 placeholder="Cuenta brevemente una descripción sobre ti"
-                className="min-h-[168px] resize-none rounded-lg bg-background/40 pr-14"
+                className={cn(
+                  "min-h-[168px] resize-none rounded-lg bg-background/40 pr-14",
+                  description.length > 0 && (descriptionReady ? "border-[#00C9BA]" : "border-red-400"),
+                )}
                 maxLength={450}
               />
-              <span className="absolute bottom-3 right-3 text-[11px] text-muted-foreground">
+              <span
+                className={cn(
+                  "absolute bottom-3 right-3 text-[11px] font-semibold",
+                  descriptionReady ? "text-[#00A884]" : "text-red-500",
+                )}
+              >
                 {description.length}/450
               </span>
+              <p className={cn("mt-2 text-xs", descriptionReady ? "text-[#00A884]" : "text-red-500")}>
+                {descriptionReady
+                  ? "Descripción suficiente para que Skill Bot analice mejor tu perfil."
+                  : "Escribe al menos 80 caracteres para continuar."}
+              </p>
             </div>
           </ProfilePanel>
 
@@ -682,11 +664,11 @@ function FreelancerOnboarding() {
               disabled={!canContinue}
               onClick={continueWithAi}
             >
-              Continuar con la IA
+              Continuar con Skill Bot
             </Button>
             {!canContinue ? (
               <p className="mt-2 text-xs text-muted-foreground">
-                Agrega al menos una skill, una herramienta y una descripcion de 10 caracteres.
+                Agrega al menos una skill, una herramienta y una descripción de 80 caracteres.
               </p>
             ) : null}
           </div>
@@ -1073,3 +1055,9 @@ function ChipSelect({
     </div>
   );
 }
+
+
+
+
+
+
