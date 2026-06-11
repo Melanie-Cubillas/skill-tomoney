@@ -300,6 +300,36 @@ export type RecommendationPayload = {
   recommendations: RecommendedFreelancerItem[];
 };
 
+export type MarketTrendItem = {
+  label: string;
+  demand_count: number;
+  average_budget: number | null;
+  min_budget: number | null;
+  max_budget: number | null;
+  currency: string;
+  sample_projects: {
+    id: number;
+    title: string;
+    category: string | null;
+  }[];
+};
+
+export type MarketTrendsPayload = {
+  trends: MarketTrendItem[];
+  has_data: boolean;
+  keywords: string[];
+};
+
+export type PriceSuggestionPayload = {
+  has_data: boolean;
+  sample_count: number;
+  recommended_min: number | null;
+  recommended_max: number | null;
+  average_price: number | null;
+  currency: string;
+  source?: string;
+};
+
 type RequestOptions = RequestInit & {
   token?: string;
   cacheKey?: string;
@@ -631,6 +661,24 @@ export const api = {
       cacheTtlMs: 60 * 1000,
     });
   },
+  getMarketTrends: (token: string) =>
+    apiRequest<MarketTrendsPayload>("/market/trends", {
+      token,
+      cacheKey: `market:trends:${token.slice(-12)}`,
+      cacheTtlMs: 60 * 1000,
+    }),
+
+  getPriceSuggestion: (token: string, params?: Record<string, string | number>) => {
+    const query = params
+      ? "?" + new URLSearchParams(Object.entries(params).map(([key, value]) => [key, String(value)])).toString()
+      : "";
+
+    return apiRequest<PriceSuggestionPayload>(`/market/price-suggestion${query}`, {
+      token,
+      cacheKey: `market:price:${query}:${token.slice(-12)}`,
+      cacheTtlMs: 60 * 1000,
+    });
+  },
   analyzeFreelancer: (
     token: string,
     data: {
@@ -715,6 +763,7 @@ export const api = {
       body: JSON.stringify(body),
     }).then((payload) => {
       clearApiCache("client:projects:");
+      clearApiCache("market:");
       return payload;
     }),
 
@@ -725,6 +774,7 @@ export const api = {
       body: JSON.stringify(body),
     }).then((payload) => {
       clearApiCache("client:projects:");
+      clearApiCache("market:");
       return payload;
     }),
 
@@ -734,6 +784,7 @@ export const api = {
       token,
     }).then((payload) => {
       clearApiCache("client:projects:");
+      clearApiCache("market:");
       return payload;
     }),
 
