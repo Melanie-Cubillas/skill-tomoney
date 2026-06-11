@@ -146,7 +146,7 @@ function FreelancerOnboarding() {
   const processing = stage === "processing";
   const error = geminiError;
 
-  const canContinue = skills.length > 0 && tools.length > 0 && description.trim().length >= 20;
+  const canContinue = skills.length > 0 && tools.length > 0 && description.trim().length >= 10;
   const selectedSkill = skills[0] ?? "tus habilidades principales";
   const selectedTool = tools[0] ?? "tus herramientas";
   const selectedArea = areas[0] ?? skills[0] ?? "tu carrera";
@@ -187,7 +187,7 @@ function FreelancerOnboarding() {
       .join("");
   }, []);
   const suggestedProjects = useMemo(
-    () => analysis?.suggested_projects ?? buildSuggestedProjects(selectedSkill, selectedArea),
+    () => normalizeSuggestedProjects(analysis?.suggested_projects, selectedSkill, selectedArea),
     [analysis, selectedArea, selectedSkill],
   );
 
@@ -217,27 +217,12 @@ function FreelancerOnboarding() {
       return;
     }
 
-    api
-      .analyzeFreelancer(token, {
-        skills,
-        tools,
-        description,
-        linkedin,
-        instagram,
-        website,
-        areas,
-        certificates,
-      })
-      .then((res) => {
-        if (res.data) setAnalysis(res.data);
-        setStage("project-choice");
-      })
-      .catch((err) => {
-        const payload = err as { message?: string };
-        setGeminiError(payload?.message ?? "Error al analizar el perfil.");
-        setStage("project-choice");
-      });
-  }, [stage, token, skills, tools, description, linkedin, instagram, website, areas, certificates]);
+    const timer = window.setTimeout(() => {
+      setStage("project-choice");
+    }, 900);
+
+    return () => window.clearTimeout(timer);
+  }, [stage, token]);
 
   const continueWithAi = () => {
     if (!canContinue) return;
@@ -317,11 +302,11 @@ function FreelancerOnboarding() {
         <main className="grid min-h-[calc(100vh-57px)] place-items-center px-6">
           <div className="text-center">
             <p className="max-w-xl font-display text-xl font-bold leading-tight">
-              {geminiError ? "Error al procesar" : "Procesando tus datos con Gemini IA..."}
+              {geminiError ? "Error al procesar" : "Preparando tu perfil freelancer..."}
               <br />
               {geminiError
                 ? "Continuando de todos modos."
-                : "Analizando habilidades y preparando recomendaciones"}
+                : "Ordenando tus habilidades antes de continuar"}
             </p>
             {geminiError ? (
               <p className="mx-auto mt-4 max-w-md text-sm text-red-500">{geminiError}</p>
@@ -690,15 +675,21 @@ function FreelancerOnboarding() {
         </div>
 
         <div className="mt-8 flex justify-end">
-          {error ? <p className="mr-4 self-center text-sm text-red-600">{error}</p> : null}
-          <Button
-            type="button"
-            className="bg-gradient-primary px-6 shadow-soft"
-            disabled={!canContinue || processing}
-            onClick={continueWithAi}
-          >
-            Continuar con la IA
-          </Button>
+          <div className="text-right">
+            <Button
+              type="button"
+              className="bg-gradient-primary px-6 shadow-soft"
+              disabled={!canContinue}
+              onClick={continueWithAi}
+            >
+              Continuar con la IA
+            </Button>
+            {!canContinue ? (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Agrega al menos una skill, una herramienta y una descripcion de 10 caracteres.
+              </p>
+            ) : null}
+          </div>
         </div>
       </main>
     </FreelancerFrame>
@@ -848,6 +839,27 @@ function RadioChoice({
       {label}
     </button>
   );
+}
+
+function normalizeSuggestedProjects(
+  projects: GeminiAnalysisPayload["suggested_projects"] | undefined,
+  skill: string,
+  area: string,
+) {
+  const fallback = buildSuggestedProjects(skill, area);
+  const merged = [...(projects ?? []), ...fallback];
+  const seen = new Set<string>();
+
+  return merged
+    .filter((project) => {
+      const title = project.title.trim();
+
+      if (!title || seen.has(title)) return false;
+
+      seen.add(title);
+      return true;
+    })
+    .slice(0, 3);
 }
 
 function buildSuggestedProjects(skill: string, area: string) {
@@ -1004,13 +1016,13 @@ function ChipSelect({
         </button>
 
         {open && !isLocked && (
-          <div className="absolute z-20 mt-1 max-h-40 w-full overflow-y-auto rounded-lg border border-[#00C9BA]/45 bg-white py-1.5 text-sm shadow-elegant">
+          <div className="absolute z-20 mt-1 max-h-44 w-full overflow-y-auto rounded-lg border border-[#00C9BA]/45 bg-[#f8fffe] py-1.5 text-sm text-[#061013] shadow-elegant">
             {(availableOptions.length ? availableOptions : ["Sin resultados"]).map((option) => (
               <button
                 key={option}
                 type="button"
                 className={cn(
-                  "flex w-full items-center justify-between px-3 py-2 text-left font-semibold text-foreground transition hover:bg-[#00C9BA]/14 hover:text-[#061013]",
+                  "flex w-full items-center justify-between px-3 py-2 text-left font-semibold text-[#061013] transition hover:bg-[#d9f7f3] hover:text-[#061013] focus:bg-[#d9f7f3] focus:outline-none",
                   option === "Sin resultados" &&
                     "cursor-default text-muted-foreground hover:bg-transparent hover:text-muted-foreground",
                 )}

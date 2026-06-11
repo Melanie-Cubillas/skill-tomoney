@@ -154,6 +154,9 @@ export type ProfilePayload = {
   business_name?: string | null;
   industry?: string | null;
   experience_area?: string | null;
+  headline?: string | null;
+  category?: string | null;
+  suggested_rate?: string | null;
   bio: string | null;
   description: string | null;
   location: string | null;
@@ -168,6 +171,9 @@ export type ProfilePayload = {
   social_links: Record<string, string | null> | null;
   profile_photo?: string | null;
   photo_url: string | null;
+  gemini_analysis?: GeminiAnalysisPayload | null;
+  services_count?: number | null;
+  portfolio_projects_count?: number | null;
 };
 
 export type ProfileSkillItemPayload = {
@@ -607,6 +613,8 @@ export const api = {
         description?: string;
         time?: string;
         estimated_time?: string;
+        tools?: string[];
+        category?: string;
       }[];
       availability?: "si" | "no";
       availability_time?: string;
@@ -685,6 +693,25 @@ export const api = {
 };
 
 export type GeminiAnalysisPayload = {
+  titulo_profesional?: string | null;
+  descripcion_profesional?: string | null;
+  propuesta_valor?: string | null;
+  skills_destacadas?: string[];
+  herramientas_destacadas?: string[];
+  proyectos_optimizados?: {
+    nombre: string | null;
+    descripcion_mejorada: string | null;
+    categoria: string | null;
+    herramientas: string[];
+  }[];
+  servicios_recomendados?: {
+    nombre: string | null;
+    descripcion: string | null;
+    precio_sugerido: string | null;
+    tiempo_entrega: string | null;
+    categoria: string | null;
+  }[];
+  recomendaciones_mejora?: string[];
   headline: string;
   category: string;
   suggested_rate: string;
