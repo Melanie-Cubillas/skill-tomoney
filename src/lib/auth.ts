@@ -6,6 +6,7 @@ export type SessionUser = {
   name: string;
   account_type: "freelancer" | "mype";
   email: string;
+  email_verified_at?: string | null;
 };
 
 export function saveSession(token: string, user: SessionUser): void {

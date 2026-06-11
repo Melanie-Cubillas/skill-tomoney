@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { Shell } from "@/components/layout/Shell";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/premium")({
         <div className="grid gap-6 lg:grid-cols-3">
           {[
             { name: "Free", price: "S/ 0", desc: "Perfecto para empezar", cta: "Empezar gratis", features: ["Perfil + portafolio","Hasta 3 servicios","Pagos protegidos","Soporte por correo"], highlight: false },
-            { name: "Pro", price: "S/ 29", desc: "Para quienes van en serio", cta: "Probar 14 días gratis", features: ["Todo lo del plan Free","Servicios ilimitados","Badge Pro + más visibilidad","IA Assistant ilimitada","2 mentorías 1:1 al mes"], highlight: true },
+            { name: "Pro", price: "S/ 29", desc: "Para quienes van en serio", cta: "Probar 14 días gratis", features: ["Todo lo del plan Free","Servicios ilimitados","Badge Pro + más visibilidad","Skill Bot ilimitado","2 mentorías 1:1 al mes"], highlight: true },
             { name: "Mentor", price: "S/ 79", desc: "Para top freelancers", cta: "Postular como Mentor", features: ["Todo lo de Pro","Acceso a clientes premium","Comisiones reducidas","Ingresos por mentorías","Sesiones grupales"], highlight: false },
           ].map(p=>(
             <Card key={p.name} className={`relative overflow-hidden p-8 ${p.highlight ? "border-primary/40 shadow-glow" : "shadow-soft"}`}>
@@ -77,3 +77,5 @@ export const Route = createFileRoute("/premium")({
     </Shell>
   ),
 });
+
+

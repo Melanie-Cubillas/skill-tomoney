@@ -1,4 +1,4 @@
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+﻿import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { Heart, Loader2, MapPin, MessageSquare, Search, SlidersHorizontal, Star, X } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
@@ -20,7 +20,7 @@ const CATEGORIES = [
   "Marketing",
   "Desarrollo Web",
   "UX/UI",
-  "IA & Automatizacion",
+  "Skill Bot & Automatización",
 ];
 
 function ClientSearchPage() {
@@ -403,3 +403,5 @@ function EmptyState({ title, detail }: { title: string; detail: string }) {
     </div>
   );
 }
+
+

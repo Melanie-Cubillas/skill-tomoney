@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+﻿import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Shell } from "@/components/layout/Shell";
 import { Card } from "@/components/ui/card";
@@ -25,7 +25,7 @@ const FALLBACK_CATEGORIES = [
   "Marketing",
   "Desarrollo Web",
   "UX/UI",
-  "IA & Automatizacion",
+  "Skill Bot & Automatización",
 ];
 
 function ServicesPage() {
@@ -319,3 +319,4 @@ function formatRating(rating: number | string | null): string {
   if (rating === null || rating === undefined) return "0.0";
   return Number(rating).toFixed(1);
 }
+

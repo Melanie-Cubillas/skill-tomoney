@@ -1,4 +1,4 @@
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+﻿import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Bell,
@@ -41,16 +41,17 @@ export function DashboardShell({
   const items = role === "freelancer"
     ? [
         { to: "/dashboard/freelancer", icon: LayoutDashboard, label: "Dashboard" },
-        { to: "/dashboard/freelancer/profile", icon: UserRound, label: "Perfil Freelancer" },
+        { to: "/dashboard/freelancer/profile", icon: UserRound, label: "Dashboard Freelancer" },
         { to: "/dashboard/freelancer/portfolio", icon: FolderKanban, label: "Portafolio" },
         { to: "/dashboard/freelancer/services", icon: Briefcase, label: "Servicios" },
+        { to: "/dashboard/freelancer/projects", icon: Search, label: "Buscar proyectos" },
         { to: "/dashboard/messages", icon: MessageSquare, label: "Mensajes" },
         { to: "/dashboard/payments", icon: Wallet, label: "Pagos" },
         { to: "/dashboard/premium", icon: Crown, label: "Premium" },
       ]
     : [
         { to: "/dashboard/client", icon: LayoutDashboard, label: "Dashboard" },
-        { to: "/dashboard/client/profile", icon: UserRound, label: "Perfil MYPE" },
+        { to: "/dashboard/client/profile", icon: UserRound, label: "Dashboard MYPE" },
         { to: "/dashboard/client/projects", icon: FileText, label: "Publicaciones" },
         { to: "/dashboard/client/search", icon: Search, label: "Buscar freelancers" },
         { to: "/dashboard/client/services", icon: Briefcase, label: "Explorar servicios" },
@@ -183,7 +184,7 @@ export function DashboardShell({
             <Crown className="h-3.5 w-3.5" /> {role === "freelancer" ? "Skill Pro" : "Skill Pro para MYPES"}
           </div>
           <p className="mt-1.5 text-xs text-sidebar-foreground/75">
-            {role === "freelancer" ? "Mentorias 1:1, IA ilimitada y mejor visibilidad." : "Publicaciones destacadas y acceso a talento verificado."}
+            {role === "freelancer" ? "Mentorias 1:1, Skill Bot ilimitado y mejor visibilidad." : "Publicaciones destacadas y acceso a talento verificado."}
           </p>
           <Link to="/dashboard/premium" className="mt-3 inline-flex w-full justify-center rounded-lg bg-gradient-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">
             Subir a Pro
@@ -301,3 +302,5 @@ function formatRelativeTime(iso: string): string {
   if (days < 7) return `hace ${days}d`;
   return new Date(iso).toLocaleDateString("es-PE", { day: "numeric", month: "short" });
 }
+
+

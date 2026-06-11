@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as TalentRouteImport } from './routes/talent'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicesRouteImport } from './routes/services'
@@ -28,6 +29,7 @@ import { Route as DashboardMessagesRouteImport } from './routes/dashboard/messag
 import { Route as DashboardFreelancerRouteImport } from './routes/dashboard/freelancer'
 import { Route as DashboardClientRouteImport } from './routes/dashboard/client'
 import { Route as DashboardFreelancerServicesRouteImport } from './routes/dashboard/freelancer.services'
+import { Route as DashboardFreelancerProjectsRouteImport } from './routes/dashboard/freelancer.projects'
 import { Route as DashboardFreelancerProfileRouteImport } from './routes/dashboard/freelancer.profile'
 import { Route as DashboardFreelancerPortfolioRouteImport } from './routes/dashboard/freelancer.portfolio'
 import { Route as DashboardClientServicesRouteImport } from './routes/dashboard/client.services'
@@ -39,6 +41,11 @@ import { Route as DashboardFreelancerMypesMypeIdRouteImport } from './routes/das
 import { Route as DashboardClientServicesServiceIdRouteImport } from './routes/dashboard/client.services.$serviceId'
 import { Route as DashboardClientFreelancersFreelancerIdRouteImport } from './routes/dashboard/client/freelancers.$freelancerId'
 
+const VerifyEmailRoute = VerifyEmailRouteImport.update({
+  id: '/verify-email',
+  path: '/verify-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TalentRoute = TalentRouteImport.update({
   id: '/talent',
   path: '/talent',
@@ -136,6 +143,12 @@ const DashboardFreelancerServicesRoute =
     path: '/services',
     getParentRoute: () => DashboardFreelancerRoute,
   } as any)
+const DashboardFreelancerProjectsRoute =
+  DashboardFreelancerProjectsRouteImport.update({
+    id: '/projects',
+    path: '/projects',
+    getParentRoute: () => DashboardFreelancerRoute,
+  } as any)
 const DashboardFreelancerProfileRoute =
   DashboardFreelancerProfileRouteImport.update({
     id: '/profile',
@@ -170,9 +183,9 @@ const DashboardClientProfileRoute = DashboardClientProfileRouteImport.update({
 } as any)
 const DashboardFreelancerProjectsProjectIdRoute =
   DashboardFreelancerProjectsProjectIdRouteImport.update({
-    id: '/projects/$projectId',
-    path: '/projects/$projectId',
-    getParentRoute: () => DashboardFreelancerRoute,
+    id: '/$projectId',
+    path: '/$projectId',
+    getParentRoute: () => DashboardFreelancerProjectsRoute,
   } as any)
 const DashboardFreelancerMypesMypeIdRoute =
   DashboardFreelancerMypesMypeIdRouteImport.update({
@@ -205,6 +218,7 @@ export interface FileRoutesByFullPath {
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/talent': typeof TalentRouteWithChildren
+  '/verify-email': typeof VerifyEmailRoute
   '/dashboard/client': typeof DashboardClientRouteWithChildren
   '/dashboard/freelancer': typeof DashboardFreelancerRouteWithChildren
   '/dashboard/messages': typeof DashboardMessagesRoute
@@ -218,6 +232,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/client/services': typeof DashboardClientServicesRouteWithChildren
   '/dashboard/freelancer/portfolio': typeof DashboardFreelancerPortfolioRoute
   '/dashboard/freelancer/profile': typeof DashboardFreelancerProfileRoute
+  '/dashboard/freelancer/projects': typeof DashboardFreelancerProjectsRouteWithChildren
   '/dashboard/freelancer/services': typeof DashboardFreelancerServicesRoute
   '/dashboard/client/freelancers/$freelancerId': typeof DashboardClientFreelancersFreelancerIdRoute
   '/dashboard/client/services/$serviceId': typeof DashboardClientServicesServiceIdRoute
@@ -236,6 +251,7 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/talent': typeof TalentRouteWithChildren
+  '/verify-email': typeof VerifyEmailRoute
   '/dashboard/client': typeof DashboardClientRouteWithChildren
   '/dashboard/freelancer': typeof DashboardFreelancerRouteWithChildren
   '/dashboard/messages': typeof DashboardMessagesRoute
@@ -249,6 +265,7 @@ export interface FileRoutesByTo {
   '/dashboard/client/services': typeof DashboardClientServicesRouteWithChildren
   '/dashboard/freelancer/portfolio': typeof DashboardFreelancerPortfolioRoute
   '/dashboard/freelancer/profile': typeof DashboardFreelancerProfileRoute
+  '/dashboard/freelancer/projects': typeof DashboardFreelancerProjectsRouteWithChildren
   '/dashboard/freelancer/services': typeof DashboardFreelancerServicesRoute
   '/dashboard/client/freelancers/$freelancerId': typeof DashboardClientFreelancersFreelancerIdRoute
   '/dashboard/client/services/$serviceId': typeof DashboardClientServicesServiceIdRoute
@@ -268,6 +285,7 @@ export interface FileRoutesById {
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/talent': typeof TalentRouteWithChildren
+  '/verify-email': typeof VerifyEmailRoute
   '/dashboard/client': typeof DashboardClientRouteWithChildren
   '/dashboard/freelancer': typeof DashboardFreelancerRouteWithChildren
   '/dashboard/messages': typeof DashboardMessagesRoute
@@ -281,6 +299,7 @@ export interface FileRoutesById {
   '/dashboard/client/services': typeof DashboardClientServicesRouteWithChildren
   '/dashboard/freelancer/portfolio': typeof DashboardFreelancerPortfolioRoute
   '/dashboard/freelancer/profile': typeof DashboardFreelancerProfileRoute
+  '/dashboard/freelancer/projects': typeof DashboardFreelancerProjectsRouteWithChildren
   '/dashboard/freelancer/services': typeof DashboardFreelancerServicesRoute
   '/dashboard/client/freelancers/$freelancerId': typeof DashboardClientFreelancersFreelancerIdRoute
   '/dashboard/client/services/$serviceId': typeof DashboardClientServicesServiceIdRoute
@@ -301,6 +320,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/sitemap.xml'
     | '/talent'
+    | '/verify-email'
     | '/dashboard/client'
     | '/dashboard/freelancer'
     | '/dashboard/messages'
@@ -314,6 +334,7 @@ export interface FileRouteTypes {
     | '/dashboard/client/services'
     | '/dashboard/freelancer/portfolio'
     | '/dashboard/freelancer/profile'
+    | '/dashboard/freelancer/projects'
     | '/dashboard/freelancer/services'
     | '/dashboard/client/freelancers/$freelancerId'
     | '/dashboard/client/services/$serviceId'
@@ -332,6 +353,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/sitemap.xml'
     | '/talent'
+    | '/verify-email'
     | '/dashboard/client'
     | '/dashboard/freelancer'
     | '/dashboard/messages'
@@ -345,6 +367,7 @@ export interface FileRouteTypes {
     | '/dashboard/client/services'
     | '/dashboard/freelancer/portfolio'
     | '/dashboard/freelancer/profile'
+    | '/dashboard/freelancer/projects'
     | '/dashboard/freelancer/services'
     | '/dashboard/client/freelancers/$freelancerId'
     | '/dashboard/client/services/$serviceId'
@@ -363,6 +386,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/sitemap.xml'
     | '/talent'
+    | '/verify-email'
     | '/dashboard/client'
     | '/dashboard/freelancer'
     | '/dashboard/messages'
@@ -376,6 +400,7 @@ export interface FileRouteTypes {
     | '/dashboard/client/services'
     | '/dashboard/freelancer/portfolio'
     | '/dashboard/freelancer/profile'
+    | '/dashboard/freelancer/projects'
     | '/dashboard/freelancer/services'
     | '/dashboard/client/freelancers/$freelancerId'
     | '/dashboard/client/services/$serviceId'
@@ -395,6 +420,7 @@ export interface RootRouteChildren {
   ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TalentRoute: typeof TalentRouteWithChildren
+  VerifyEmailRoute: typeof VerifyEmailRoute
   DashboardClientRoute: typeof DashboardClientRouteWithChildren
   DashboardFreelancerRoute: typeof DashboardFreelancerRouteWithChildren
   DashboardMessagesRoute: typeof DashboardMessagesRoute
@@ -405,6 +431,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/verify-email': {
+      id: '/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof VerifyEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/talent': {
       id: '/talent'
       path: '/talent'
@@ -538,6 +571,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardFreelancerServicesRouteImport
       parentRoute: typeof DashboardFreelancerRoute
     }
+    '/dashboard/freelancer/projects': {
+      id: '/dashboard/freelancer/projects'
+      path: '/projects'
+      fullPath: '/dashboard/freelancer/projects'
+      preLoaderRoute: typeof DashboardFreelancerProjectsRouteImport
+      parentRoute: typeof DashboardFreelancerRoute
+    }
     '/dashboard/freelancer/profile': {
       id: '/dashboard/freelancer/profile'
       path: '/profile'
@@ -582,10 +622,10 @@ declare module '@tanstack/react-router' {
     }
     '/dashboard/freelancer/projects/$projectId': {
       id: '/dashboard/freelancer/projects/$projectId'
-      path: '/projects/$projectId'
+      path: '/$projectId'
       fullPath: '/dashboard/freelancer/projects/$projectId'
       preLoaderRoute: typeof DashboardFreelancerProjectsProjectIdRouteImport
-      parentRoute: typeof DashboardFreelancerRoute
+      parentRoute: typeof DashboardFreelancerProjectsRoute
     }
     '/dashboard/freelancer/mypes/$mypeId': {
       id: '/dashboard/freelancer/mypes/$mypeId'
@@ -658,21 +698,36 @@ const DashboardClientRouteWithChildren = DashboardClientRoute._addFileChildren(
   DashboardClientRouteChildren,
 )
 
+interface DashboardFreelancerProjectsRouteChildren {
+  DashboardFreelancerProjectsProjectIdRoute: typeof DashboardFreelancerProjectsProjectIdRoute
+}
+
+const DashboardFreelancerProjectsRouteChildren: DashboardFreelancerProjectsRouteChildren =
+  {
+    DashboardFreelancerProjectsProjectIdRoute:
+      DashboardFreelancerProjectsProjectIdRoute,
+  }
+
+const DashboardFreelancerProjectsRouteWithChildren =
+  DashboardFreelancerProjectsRoute._addFileChildren(
+    DashboardFreelancerProjectsRouteChildren,
+  )
+
 interface DashboardFreelancerRouteChildren {
   DashboardFreelancerPortfolioRoute: typeof DashboardFreelancerPortfolioRoute
   DashboardFreelancerProfileRoute: typeof DashboardFreelancerProfileRoute
+  DashboardFreelancerProjectsRoute: typeof DashboardFreelancerProjectsRouteWithChildren
   DashboardFreelancerServicesRoute: typeof DashboardFreelancerServicesRoute
   DashboardFreelancerMypesMypeIdRoute: typeof DashboardFreelancerMypesMypeIdRoute
-  DashboardFreelancerProjectsProjectIdRoute: typeof DashboardFreelancerProjectsProjectIdRoute
 }
 
 const DashboardFreelancerRouteChildren: DashboardFreelancerRouteChildren = {
   DashboardFreelancerPortfolioRoute: DashboardFreelancerPortfolioRoute,
   DashboardFreelancerProfileRoute: DashboardFreelancerProfileRoute,
+  DashboardFreelancerProjectsRoute:
+    DashboardFreelancerProjectsRouteWithChildren,
   DashboardFreelancerServicesRoute: DashboardFreelancerServicesRoute,
   DashboardFreelancerMypesMypeIdRoute: DashboardFreelancerMypesMypeIdRoute,
-  DashboardFreelancerProjectsProjectIdRoute:
-    DashboardFreelancerProjectsProjectIdRoute,
 }
 
 const DashboardFreelancerRouteWithChildren =
@@ -690,6 +745,7 @@ const rootRouteChildren: RootRouteChildren = {
   ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TalentRoute: TalentRouteWithChildren,
+  VerifyEmailRoute: VerifyEmailRoute,
   DashboardClientRoute: DashboardClientRouteWithChildren,
   DashboardFreelancerRoute: DashboardFreelancerRouteWithChildren,
   DashboardMessagesRoute: DashboardMessagesRoute,

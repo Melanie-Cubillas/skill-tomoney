@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+﻿import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import { ArrowRight, CheckCircle2, ClipboardCheck, FolderKanban, Package, Star, TrendingUp } from "lucide-react";
@@ -106,7 +106,7 @@ function FreelancerDashboard() {
         <div className="grid gap-5 xl:grid-cols-[1.7fr_0.85fr_0.85fr]">
           <Card className="rounded-2xl p-6 shadow-soft">
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="font-display text-lg font-bold tracking-normal">Perfil generado</h2>
+              <h2 className="font-display text-lg font-bold tracking-normal">Dashboard generado</h2>
               <Button asChild variant="outline" size="sm">
                 <Link to="/dashboard/freelancer/profile">Editar</Link>
               </Button>
@@ -121,7 +121,7 @@ function FreelancerDashboard() {
                   {profile.experience_area ?? profile.category ?? "Area sin definir"}
                 </h2>
                 <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-                  {profile.bio ?? profile.description ?? "Completa el onboarding para generar una descripcion profesional con IA."}
+                  {profile.bio ?? profile.description ?? "Completa el onboarding para generar una descripcion profesional con Skill Bot."}
                 </p>
                 <div className="mt-5 flex flex-wrap gap-2">
                   {(profile.skills ?? []).slice(0, 8).map((skill) => (
@@ -140,8 +140,8 @@ function FreelancerDashboard() {
                 <div className="mt-2 font-display text-2xl font-extrabold tracking-normal">
                   {profile.suggested_rate ?? "Pendiente"}
                 </div>
-                <div className="mt-4 text-sm font-semibold text-muted-foreground">Fuente IA</div>
-                <div className="mt-1 text-sm">{profile.gemini_analysis?.source ?? "Sin analisis"}</div>
+                <div className="mt-4 text-sm font-semibold text-muted-foreground">Fuente Skill Bot</div>
+                <div className="mt-1 text-sm">{profile.gemini_analysis?.source ?? "Sin análisis"}</div>
               </div>
             </div>
           </Card>
@@ -170,7 +170,7 @@ function FreelancerDashboard() {
               <h2 className="font-display text-lg font-bold tracking-normal">Consejo para hoy</h2>
               <p className="mt-3 text-sm text-muted-foreground">
                 {profile.gemini_analysis?.recomendaciones_mejora?.[0] ??
-                  "Completa tu perfil y agrega proyectos para mejorar tu presentacion."}
+                  "Completa tu perfil y agrega proyectos para mejorar tu presentación."}
               </p>
               <Link to="/dashboard/freelancer/portfolio" className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-secondary">
                 Ver portafolio <ArrowRight className="h-4 w-4" />
@@ -183,7 +183,7 @@ function FreelancerDashboard() {
                 {services[0] ? <Activity icon={Package} title="Servicio creado" detail={services[0].title} /> : null}
                 {portfolio[0] ? <Activity icon={FolderKanban} title="Proyecto agregado" detail={portfolio[0].title} /> : null}
                 {!services[0] && !portfolio[0] ? (
-                  <p className="text-sm text-muted-foreground">{loading ? "Cargando..." : "Aun no hay actividad guardada."}</p>
+                  <p className="text-sm text-muted-foreground">{loading ? "Cargando..." : "Aún no hay actividad guardada."}</p>
                 ) : null}
               </div>
             </Card>
@@ -195,7 +195,7 @@ function FreelancerDashboard() {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h2 className="font-display text-lg font-bold tracking-normal">Tendencias de mercado</h2>
-                <p className="text-sm text-muted-foreground">Calculado con publicaciones reales de MYPES, sin IA.</p>
+                <p className="text-sm text-muted-foreground">Calculado con publicaciones reales de MYPES, sin Skill Bot.</p>
               </div>
               <TrendingUp className="h-5 w-5 text-secondary" />
             </div>
@@ -225,7 +225,7 @@ function FreelancerDashboard() {
                 </div>
               ))}
               {marketTrends.length === 0 ? (
-                <EmptyState text={loading ? "Cargando tendencias..." : "Aun no hay suficientes publicaciones MYPE relacionadas con tu perfil."} />
+                <EmptyState text={loading ? "Cargando tendencias..." : "Aún no hay suficientes publicaciones MYPE relacionadas con tu perfil."} />
               ) : null}
             </div>
           </Card>
@@ -244,7 +244,7 @@ function FreelancerDashboard() {
                 </div>
               </div>
             ) : (
-              <EmptyState text="Aun no hay datos suficientes para calcular un rango real." />
+              <EmptyState text="Aún no hay datos suficientes para calcular un rango real." />
             )}
           </Card>
         </div>
@@ -260,7 +260,7 @@ function FreelancerDashboard() {
                 <div key={project.id} className="flex items-center justify-between gap-3 rounded-xl border border-border px-4 py-3">
                   <div>
                     <div className="font-bold">{project.title}</div>
-                    <div className="text-xs text-muted-foreground">{project.category ?? "Sin categoria"}</div>
+                    <div className="text-xs text-muted-foreground">{project.category ?? "Sin categoría"}</div>
                   </div>
                   <Badge variant="outline" className={project.is_featured ? "border-secondary/40 text-secondary" : "border-border text-muted-foreground"}>
                     {project.is_featured ? "Destacado" : "Portafolio"}
@@ -268,7 +268,7 @@ function FreelancerDashboard() {
                 </div>
               ))}
               {portfolio.length === 0 ? (
-                <EmptyState text={loading ? "Cargando portafolio..." : "Aun no hay proyectos guardados."} />
+                <EmptyState text={loading ? "Cargando portafolio..." : "Aún no hay proyectos guardados."} />
               ) : null}
             </div>
           </Card>
@@ -286,11 +286,11 @@ function FreelancerDashboard() {
                     <Badge variant="outline" className="border-secondary/40 text-secondary">{service.status}</Badge>
                   </div>
                   <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{service.description}</p>
-                  <div className="mt-3 text-sm font-bold">S/ {Number(service.price).toFixed(2)} - {service.delivery_days} dias</div>
+                  <div className="mt-3 text-sm font-bold">S/ {Number(service.price).toFixed(2)} - {service.delivery_days} días</div>
                 </div>
               ))}
               {services.length === 0 ? (
-                <EmptyState text={loading ? "Cargando servicios..." : "Aun no hay servicios guardados."} />
+                <EmptyState text={loading ? "Cargando servicios..." : "Aún no hay servicios guardados."} />
               ) : null}
             </div>
           </Card>
@@ -359,3 +359,6 @@ function formatMarketPrice(value: number | null): string {
   if (!value) return "Sin precio";
   return `Prom. S/ ${Number(value).toFixed(0)}`;
 }
+
+
+

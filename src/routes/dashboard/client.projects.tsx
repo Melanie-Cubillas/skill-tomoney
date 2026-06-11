@@ -1,4 +1,4 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+﻿import { Link, createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Edit3, FileText, Loader2, Plus, Save, Star, Trash2, Users } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
@@ -368,7 +368,7 @@ function ClientProjectsPage() {
                 <div className="mt-4 grid gap-3 text-sm md:grid-cols-3">
                   <Info label="Presupuesto" value={formatBudget(project)} />
                   <Info label="Entrega" value={project.expected_delivery_days ? `${project.expected_delivery_days} dias` : "No definida"} />
-                  <Info label="Origen" value={project.ai_generated ? "Creado con IA" : "Creado manualmente"} />
+                  <Info label="Origen" value={project.ai_generated ? "Creado con Skill Bot" : "Creado manualmente"} />
                 </div>
                 {insightProjectId === project.id ? (
                   <div className="mt-4 grid gap-3 lg:grid-cols-[0.8fr_1fr]">
@@ -518,3 +518,4 @@ function formatBudget(project: ClientProjectPayload): string {
   if (project.budget_max) return `Hasta S/ ${Number(project.budget_max).toFixed(0)}`;
   return "No definido";
 }
+

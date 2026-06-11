@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+﻿import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { Shell } from "@/components/layout/Shell";
 import { Card } from "@/components/ui/card";
@@ -37,7 +37,7 @@ const CATEGORIES = [
   "Marketing",
   "Desarrollo Web",
   "UX/UI",
-  "IA & Automatización",
+  "Skill Bot & Automatización",
 ];
 
 function TalentPage() {
@@ -175,13 +175,13 @@ function TalentPage() {
         <div className="pointer-events-none absolute inset-0 grid-pattern opacity-30" />
         <div className="relative mx-auto max-w-7xl px-6">
           <Badge className="bg-white/15 text-primary-foreground backdrop-blur">
-            Matching IA
+            Matching Skill Bot
           </Badge>
           <h1 className="mt-3 font-display text-4xl font-bold">
             Encuentra al freelancer perfecto
           </h1>
           <p className="mt-2 max-w-xl text-white/70">
-            Filtra por categoría, precio y ubicación. Nuestra IA recomienda el
+            Filtra por categoría, precio y ubicación. Skill Bot recomienda el
             mejor match para tu proyecto.
           </p>
           <div className="mt-6 flex flex-wrap gap-3 rounded-2xl border border-white/15 bg-white/5 p-2 backdrop-blur">
@@ -220,7 +220,7 @@ function TalentPage() {
               ) : (
                 <Sparkles className="mr-1.5 h-4 w-4" />
               )}
-              Buscar con IA
+              Buscar con Skill Bot
             </Button>
           </div>
 
@@ -536,3 +536,5 @@ function formatHourlyRate(rate: string | null, amount?: number | null): string |
 
   return /^s\/?\s*/i.test(value) ? value : `S/ ${value}`;
 }
+
+

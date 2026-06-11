@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+﻿import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import { Building2, CheckCircle2, Globe2, HelpCircle, ImageUp, LinkIcon, Save, ShieldCheck, Store } from "lucide-react";
@@ -19,7 +19,7 @@ import { api, type ProfilePayload } from "@/lib/api";
 import { getSessionUser, getToken } from "@/lib/auth";
 
 export const Route = createFileRoute("/dashboard/client/profile")({
-  head: () => ({ meta: [{ title: "Perfil MYPE · SkilltoMoney" }] }),
+  head: () => ({ meta: [{ title: "Dashboard MYPE · SkilltoMoney" }] }),
   component: MypeProfilePage,
 });
 
@@ -45,7 +45,7 @@ function MypeProfilePage() {
         const response = await api.getProfile(token);
         setProfile(response.data ?? {});
       } catch {
-        setError("No se pudo cargar la informacion del negocio.");
+        setError("No se pudo cargar la información del negocio.");
       }
     };
 
@@ -117,8 +117,8 @@ function MypeProfilePage() {
     <DashboardShell role="client" profilePhotoUrl={visiblePhotoUrl}>
       <div className="space-y-5">
         <div>
-          <h1 className="font-display text-4xl font-extrabold tracking-normal">Perfil MYPE</h1>
-          <p className="mt-1 text-muted-foreground">Gestiona la informacion de tu negocio.</p>
+          <h1 className="font-display text-4xl font-extrabold tracking-normal">Dashboard MYPE</h1>
+          <p className="mt-1 text-muted-foreground">Gestiona la información de tu negocio.</p>
         </div>
 
         {error ? <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">{error}</p> : null}
@@ -133,8 +133,8 @@ function MypeProfilePage() {
                     <Store className="h-5 w-5" />
                   </span>
                   <div>
-                    <h2 className="font-display text-lg font-bold tracking-normal">Completa tu perfil y genera mas confianza</h2>
-                    <p className="text-sm text-muted-foreground">Un perfil completo te ayuda a conectar con mas clientes y crecer tu negocio.</p>
+                    <h2 className="font-display text-lg font-bold tracking-normal">Completa tu perfil y genera más confianza</h2>
+                    <p className="text-sm text-muted-foreground">Un perfil completo te ayuda a conectar con más clientes y crecer tu negocio.</p>
                   </div>
                 </div>
                 <div className="min-w-48">
@@ -169,7 +169,7 @@ function MypeProfilePage() {
                       </SelectContent>
                     </Select>
                   </Field>
-                  <Field label="Ubicacion">
+                  <Field label="Ubicación">
                     <Input value={profile.location ?? ""} onChange={(event) => setProfile((prev) => ({ ...prev, location: event.target.value }))} placeholder="Ej. Lima, Peru" className="h-11 rounded-xl" />
                   </Field>
                 </div>
@@ -199,7 +199,7 @@ function MypeProfilePage() {
                     setSelectedPhoto(file);
                     setPhotoPreviewUrl(file ? URL.createObjectURL(file) : null);
                   }} />
-                  <span><ImageUp className="mx-auto mb-2 h-8 w-8 text-secondary" />Arrastra y suelta tu archivo aqui<br />o haz clic para seleccionar</span>
+                  <span><ImageUp className="mx-auto mb-2 h-8 w-8 text-secondary" />Arrastra y suelta tu archivo aquí<br />o haz clic para seleccionar</span>
                 </label>
                 <div className="grid place-items-center rounded-2xl border border-border bg-muted/40 p-4">
                   {visiblePhotoUrl ? <img src={visiblePhotoUrl} alt="Vista previa" className="h-32 w-32 rounded-2xl object-cover" /> : <Store className="h-20 w-20 text-muted-foreground" />}
@@ -212,7 +212,7 @@ function MypeProfilePage() {
               <div className="flex items-center gap-4">
                 <span className="grid h-12 w-12 place-items-center rounded-xl bg-secondary/15 text-secondary"><ShieldCheck className="h-5 w-5" /></span>
                 <div>
-                  <h2 className="font-display text-lg font-bold tracking-normal">Tu informacion esta protegida</h2>
+                  <h2 className="font-display text-lg font-bold tracking-normal">Tu información esta protegida</h2>
                   <p className="text-sm text-muted-foreground">Cuidamos tus datos y los usamos solo para mejorar tu experiencia.</p>
                 </div>
               </div>
@@ -252,7 +252,7 @@ function MypeProfilePage() {
             <Card className="rounded-2xl border-secondary/30 bg-secondary/10 p-5 shadow-soft">
               <HelpCircle className="h-5 w-5 text-secondary" />
               <h2 className="mt-3 font-display text-base font-bold tracking-normal">¿Necesitas ayuda?</h2>
-              <p className="mt-2 text-sm text-muted-foreground">Visita nuestro Centro de ayuda para mas informacion.</p>
+              <p className="mt-2 text-sm text-muted-foreground">Visita nuestro Centro de ayuda para más información.</p>
               <a className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-secondary">
                 Ir al Centro de ayuda <Globe2 className="h-4 w-4" />
               </a>
@@ -281,3 +281,5 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     </div>
   );
 }
+
+

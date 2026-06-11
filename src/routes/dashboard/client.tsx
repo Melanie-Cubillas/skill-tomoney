@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+﻿import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import { ArrowRight, Briefcase, CheckCircle2, FileText, Search, Star, Store, Users } from "lucide-react";
@@ -84,7 +84,7 @@ function ClientDashboard() {
           <Metric icon={FileText} label="Publicaciones creadas" value={String(projects.length)} hint="Datos reales de tu cuenta" />
           <Metric icon={Briefcase} label="Proyectos activos" value={String(activeProjects)} hint={`${publishedProjects} publicados`} />
           <Metric icon={Star} label="Favoritos guardados" value={String(favoritesCount)} hint="Freelancers guardados" />
-          <Metric icon={Store} label="Perfil MYPE" value={`${profileCompletion}%`} hint="Completitud del perfil" />
+          <Metric icon={Store} label="Dashboard MYPE" value={`${profileCompletion}%`} hint="Completitud del perfil" />
         </div>
 
         <div className="grid gap-5 xl:grid-cols-[1fr_0.8fr]">
@@ -102,7 +102,7 @@ function ClientDashboard() {
             ) : projects.length === 0 ? (
               <EmptyBlock
                 icon={FileText}
-                title="Aun no tienes publicaciones"
+                title="Aún no tienes publicaciones"
                 detail="Crea tu primer proyecto. En Free puedes publicar 1 proyecto activo."
                 actionLabel="Crear proyecto"
                 to="/dashboard/client/projects"
@@ -114,7 +114,7 @@ function ClientDashboard() {
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="font-bold">{project.title}</div>
-                        <div className="text-xs text-muted-foreground">{project.category || "Sin categoria"}</div>
+                        <div className="text-xs text-muted-foreground">{project.category || "Sin categoría"}</div>
                       </div>
                       <Badge variant="outline" className="border-secondary/40 text-secondary">
                         {statusLabel(project.status)}
@@ -144,7 +144,7 @@ function ClientDashboard() {
             <div className="mt-5 flex items-center gap-5">
               <div className="grid h-24 w-24 place-items-center rounded-full border-[8px] border-secondary text-2xl font-extrabold">{profileCompletion}%</div>
               <p className="text-sm text-muted-foreground">
-                Completa los datos de tu negocio para generar mas confianza al contactar freelancers.
+                Completa los datos de tu negocio para generar más confianza al contactar freelancers.
               </p>
             </div>
             <div className="mt-5 space-y-3 text-sm">
@@ -252,3 +252,5 @@ function statusLabel(status: ClientProjectPayload["status"]): string {
 
   return labels[status];
 }
+
+
