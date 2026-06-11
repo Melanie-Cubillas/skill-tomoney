@@ -34,6 +34,10 @@ import { Route as DashboardClientServicesRouteImport } from './routes/dashboard/
 import { Route as DashboardClientSearchRouteImport } from './routes/dashboard/client.search'
 import { Route as DashboardClientProjectsRouteImport } from './routes/dashboard/client.projects'
 import { Route as DashboardClientProfileRouteImport } from './routes/dashboard/client.profile'
+import { Route as DashboardFreelancerProjectsProjectIdRouteImport } from './routes/dashboard/freelancer/projects.$projectId'
+import { Route as DashboardFreelancerMypesMypeIdRouteImport } from './routes/dashboard/freelancer/mypes.$mypeId'
+import { Route as DashboardClientServicesServiceIdRouteImport } from './routes/dashboard/client.services.$serviceId'
+import { Route as DashboardClientFreelancersFreelancerIdRouteImport } from './routes/dashboard/client/freelancers.$freelancerId'
 
 const TalentRoute = TalentRouteImport.update({
   id: '/talent',
@@ -164,6 +168,30 @@ const DashboardClientProfileRoute = DashboardClientProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => DashboardClientRoute,
 } as any)
+const DashboardFreelancerProjectsProjectIdRoute =
+  DashboardFreelancerProjectsProjectIdRouteImport.update({
+    id: '/projects/$projectId',
+    path: '/projects/$projectId',
+    getParentRoute: () => DashboardFreelancerRoute,
+  } as any)
+const DashboardFreelancerMypesMypeIdRoute =
+  DashboardFreelancerMypesMypeIdRouteImport.update({
+    id: '/mypes/$mypeId',
+    path: '/mypes/$mypeId',
+    getParentRoute: () => DashboardFreelancerRoute,
+  } as any)
+const DashboardClientServicesServiceIdRoute =
+  DashboardClientServicesServiceIdRouteImport.update({
+    id: '/$serviceId',
+    path: '/$serviceId',
+    getParentRoute: () => DashboardClientServicesRoute,
+  } as any)
+const DashboardClientFreelancersFreelancerIdRoute =
+  DashboardClientFreelancersFreelancerIdRouteImport.update({
+    id: '/freelancers/$freelancerId',
+    path: '/freelancers/$freelancerId',
+    getParentRoute: () => DashboardClientRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -187,10 +215,14 @@ export interface FileRoutesByFullPath {
   '/dashboard/client/profile': typeof DashboardClientProfileRoute
   '/dashboard/client/projects': typeof DashboardClientProjectsRoute
   '/dashboard/client/search': typeof DashboardClientSearchRoute
-  '/dashboard/client/services': typeof DashboardClientServicesRoute
+  '/dashboard/client/services': typeof DashboardClientServicesRouteWithChildren
   '/dashboard/freelancer/portfolio': typeof DashboardFreelancerPortfolioRoute
   '/dashboard/freelancer/profile': typeof DashboardFreelancerProfileRoute
   '/dashboard/freelancer/services': typeof DashboardFreelancerServicesRoute
+  '/dashboard/client/freelancers/$freelancerId': typeof DashboardClientFreelancersFreelancerIdRoute
+  '/dashboard/client/services/$serviceId': typeof DashboardClientServicesServiceIdRoute
+  '/dashboard/freelancer/mypes/$mypeId': typeof DashboardFreelancerMypesMypeIdRoute
+  '/dashboard/freelancer/projects/$projectId': typeof DashboardFreelancerProjectsProjectIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -214,10 +246,14 @@ export interface FileRoutesByTo {
   '/dashboard/client/profile': typeof DashboardClientProfileRoute
   '/dashboard/client/projects': typeof DashboardClientProjectsRoute
   '/dashboard/client/search': typeof DashboardClientSearchRoute
-  '/dashboard/client/services': typeof DashboardClientServicesRoute
+  '/dashboard/client/services': typeof DashboardClientServicesRouteWithChildren
   '/dashboard/freelancer/portfolio': typeof DashboardFreelancerPortfolioRoute
   '/dashboard/freelancer/profile': typeof DashboardFreelancerProfileRoute
   '/dashboard/freelancer/services': typeof DashboardFreelancerServicesRoute
+  '/dashboard/client/freelancers/$freelancerId': typeof DashboardClientFreelancersFreelancerIdRoute
+  '/dashboard/client/services/$serviceId': typeof DashboardClientServicesServiceIdRoute
+  '/dashboard/freelancer/mypes/$mypeId': typeof DashboardFreelancerMypesMypeIdRoute
+  '/dashboard/freelancer/projects/$projectId': typeof DashboardFreelancerProjectsProjectIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -242,10 +278,14 @@ export interface FileRoutesById {
   '/dashboard/client/profile': typeof DashboardClientProfileRoute
   '/dashboard/client/projects': typeof DashboardClientProjectsRoute
   '/dashboard/client/search': typeof DashboardClientSearchRoute
-  '/dashboard/client/services': typeof DashboardClientServicesRoute
+  '/dashboard/client/services': typeof DashboardClientServicesRouteWithChildren
   '/dashboard/freelancer/portfolio': typeof DashboardFreelancerPortfolioRoute
   '/dashboard/freelancer/profile': typeof DashboardFreelancerProfileRoute
   '/dashboard/freelancer/services': typeof DashboardFreelancerServicesRoute
+  '/dashboard/client/freelancers/$freelancerId': typeof DashboardClientFreelancersFreelancerIdRoute
+  '/dashboard/client/services/$serviceId': typeof DashboardClientServicesServiceIdRoute
+  '/dashboard/freelancer/mypes/$mypeId': typeof DashboardFreelancerMypesMypeIdRoute
+  '/dashboard/freelancer/projects/$projectId': typeof DashboardFreelancerProjectsProjectIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -275,6 +315,10 @@ export interface FileRouteTypes {
     | '/dashboard/freelancer/portfolio'
     | '/dashboard/freelancer/profile'
     | '/dashboard/freelancer/services'
+    | '/dashboard/client/freelancers/$freelancerId'
+    | '/dashboard/client/services/$serviceId'
+    | '/dashboard/freelancer/mypes/$mypeId'
+    | '/dashboard/freelancer/projects/$projectId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -302,6 +346,10 @@ export interface FileRouteTypes {
     | '/dashboard/freelancer/portfolio'
     | '/dashboard/freelancer/profile'
     | '/dashboard/freelancer/services'
+    | '/dashboard/client/freelancers/$freelancerId'
+    | '/dashboard/client/services/$serviceId'
+    | '/dashboard/freelancer/mypes/$mypeId'
+    | '/dashboard/freelancer/projects/$projectId'
   id:
     | '__root__'
     | '/'
@@ -329,6 +377,10 @@ export interface FileRouteTypes {
     | '/dashboard/freelancer/portfolio'
     | '/dashboard/freelancer/profile'
     | '/dashboard/freelancer/services'
+    | '/dashboard/client/freelancers/$freelancerId'
+    | '/dashboard/client/services/$serviceId'
+    | '/dashboard/freelancer/mypes/$mypeId'
+    | '/dashboard/freelancer/projects/$projectId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -528,6 +580,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardClientProfileRouteImport
       parentRoute: typeof DashboardClientRoute
     }
+    '/dashboard/freelancer/projects/$projectId': {
+      id: '/dashboard/freelancer/projects/$projectId'
+      path: '/projects/$projectId'
+      fullPath: '/dashboard/freelancer/projects/$projectId'
+      preLoaderRoute: typeof DashboardFreelancerProjectsProjectIdRouteImport
+      parentRoute: typeof DashboardFreelancerRoute
+    }
+    '/dashboard/freelancer/mypes/$mypeId': {
+      id: '/dashboard/freelancer/mypes/$mypeId'
+      path: '/mypes/$mypeId'
+      fullPath: '/dashboard/freelancer/mypes/$mypeId'
+      preLoaderRoute: typeof DashboardFreelancerMypesMypeIdRouteImport
+      parentRoute: typeof DashboardFreelancerRoute
+    }
+    '/dashboard/client/services/$serviceId': {
+      id: '/dashboard/client/services/$serviceId'
+      path: '/$serviceId'
+      fullPath: '/dashboard/client/services/$serviceId'
+      preLoaderRoute: typeof DashboardClientServicesServiceIdRouteImport
+      parentRoute: typeof DashboardClientServicesRoute
+    }
+    '/dashboard/client/freelancers/$freelancerId': {
+      id: '/dashboard/client/freelancers/$freelancerId'
+      path: '/freelancers/$freelancerId'
+      fullPath: '/dashboard/client/freelancers/$freelancerId'
+      preLoaderRoute: typeof DashboardClientFreelancersFreelancerIdRouteImport
+      parentRoute: typeof DashboardClientRoute
+    }
   }
 }
 
@@ -542,18 +622,36 @@ const TalentRouteChildren: TalentRouteChildren = {
 const TalentRouteWithChildren =
   TalentRoute._addFileChildren(TalentRouteChildren)
 
+interface DashboardClientServicesRouteChildren {
+  DashboardClientServicesServiceIdRoute: typeof DashboardClientServicesServiceIdRoute
+}
+
+const DashboardClientServicesRouteChildren: DashboardClientServicesRouteChildren =
+  {
+    DashboardClientServicesServiceIdRoute:
+      DashboardClientServicesServiceIdRoute,
+  }
+
+const DashboardClientServicesRouteWithChildren =
+  DashboardClientServicesRoute._addFileChildren(
+    DashboardClientServicesRouteChildren,
+  )
+
 interface DashboardClientRouteChildren {
   DashboardClientProfileRoute: typeof DashboardClientProfileRoute
   DashboardClientProjectsRoute: typeof DashboardClientProjectsRoute
   DashboardClientSearchRoute: typeof DashboardClientSearchRoute
-  DashboardClientServicesRoute: typeof DashboardClientServicesRoute
+  DashboardClientServicesRoute: typeof DashboardClientServicesRouteWithChildren
+  DashboardClientFreelancersFreelancerIdRoute: typeof DashboardClientFreelancersFreelancerIdRoute
 }
 
 const DashboardClientRouteChildren: DashboardClientRouteChildren = {
   DashboardClientProfileRoute: DashboardClientProfileRoute,
   DashboardClientProjectsRoute: DashboardClientProjectsRoute,
   DashboardClientSearchRoute: DashboardClientSearchRoute,
-  DashboardClientServicesRoute: DashboardClientServicesRoute,
+  DashboardClientServicesRoute: DashboardClientServicesRouteWithChildren,
+  DashboardClientFreelancersFreelancerIdRoute:
+    DashboardClientFreelancersFreelancerIdRoute,
 }
 
 const DashboardClientRouteWithChildren = DashboardClientRoute._addFileChildren(
@@ -564,12 +662,17 @@ interface DashboardFreelancerRouteChildren {
   DashboardFreelancerPortfolioRoute: typeof DashboardFreelancerPortfolioRoute
   DashboardFreelancerProfileRoute: typeof DashboardFreelancerProfileRoute
   DashboardFreelancerServicesRoute: typeof DashboardFreelancerServicesRoute
+  DashboardFreelancerMypesMypeIdRoute: typeof DashboardFreelancerMypesMypeIdRoute
+  DashboardFreelancerProjectsProjectIdRoute: typeof DashboardFreelancerProjectsProjectIdRoute
 }
 
 const DashboardFreelancerRouteChildren: DashboardFreelancerRouteChildren = {
   DashboardFreelancerPortfolioRoute: DashboardFreelancerPortfolioRoute,
   DashboardFreelancerProfileRoute: DashboardFreelancerProfileRoute,
   DashboardFreelancerServicesRoute: DashboardFreelancerServicesRoute,
+  DashboardFreelancerMypesMypeIdRoute: DashboardFreelancerMypesMypeIdRoute,
+  DashboardFreelancerProjectsProjectIdRoute:
+    DashboardFreelancerProjectsProjectIdRoute,
 }
 
 const DashboardFreelancerRouteWithChildren =

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Edit3, FileText, Loader2, Plus, Save, Star, Trash2, Users } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
@@ -381,7 +381,12 @@ function ClientProjectsPage() {
                       {projectRecommendations.length > 0 ? (
                         <div className="space-y-2">
                           {projectRecommendations.map((freelancer) => (
-                            <div key={freelancer.id} className="flex items-center justify-between gap-3 rounded-lg bg-background px-3 py-2 text-sm">
+                            <Link
+                              key={freelancer.id}
+                              to="/dashboard/client/freelancers/$freelancerId"
+                              params={{ freelancerId: String(freelancer.id) }}
+                              className="flex items-center justify-between gap-3 rounded-lg bg-background px-3 py-2 text-sm transition hover:bg-muted"
+                            >
                               <div>
                                 <div className="font-semibold">{freelancer.name}</div>
                                 <div className="text-xs text-muted-foreground">{freelancer.headline ?? freelancer.category ?? "Freelancer"}</div>
@@ -390,7 +395,7 @@ function ClientProjectsPage() {
                                 <Star className="h-3.5 w-3.5 fill-current" />
                                 {Math.round(freelancer.score)}%
                               </span>
-                            </div>
+                            </Link>
                           ))}
                         </div>
                       ) : (

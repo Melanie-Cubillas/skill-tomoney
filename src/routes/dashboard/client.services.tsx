@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Clock, Loader2, Search, SlidersHorizontal, Star, X } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
@@ -270,9 +270,20 @@ function ServiceCard({ service }: { service: ServiceItem }) {
           <div className="font-display font-bold">{formatPrice(service.price, service.currency)}</div>
         </div>
 
-        <Button className="mt-4 w-full rounded-xl bg-gradient-primary shadow-soft">
-          Contactar freelancer
-        </Button>
+        <div className="mt-4 grid gap-2">
+          <Button asChild className="rounded-xl bg-gradient-primary shadow-soft">
+            <Link to="/dashboard/client/services/$serviceId" params={{ serviceId: String(service.id) }}>
+              Ver detalle del servicio
+            </Link>
+          </Button>
+          {service.freelancer.id ? (
+            <Button asChild variant="outline" className="rounded-xl">
+              <Link to="/dashboard/client/freelancers/$freelancerId" params={{ freelancerId: String(service.freelancer.id) }}>
+                Ver perfil del freelancer
+              </Link>
+            </Button>
+          ) : null}
+        </div>
       </div>
     </Card>
   );

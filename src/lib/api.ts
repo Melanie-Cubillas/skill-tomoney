@@ -256,6 +256,7 @@ export type ClientProjectPayload = {
   expected_delivery_days: number | null;
   status: "draft" | "published" | "in_progress" | "completed" | "cancelled";
   progress: number;
+  views_count: number;
   ai_generated: boolean;
   created_at: string;
   updated_at: string;
@@ -280,6 +281,28 @@ export type ClientProjectsPayload = {
     max_projects: number;
     can_create: boolean;
   };
+};
+
+export type MypeSummaryPayload = {
+  id: number | null;
+  name: string;
+  business_name: string | null;
+  industry: string | null;
+  description: string | null;
+  website: string | null;
+  location: string | null;
+  profile_photo: string | null;
+  views_count: number | null;
+};
+
+export type ClientProjectDetailPayload = ClientProjectPayload & {
+  mype: MypeSummaryPayload;
+};
+
+export type MypeDetailPayload = MypeSummaryPayload & {
+  id: number;
+  user_id: number;
+  projects: ClientProjectPayload[];
 };
 
 export type CatalogPortfolioItem = {
@@ -745,8 +768,19 @@ export const api = {
   getServiceItem: (token: string, id: number) =>
     apiRequest<ServiceItem>(`/services/${id}`, {
       token,
-      cacheKey: `services:item:${id}:${token.slice(-12)}`,
-      cacheTtlMs: 2 * 60 * 1000,
+      skipCache: true,
+    }),
+
+  getMypeItem: (token: string, id: number) =>
+    apiRequest<MypeDetailPayload>(`/mypes/${id}`, {
+      token,
+      skipCache: true,
+    }),
+
+  getClientProjectItem: (token: string, id: number) =>
+    apiRequest<ClientProjectDetailPayload>(`/client-projects/${id}`, {
+      token,
+      skipCache: true,
     }),
 
   getClientProjects: (token: string) =>
@@ -874,12 +908,24 @@ export type FreelancerItem = {
   photo_url?: string | null;
   skills: string[];
   availability_status: string | null;
+  views_count?: number | null;
 };
 
 export type FreelancerDetailPayload = FreelancerItem & {
   website: string | null;
   social_links: Record<string, string | null> | null;
   portfolio: CatalogPortfolioItem[];
+  services: Array<{
+    id: number;
+    title: string;
+    description: string;
+    price: number;
+    currency: string;
+    delivery_days: number;
+    status: string;
+    views_count: number;
+    category: string | null;
+  }>;
 };
 
 export type RecommendedFreelancerItem = FreelancerItem & {

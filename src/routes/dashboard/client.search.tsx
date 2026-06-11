@@ -234,7 +234,7 @@ function ClientSearchPage() {
                 onToggleFavorite={() => void toggleFavorite(freelancer.id)}
                 onOpenProfile={() =>
                   void navigate({
-                    to: "/freelancer-portfolio/$freelancerId",
+                    to: "/dashboard/client/freelancers/$freelancerId",
                     params: { freelancerId: String(freelancer.id) },
                   })
                 }

@@ -211,6 +211,17 @@ function FreelancerDashboard() {
                       {formatMarketPrice(trend.average_budget)}
                     </Badge>
                   </div>
+                  {trend.sample_projects.length > 0 ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {trend.sample_projects.slice(0, 2).map((project) => (
+                        <Button key={project.id} asChild size="sm" variant="outline" className="rounded-xl">
+                          <Link to="/dashboard/freelancer/projects/$projectId" params={{ projectId: String(project.id) }}>
+                            {project.title}
+                          </Link>
+                        </Button>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
               ))}
               {marketTrends.length === 0 ? (
