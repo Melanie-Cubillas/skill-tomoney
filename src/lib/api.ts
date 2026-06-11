@@ -246,6 +246,42 @@ export type PortfolioProjectPayload = {
   created_at: string;
 };
 
+export type ClientProjectPayload = {
+  id: number;
+  title: string;
+  category: string | null;
+  description: string;
+  budget_min: string | null;
+  budget_max: string | null;
+  expected_delivery_days: number | null;
+  status: "draft" | "published" | "in_progress" | "completed" | "cancelled";
+  progress: number;
+  ai_generated: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ClientProjectInput = {
+  title: string;
+  category: string | null;
+  description: string;
+  budget_min: string | null;
+  budget_max: string | null;
+  expected_delivery_days: number | null;
+  status: ClientProjectPayload["status"];
+  progress?: number;
+  ai_generated?: boolean;
+};
+
+export type ClientProjectsPayload = {
+  projects: ClientProjectPayload[];
+  limits: {
+    plan: "free" | "pro";
+    max_projects: number;
+    can_create: boolean;
+  };
+};
+
 export type CatalogPortfolioItem = {
   id: number;
   category_id: number | null;
@@ -663,6 +699,42 @@ export const api = {
       token,
       cacheKey: `services:item:${id}:${token.slice(-12)}`,
       cacheTtlMs: 2 * 60 * 1000,
+    }),
+
+  getClientProjects: (token: string) =>
+    apiRequest<ClientProjectsPayload>("/client/projects", {
+      token,
+      cacheKey: `client:projects:${token.slice(-12)}`,
+      cacheTtlMs: 60 * 1000,
+    }),
+
+  createClientProject: (token: string, body: ClientProjectInput) =>
+    apiRequest<ClientProjectPayload>("/client/projects", {
+      method: "POST",
+      token,
+      body: JSON.stringify(body),
+    }).then((payload) => {
+      clearApiCache("client:projects:");
+      return payload;
+    }),
+
+  updateClientProject: (token: string, id: number, body: ClientProjectInput) =>
+    apiRequest<ClientProjectPayload>(`/client/projects/${id}`, {
+      method: "PUT",
+      token,
+      body: JSON.stringify(body),
+    }).then((payload) => {
+      clearApiCache("client:projects:");
+      return payload;
+    }),
+
+  deleteClientProject: (token: string, id: number) =>
+    apiRequest<null>(`/client/projects/${id}`, {
+      method: "DELETE",
+      token,
+    }).then((payload) => {
+      clearApiCache("client:projects:");
+      return payload;
     }),
 
   getFavorites: (token: string) =>

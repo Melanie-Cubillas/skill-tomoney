@@ -17,23 +17,23 @@ export function DashboardShell({
   const user = getSessionUser();
   const items = role === "freelancer"
     ? [
-        { to: "/dashboard/freelancer", icon: LayoutDashboard, label: "Inicio" },
+        { to: "/dashboard/freelancer", icon: LayoutDashboard, label: "Dashboard" },
         { to: "/dashboard/freelancer/profile", icon: UserRound, label: "Perfil Freelancer" },
         { to: "/dashboard/freelancer/portfolio", icon: FolderKanban, label: "Portafolio" },
         { to: "/dashboard/freelancer/services", icon: Briefcase, label: "Servicios" },
         { to: "/dashboard/messages", icon: MessageSquare, label: "Mensajes" },
         { to: "/dashboard/payments", icon: Wallet, label: "Pagos" },
-        { to: "/premium", icon: Crown, label: "Premium" },
+        { to: "/dashboard/premium", icon: Crown, label: "Premium" },
       ]
     : [
-        { to: "/dashboard/client", icon: LayoutDashboard, label: "Inicio" },
+        { to: "/dashboard/client", icon: LayoutDashboard, label: "Dashboard" },
         { to: "/dashboard/client/profile", icon: UserRound, label: "Perfil MYPE" },
         { to: "/dashboard/client/projects", icon: FileText, label: "Publicaciones" },
         { to: "/dashboard/client/search", icon: Search, label: "Buscar freelancers" },
         { to: "/dashboard/client/services", icon: Briefcase, label: "Explorar servicios" },
         { to: "/dashboard/messages", icon: MessageSquare, label: "Mensajes" },
         { to: "/dashboard/payments", icon: Wallet, label: "Pagos" },
-        { to: "/premium", icon: Crown, label: "Premium" },
+        { to: "/dashboard/premium", icon: Crown, label: "Premium" },
       ];
 
   const onLogout = async () => {
@@ -53,9 +53,9 @@ export function DashboardShell({
   return (
     <div className="grid min-h-screen bg-background lg:grid-cols-[256px_1fr]">
       <aside className="hidden border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex lg:flex-col">
-        <Link to="/" className="flex items-center gap-2.5 px-6 py-5">
+        <div className="flex items-center gap-2.5 px-6 py-5">
           <img src="/brand/skill-to-money-logo-white.png" alt="Skill-to-Money" className="h-auto w-[160px] object-contain" />
-        </Link>
+        </div>
         <div className="px-4 pb-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">
           {role === "freelancer" ? "Freelancer" : "Navegacion"}
         </div>
@@ -84,12 +84,12 @@ export function DashboardShell({
           <p className="mt-1.5 text-xs text-sidebar-foreground/75">
             {role === "freelancer" ? "Mentorias 1:1, IA ilimitada y mejor visibilidad." : "Publicaciones destacadas y acceso a talento verificado."}
           </p>
-          <Link to="/premium" className="mt-3 inline-flex w-full justify-center rounded-lg bg-gradient-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">
+          <Link to="/dashboard/premium" className="mt-3 inline-flex w-full justify-center rounded-lg bg-gradient-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">
             Subir a Pro
           </Link>
         </div>
         <div className="border-t border-sidebar-border p-3">
-          <Link to="/" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent">
+          <Link to={role === "freelancer" ? "/dashboard/freelancer/profile" : "/dashboard/client/profile"} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent">
             <Settings className="h-4 w-4" /> Ajustes
           </Link>
           <button onClick={onLogout} className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent">
