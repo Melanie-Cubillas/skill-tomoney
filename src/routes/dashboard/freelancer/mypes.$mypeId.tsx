@@ -1,6 +1,6 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { ArrowLeft, Building2, ExternalLink, FileText, Loader2 } from "lucide-react";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useCallback, useEffect, useState } from "react";
+import { ArrowLeft, Building2, ExternalLink, FileText, Loader2, MessageSquare } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,10 +14,12 @@ export const Route = createFileRoute("/dashboard/freelancer/mypes/$mypeId")({
 });
 
 function FreelancerMypeDetailPage() {
+  const navigate = useNavigate();
   const token = getToken();
   const user = getSessionUser();
   const isFreelancer = user?.account_type === "freelancer";
   const { mypeId } = Route.useParams();
+  const [contacting, setContacting] = useState(false);
   const [mype, setMype] = useState<MypeDetailPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +47,25 @@ function FreelancerMypeDetailPage() {
 
     void load();
   }, [isFreelancer, mypeId, token]);
+
+  const contactMype = useCallback(async () => {
+    if (!token || contacting) return;
+    setContacting(true);
+    try {
+      const res = await api.createConversation(token, {
+        mype_profile_id: Number(mypeId),
+        message: "Hola, me interesa trabajar contigo. Podemos coordinar?",
+      });
+      await navigate({
+        to: "/dashboard/messages",
+        search: { conversation: res.data?.conversation.id },
+      });
+    } catch {
+      // silent
+    } finally {
+      setContacting(false);
+    }
+  }, [contacting, mypeId, navigate, token]);
 
   return (
     <DashboardShell role="freelancer">
@@ -80,8 +101,22 @@ function FreelancerMypeDetailPage() {
                     </p>
                   </div>
                 </div>
-                <div className="rounded-2xl border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
-                  {mype.views_count ?? 0} vistas
+                <div className="space-y-3">
+                  <div className="rounded-2xl border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
+                    {mype.views_count ?? 0} vistas
+                  </div>
+                  <Button
+                    onClick={() => void contactMype()}
+                    disabled={contacting}
+                    className="w-full rounded-xl bg-gradient-primary shadow-soft"
+                  >
+                    {contacting ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <MessageSquare className="h-4 w-4" />
+                    )}
+                    Contactar
+                  </Button>
                 </div>
               </div>
               {mype.website ? (

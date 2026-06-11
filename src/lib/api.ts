@@ -455,6 +455,50 @@ export type RucLookupPayload = {
   location: string | null;
 };
 
+export type ConversationItem = {
+  id: number;
+  other_user: {
+    id: number;
+    name: string;
+    photo_url: string | null;
+  };
+  last_message: string;
+  last_message_at: string;
+  unread_count: number;
+  service_id: number | null;
+  status: string;
+  created_at: string;
+};
+
+export type MessageItem = {
+  id: number;
+  conversation_id: number;
+  sender: {
+    id: number;
+    name: string;
+  } | null;
+  is_mine: boolean;
+  message: string;
+  read_at: string | null;
+  created_at: string;
+};
+
+export type NotificationItem = {
+  id: number;
+  type: string;
+  title: string;
+  message: string;
+  data: Record<string, unknown> | null;
+  read_at: string | null;
+  created_at: string;
+};
+
+export type UnreadCountPayload = {
+  messages: number;
+  notifications: number;
+  total: number;
+};
+
 export const api = {
   health: async (): Promise<HealthPayload> => {
     const response = await fetch(`${API_URL}/health`);
@@ -846,6 +890,62 @@ export const api = {
     }).then((payload) => {
       clearApiCache("favorites:");
       return payload;
+    }),
+
+  getConversations: (token: string) =>
+    apiRequest<{ conversations: ConversationItem[] }>("/messaging/conversations", {
+      token,
+      skipCache: true,
+    }),
+
+  createConversation: (token: string, body: { freelancer_profile_id?: number; mype_profile_id?: number; message: string }) =>
+    apiRequest<{ conversation: ConversationItem; message: MessageItem }>("/messaging/conversations", {
+      method: "POST",
+      token,
+      body: JSON.stringify(body),
+    }),
+
+  getConversation: (token: string, id: number) =>
+    apiRequest<{ conversation: ConversationItem; messages: MessageItem[] }>(`/messaging/conversations/${id}`, {
+      token,
+      skipCache: true,
+    }),
+
+  sendMessage: (token: string, conversationId: number, message: string) =>
+    apiRequest<{ message: MessageItem }>(`/messaging/conversations/${conversationId}/messages`, {
+      method: "POST",
+      token,
+      body: JSON.stringify({ message }),
+    }),
+
+  markConversationRead: (token: string, conversationId: number) =>
+    apiRequest<null>(`/messaging/conversations/${conversationId}/read`, {
+      method: "PUT",
+      token,
+    }),
+
+  getUnreadCount: (token: string) =>
+    apiRequest<UnreadCountPayload>("/messaging/unread-count", {
+      token,
+      skipCache: true,
+    }),
+
+  getNotifications: (token: string) =>
+    apiRequest<{ notifications: NotificationItem[] }>("/messaging/notifications", {
+      token,
+      skipCache: true,
+    }),
+
+  markNotificationRead: (token: string, id: number) =>
+    apiRequest<null>(`/messaging/notifications/${id}/read`, {
+      method: "PUT",
+      token,
+    }),
+
+  markAllNotificationsRead: (token: string) =>
+    apiRequest<null>("/messaging/notifications/read-all", {
+      method: "PUT",
+      token,
     }),
 };
 

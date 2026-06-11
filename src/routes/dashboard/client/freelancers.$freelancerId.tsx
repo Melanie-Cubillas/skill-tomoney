@@ -1,6 +1,6 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Briefcase, ExternalLink, FolderKanban, Loader2, Star } from "lucide-react";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ArrowLeft, Briefcase, ExternalLink, FolderKanban, Loader2, MessageSquare, Star } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,10 +14,12 @@ export const Route = createFileRoute("/dashboard/client/freelancers/$freelancerI
 });
 
 function ClientFreelancerDetailPage() {
+  const navigate = useNavigate();
   const token = getToken();
   const user = getSessionUser();
   const isMype = user?.account_type === "mype";
   const { freelancerId } = Route.useParams();
+  const [contacting, setContacting] = useState(false);
   const [freelancer, setFreelancer] = useState<FreelancerDetailPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +47,25 @@ function ClientFreelancerDetailPage() {
 
     void load();
   }, [freelancerId, isMype, token]);
+
+  const contactFreelancer = useCallback(async () => {
+    if (!token || contacting) return;
+    setContacting(true);
+    try {
+      const res = await api.createConversation(token, {
+        freelancer_profile_id: Number(freelancerId),
+        message: "Hola, me interesa tu perfil. Podemos hablar?",
+      });
+      await navigate({
+        to: "/dashboard/messages",
+        search: { conversation: res.data?.conversation.id },
+      });
+    } catch {
+      // silent
+    } finally {
+      setContacting(false);
+    }
+  }, [contacting, freelancerId, navigate, token]);
 
   const avatar = resolveAssetUrl(freelancer?.photo_url ?? freelancer?.profile_photo);
   const topProjects = useMemo(
@@ -98,13 +119,27 @@ function ClientFreelancerDetailPage() {
                     </div>
                   </div>
                 </div>
-                <div className="rounded-2xl border border-border bg-muted/30 p-4 text-sm">
-                  <div className="flex items-center gap-1 font-bold">
-                    <Star className="h-4 w-4 fill-warning text-warning" />
-                    {Number(freelancer.rating ?? 0).toFixed(1)}
+                <div className="space-y-3">
+                  <div className="rounded-2xl border border-border bg-muted/30 p-4 text-sm">
+                    <div className="flex items-center gap-1 font-bold">
+                      <Star className="h-4 w-4 fill-warning text-warning" />
+                      {Number(freelancer.rating ?? 0).toFixed(1)}
+                    </div>
+                    <div className="mt-1 text-muted-foreground">{freelancer.completed_jobs ?? 0} trabajos completados</div>
+                    <div className="mt-1 text-muted-foreground">{freelancer.views_count ?? 0} vistas</div>
                   </div>
-                  <div className="mt-1 text-muted-foreground">{freelancer.completed_jobs ?? 0} trabajos completados</div>
-                  <div className="mt-1 text-muted-foreground">{freelancer.views_count ?? 0} vistas</div>
+                  <Button
+                    onClick={() => void contactFreelancer()}
+                    disabled={contacting}
+                    className="w-full rounded-xl bg-gradient-primary shadow-soft"
+                  >
+                    {contacting ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <MessageSquare className="h-4 w-4" />
+                    )}
+                    Contactar
+                  </Button>
                 </div>
               </div>
               <p className="mt-6 max-w-4xl text-sm leading-relaxed text-muted-foreground">

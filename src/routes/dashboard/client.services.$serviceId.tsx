@@ -1,6 +1,6 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { ArrowLeft, Clock, Loader2, Star } from "lucide-react";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useCallback, useEffect, useState } from "react";
+import { ArrowLeft, Clock, Loader2, MessageSquare, Star } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,10 +14,12 @@ export const Route = createFileRoute("/dashboard/client/services/$serviceId")({
 });
 
 function ClientServiceDetailPage() {
+  const navigate = useNavigate();
   const token = getToken();
   const user = getSessionUser();
   const isMype = user?.account_type === "mype";
   const { serviceId } = Route.useParams();
+  const [contacting, setContacting] = useState(false);
   const [service, setService] = useState<ServiceItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +47,25 @@ function ClientServiceDetailPage() {
 
     void load();
   }, [isMype, serviceId, token]);
+
+  const contactFreelancer = useCallback(async () => {
+    if (!token || contacting || !service?.freelancer.id) return;
+    setContacting(true);
+    try {
+      const res = await api.createConversation(token, {
+        freelancer_profile_id: service.freelancer.id,
+        message: "Hola, me interesa tu servicio. Podemos hablar?",
+      });
+      await navigate({
+        to: "/dashboard/messages",
+        search: { conversation: res.data?.conversation.id },
+      });
+    } catch {
+      // silent
+    } finally {
+      setContacting(false);
+    }
+  }, [contacting, navigate, service?.freelancer.id, token]);
 
   const imageUrl = resolveAssetUrl(service?.freelancer.photo_url ?? service?.freelancer.profile_photo);
 
@@ -112,11 +133,25 @@ function ClientServiceDetailPage() {
                 ))}
               </div>
               {service.freelancer.id ? (
-                <Button asChild className="mt-6 w-full rounded-xl bg-gradient-primary shadow-soft">
-                  <Link to="/dashboard/client/freelancers/$freelancerId" params={{ freelancerId: String(service.freelancer.id) }}>
-                    Ver perfil del freelancer
-                  </Link>
-                </Button>
+                <div className="mt-6 grid gap-2">
+                  <Button
+                    onClick={() => void contactFreelancer()}
+                    disabled={contacting}
+                    className="w-full rounded-xl bg-gradient-primary shadow-soft"
+                  >
+                    {contacting ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <MessageSquare className="h-4 w-4" />
+                    )}
+                    Contactar
+                  </Button>
+                  <Button asChild variant="outline" className="w-full rounded-xl">
+                    <Link to="/dashboard/client/freelancers/$freelancerId" params={{ freelancerId: String(service.freelancer.id) }}>
+                      Ver perfil del freelancer
+                    </Link>
+                  </Button>
+                </div>
               ) : null}
             </Card>
           </div>
