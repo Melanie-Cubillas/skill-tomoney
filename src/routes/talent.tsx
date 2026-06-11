@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { Shell } from "@/components/layout/Shell";
 import { Card } from "@/components/ui/card";
@@ -15,7 +15,7 @@ import {
   SlidersHorizontal,
   X,
 } from "lucide-react";
-import { api, type FreelancerItem, type RecommendedFreelancerItem } from "@/lib/api";
+import { api, resolveAssetUrl, type FreelancerItem, type RecommendedFreelancerItem } from "@/lib/api";
 import { getToken, getSessionUser } from "@/lib/auth";
 
 export const Route = createFileRoute("/talent")({
@@ -41,6 +41,7 @@ const CATEGORIES = [
 ];
 
 function TalentPage() {
+  const navigate = useNavigate();
   const token = getToken();
   const user = getSessionUser();
   const isMype = user?.account_type === "mype";
@@ -59,7 +60,6 @@ function TalentPage() {
   const [recommendationError, setRecommendationError] = useState<string | null>(null);
   const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
   const [favLoading, setFavLoading] = useState<number | null>(null);
-
   const loadFreelancers = useCallback(async () => {
     if (!token) {
       setFreelancers([]);
@@ -76,7 +76,7 @@ function TalentPage() {
       if (minRate) params.min_rate = minRate;
       if (maxRate) params.max_rate = maxRate;
       if (minRating) params.min_rating = minRating;
-      params.per_page = 50;
+      params.per_page = 12;
 
       const res = await api.getCatalog(token, params);
 
@@ -171,8 +171,8 @@ function TalentPage() {
 
   return (
     <Shell>
-      <section className="border-b border-border bg-gradient-hero py-14 text-primary-foreground">
-        <div className="absolute inset-0 grid-pattern opacity-30" />
+      <section className="relative overflow-hidden border-b border-border bg-gradient-hero py-14 text-primary-foreground">
+        <div className="pointer-events-none absolute inset-0 grid-pattern opacity-30" />
         <div className="relative mx-auto max-w-7xl px-6">
           <Badge className="bg-white/15 text-primary-foreground backdrop-blur">
             Matching IA
@@ -406,9 +406,18 @@ function TalentPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <div className="relative">
-                        <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-primary font-bold text-primary-foreground shadow-soft">
-                          {(f.name ?? "F").charAt(0).toUpperCase()}
-                        </div>
+                        {resolveAssetUrl(f.photo_url ?? f.profile_photo) ? (
+                          <img
+                            src={resolveAssetUrl(f.photo_url ?? f.profile_photo) ?? undefined}
+                            alt={f.name}
+                            loading="lazy"
+                            className="h-12 w-12 rounded-2xl object-cover shadow-soft"
+                          />
+                        ) : (
+                          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-primary font-bold text-primary-foreground shadow-soft">
+                            {(f.name ?? "F").charAt(0).toUpperCase()}
+                          </div>
+                        )}
                         <span className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-card bg-success" />
                       </div>
                       <div>
@@ -496,6 +505,19 @@ function TalentPage() {
 
                   <Button className="mt-4 w-full bg-gradient-primary shadow-soft">
                     Contactar
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-2 w-full"
+                    onClick={() =>
+                      void navigate({
+                        to: "/freelancer-portfolio/$freelancerId",
+                        params: { freelancerId: String(f.id) },
+                      })
+                    }
+                  >
+                    Ver portafolio
                   </Button>
                 </Card>
               );

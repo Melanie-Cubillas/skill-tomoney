@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { api, type ServiceItem } from "@/lib/api";
+import { api, resolveAssetUrl, type ServiceItem } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import { Clock, Loader2, Search, SlidersHorizontal, Star, X } from "lucide-react";
 
@@ -48,7 +48,7 @@ function ServicesPage() {
 
     setLoading(true);
     try {
-      const params: Record<string, string | number> = { per_page: 50 };
+      const params: Record<string, string | number> = { per_page: 12 };
       if (search) params.search = search;
       if (category) params.category = category;
       if (minPrice) params.min_price = minPrice;
@@ -247,9 +247,18 @@ function ServiceCard({ service }: { service: ServiceItem }) {
 
       <div className="p-5">
         <div className="flex items-center gap-3">
-          <div className="grid h-9 w-9 place-items-center rounded-full bg-gradient-primary text-xs font-bold text-primary-foreground">
-            {avatar || "FR"}
-          </div>
+          {resolveAssetUrl(service.freelancer.photo_url ?? service.freelancer.profile_photo) ? (
+            <img
+              src={resolveAssetUrl(service.freelancer.photo_url ?? service.freelancer.profile_photo) ?? undefined}
+              alt={service.freelancer.name}
+              loading="lazy"
+              className="h-9 w-9 rounded-full object-cover"
+            />
+          ) : (
+            <div className="grid h-9 w-9 place-items-center rounded-full bg-gradient-primary text-xs font-bold text-primary-foreground">
+              {avatar || "FR"}
+            </div>
+          )}
           <div>
             <div className="text-sm font-semibold">{service.freelancer.name}</div>
             <div className="text-xs text-muted-foreground">
