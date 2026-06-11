@@ -164,9 +164,33 @@ export type ProfilePayload = {
   completed_jobs?: number | null;
   visibility_score?: string | null;
   skills: string[] | null;
+  skill_items?: ProfileSkillItemPayload[] | null;
   social_links: Record<string, string | null> | null;
   profile_photo?: string | null;
   photo_url: string | null;
+};
+
+export type ProfileSkillItemPayload = {
+  id: number;
+  name: string;
+  category: string | null;
+};
+
+export type SkillOptionPayload = {
+  id: number;
+  name: string;
+  category: string | null;
+  group: "skills" | "tools" | "areas" | "Otros";
+  subcategory: string | null;
+};
+
+export type SkillOptionsPayload = {
+  items: SkillOptionPayload[];
+  grouped: {
+    skills: SkillOptionPayload[];
+    tools: SkillOptionPayload[];
+    areas: SkillOptionPayload[];
+  };
 };
 
 export type CategoryPayload = {
@@ -407,6 +431,12 @@ export const api = {
       cacheKey: `profile:${token.slice(-12)}`,
       cacheTtlMs: 5 * 60 * 1000,
     }),
+  getSkillOptions: (token: string) =>
+    apiRequest<SkillOptionsPayload>("/profile/skill-options", {
+      token,
+      cacheKey: "profile:skill-options",
+      cacheTtlMs: 30 * 60 * 1000,
+    }),
   saveProfile: (token: string, body: Partial<ProfilePayload>) =>
     apiRequest<ProfilePayload>("/profile", {
       method: "PUT",
@@ -416,7 +446,7 @@ export const api = {
       clearApiCache("profile:");
       return payload;
     }),
-  updateSkills: (token: string, skills: string[]) =>
+  updateSkills: (token: string, skills: Array<{ id: number }>) =>
     apiRequest<ProfilePayload>("/profile/skills", {
       method: "PATCH",
       token,
