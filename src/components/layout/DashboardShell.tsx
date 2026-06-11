@@ -1,7 +1,24 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Briefcase, MessageSquare, Wallet, Crown, Settings, Search, Users, FolderKanban, Bell, LogOut, UserRound, FileText } from "lucide-react";
-import { api } from "@/lib/api";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Bell,
+  Briefcase,
+  Crown,
+  FileText,
+  FolderKanban,
+  LayoutDashboard,
+  LogOut,
+  MessageSquare,
+  Search,
+  Settings,
+  UserRound,
+  Users,
+  Wallet,
+} from "lucide-react";
+import { api, type NotificationItem } from "@/lib/api";
 import { clearSession, getSessionUser, getToken } from "@/lib/auth";
+
+const POLL_INTERVAL = 15000;
 
 export function DashboardShell({
   role,
@@ -15,6 +32,12 @@ export function DashboardShell({
   const path = useRouterState({ select: (r) => r.location.pathname });
   const navigate = useNavigate();
   const user = getSessionUser();
+  const token = getToken();
+  const [unreadTotal, setUnreadTotal] = useState(0);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   const items = role === "freelancer"
     ? [
         { to: "/dashboard/freelancer", icon: LayoutDashboard, label: "Dashboard" },
@@ -36,11 +59,89 @@ export function DashboardShell({
         { to: "/dashboard/premium", icon: Crown, label: "Premium" },
       ];
 
+  const fetchUnread = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await api.getUnreadCount(token);
+      setUnreadTotal(res.data?.total ?? 0);
+    } catch {
+      // silent
+    }
+  }, [token]);
+
+  const fetchNotifications = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await api.getNotifications(token);
+      setNotifications(res.data?.notifications ?? []);
+    } catch {
+      // silent
+    }
+  }, [token]);
+
+  useEffect(() => {
+    void fetchUnread();
+    const interval = setInterval(() => void fetchUnread(), POLL_INTERVAL);
+    return () => clearInterval(interval);
+  }, [fetchUnread]);
+
+  useEffect(() => {
+    if (!showDropdown) return;
+    void fetchNotifications();
+  }, [showDropdown, fetchNotifications]);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    if (showDropdown) {
+      document.addEventListener("mousedown", handleClick);
+    }
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [showDropdown]);
+
+  const markRead = async (id: number) => {
+    if (!token) return;
+    try {
+      await api.markNotificationRead(token, id);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read_at: new Date().toISOString() } : n)),
+      );
+      void fetchUnread();
+    } catch {
+      // silent
+    }
+  };
+
+  const markAllRead = async () => {
+    if (!token) return;
+    try {
+      await api.markAllNotificationsRead(token);
+      setNotifications((prev) => prev.map((n) => ({ ...n, read_at: new Date().toISOString() })));
+      void fetchUnread();
+    } catch {
+      // silent
+    }
+  };
+
+  const handleNotificationClick = (n: NotificationItem) => {
+    const convId = n.data?.conversation_id as number | undefined;
+    if (convId) {
+      void navigate({ to: "/dashboard/messages", search: { conversation: convId } });
+    }
+    if (!n.read_at) {
+      void markRead(n.id);
+    }
+    setShowDropdown(false);
+  };
+
   const onLogout = async () => {
     try {
-      const token = getToken();
-      if (token) {
-        await api.logout(token);
+      const token_ = getToken();
+      if (token_) {
+        await api.logout(token_);
       }
     } catch {
       // no-op
@@ -103,10 +204,73 @@ export function DashboardShell({
             <Users className="h-4 w-4" /> {role === "freelancer" ? "Modo Freelancer" : "Modo MYPE"}
           </div>
           <div className="flex items-center gap-3">
-            <button className="relative grid h-9 w-9 place-items-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground">
-              <Bell className="h-4 w-4" />
-              <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-primary" />
-            </button>
+            <div ref={dropdownRef} className="relative">
+              <button
+                onClick={() => setShowDropdown((v) => !v)}
+                className="relative grid h-9 w-9 place-items-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground"
+              >
+                <Bell className="h-4 w-4" />
+                {unreadTotal > 0 ? (
+                  <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground">
+                    {unreadTotal > 9 ? "9+" : unreadTotal}
+                  </span>
+                ) : null}
+              </button>
+              {showDropdown ? (
+                <div className="absolute right-0 top-full z-50 mt-2 w-[360px] overflow-hidden rounded-2xl border border-border bg-card shadow-elegant">
+                  <div className="flex items-center justify-between border-b border-border px-4 py-3">
+                    <span className="text-sm font-bold">Notificaciones</span>
+                    {notifications.some((n) => !n.read_at) ? (
+                      <button
+                        onClick={() => void markAllRead()}
+                        className="text-xs font-medium text-primary hover:underline"
+                      >
+                        Marcar todas leidas
+                      </button>
+                    ) : null}
+                  </div>
+                  <div className="max-h-[360px] overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <p className="px-4 py-8 text-center text-xs text-muted-foreground">
+                        Sin notificaciones
+                      </p>
+                    ) : (
+                      notifications.map((n) => (
+                        <button
+                          key={n.id}
+                          onClick={() => handleNotificationClick(n)}
+                          className={`flex w-full items-start gap-3 border-b border-border px-4 py-3 text-left transition hover:bg-muted/40 ${!n.read_at ? "bg-muted/20" : ""}`}
+                        >
+                          <span
+                            className={`mt-1 grid h-2 w-2 shrink-0 rounded-full ${!n.read_at ? "bg-primary" : "bg-transparent"}`}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm font-semibold">{n.title}</div>
+                            <div className="line-clamp-2 text-xs text-muted-foreground">
+                              {n.message}
+                            </div>
+                            <div className="mt-1 text-[10px] text-muted-foreground">
+                              {formatRelativeTime(n.created_at)}
+                            </div>
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                  <div className="border-t border-border p-2">
+                    <button
+                      onClick={() => {
+                        setShowDropdown(false);
+                        void navigate({ to: "/dashboard/messages" });
+                      }}
+                      className="w-full rounded-xl px-3 py-2 text-center text-xs font-medium text-primary hover:bg-muted/40"
+                    >
+                      Ir a mensajes
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+            </div>
             {profilePhotoUrl ? (
               <img src={profilePhotoUrl} alt="Foto de perfil" className="h-9 w-9 rounded-full object-cover shadow-soft ring-2 ring-primary/20" />
             ) : (
@@ -124,4 +288,16 @@ export function DashboardShell({
       </div>
     </div>
   );
+}
+
+function formatRelativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "ahora";
+  if (mins < 60) return `hace ${mins} min`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `hace ${hours}h`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `hace ${days}d`;
+  return new Date(iso).toLocaleDateString("es-PE", { day: "numeric", month: "short" });
 }

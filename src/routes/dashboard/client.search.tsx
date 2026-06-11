@@ -1,6 +1,6 @@
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
-import { Heart, Loader2, MapPin, Search, SlidersHorizontal, Star, X } from "lucide-react";
+import { Heart, Loader2, MapPin, MessageSquare, Search, SlidersHorizontal, Star, X } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,7 @@ function ClientSearchPage() {
   const [maxRate, setMaxRate] = useState("");
   const [minRating, setMinRating] = useState("");
   const [showFilters, setShowFilters] = useState(true);
+  const [contactingId, setContactingId] = useState<number | null>(null);
 
   const loadFreelancers = useCallback(async () => {
     if (!token || !isMype) {
@@ -108,6 +109,25 @@ function ClientSearchPage() {
       }
     } finally {
       setFavLoading(null);
+    }
+  };
+
+  const contactFreelancer = async (freelancerId: number) => {
+    if (!token || contactingId !== null) return;
+    setContactingId(freelancerId);
+    try {
+      const res = await api.createConversation(token, {
+        freelancer_profile_id: freelancerId,
+        message: "Hola, me interesa tus servicios. Podemos hablar?",
+      });
+      await navigate({
+        to: "/dashboard/messages",
+        search: { conversation: res.data?.conversation.id },
+      });
+    } catch {
+      // silent
+    } finally {
+      setContactingId(null);
     }
   };
 
@@ -231,7 +251,9 @@ function ClientSearchPage() {
                 freelancer={freelancer}
                 isFavorite={favoriteIds.has(freelancer.id)}
                 favoriteLoading={favLoading === freelancer.id}
+                contacting={contactingId === freelancer.id}
                 onToggleFavorite={() => void toggleFavorite(freelancer.id)}
+                onContact={() => void contactFreelancer(freelancer.id)}
                 onOpenProfile={() =>
                   void navigate({
                     to: "/dashboard/client/freelancers/$freelancerId",
@@ -279,13 +301,17 @@ function FreelancerCard({
   freelancer,
   isFavorite,
   favoriteLoading,
+  contacting,
   onToggleFavorite,
+  onContact,
   onOpenProfile,
 }: {
   freelancer: FreelancerItem;
   isFavorite: boolean;
   favoriteLoading: boolean;
+  contacting: boolean;
   onToggleFavorite: () => void;
+  onContact: () => void;
   onOpenProfile: () => void;
 }) {
   const imageUrl = resolveAssetUrl(freelancer.photo_url ?? freelancer.profile_photo);
@@ -341,11 +367,28 @@ function FreelancerCard({
         </span>
       </div>
 
-      <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
-        <div className="font-display text-lg font-bold">{rate ?? "Tarifa pendiente"}</div>
-        <Button onClick={onOpenProfile} className="rounded-xl bg-gradient-primary shadow-soft">
-          Ver perfil
-        </Button>
+      <div className="mt-5 grid gap-2">
+        <div className="flex items-center justify-between">
+          <div className="font-display text-lg font-bold">{rate ?? "Tarifa pendiente"}</div>
+          <div className="flex gap-2">
+            <Button
+              onClick={onContact}
+              disabled={contacting}
+              variant="outline"
+              className="rounded-xl"
+            >
+              {contacting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <MessageSquare className="h-4 w-4" />
+              )}
+              Contactar
+            </Button>
+            <Button onClick={onOpenProfile} className="rounded-xl bg-gradient-primary shadow-soft">
+              Ver perfil
+            </Button>
+          </div>
+        </div>
       </div>
     </Card>
   );
