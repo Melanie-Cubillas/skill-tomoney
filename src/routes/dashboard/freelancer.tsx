@@ -1,16 +1,16 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
-import { ArrowRight, Briefcase, CheckCircle2, ClipboardCheck, Send, Star, Wallet } from "lucide-react";
+import { ArrowRight, CheckCircle2, ClipboardCheck, FolderKanban, Package, Star } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { api, type ProfilePayload } from "@/lib/api";
+import { api, type PortfolioProjectPayload, type ProfilePayload, type ServicePayload } from "@/lib/api";
 import { getSessionUser, getToken } from "@/lib/auth";
 
 export const Route = createFileRoute("/dashboard/freelancer")({
-  head: () => ({ meta: [{ title: "Dashboard Freelancer · SkilltoMoney" }] }),
+  head: () => ({ meta: [{ title: "Dashboard Freelancer - SkilltoMoney" }] }),
   component: FreelancerRoute,
 });
 
@@ -28,79 +28,125 @@ function FreelancerDashboard() {
   const token = getToken();
   const user = useMemo(() => getSessionUser(), []);
   const [profile, setProfile] = useState<Partial<ProfilePayload>>({});
+  const [services, setServices] = useState<ServicePayload[]>([]);
+  const [portfolio, setPortfolio] = useState<PortfolioProjectPayload[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!token) return;
 
     const load = async () => {
+      setLoading(true);
+
       try {
-        const response = await api.getProfile(token);
-        setProfile(response.data ?? {});
+        const [profileResponse, serviceResponse, portfolioResponse] = await Promise.all([
+          api.getProfile(token),
+          api.getFreelancerServices(token),
+          api.getPortfolioProjects(token),
+        ]);
+
+        setProfile(profileResponse.data ?? {});
+        setServices(serviceResponse.data ?? []);
+        setPortfolio(portfolioResponse.data ?? []);
       } catch {
         setProfile({});
+        setServices([]);
+        setPortfolio([]);
+      } finally {
+        setLoading(false);
       }
     };
 
     void load();
   }, [token]);
 
-  const firstName = (user?.name ?? "Andrea").split(" ")[0] || "Andrea";
+  const firstName = (user?.name ?? "Tu perfil").split(" ")[0] || "Tu perfil";
+  const activeServices = services.filter((service) => service.status === "active").length;
+  const featuredProjects = portfolio.filter((project) => project.is_featured).length;
+  const completionFields = [
+    profile.headline,
+    profile.bio ?? profile.description,
+    profile.experience_area ?? profile.category,
+    profile.skills?.length,
+    services.length,
+    portfolio.length,
+    profile.social_links?.linkedin || profile.social_links?.instagram || profile.website,
+  ];
+  const profileCompletion = Math.round((completionFields.filter(Boolean).length / completionFields.length) * 100);
 
   return (
     <DashboardShell role="freelancer" profilePhotoUrl={profile.photo_url ?? null}>
       <div className="space-y-6">
         <div>
-          <h1 className="font-display text-4xl font-extrabold tracking-normal">¡Hola, {firstName}! 👋</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Este es tu resumen profesional. Sigue asi, vas por buen camino.</p>
+          <h1 className="font-display text-4xl font-extrabold tracking-normal">Hola, {firstName}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Este es tu resumen real segun tu perfil, servicios y portafolio guardados.
+          </p>
         </div>
 
         <div className="grid gap-4 xl:grid-cols-4">
-          <Metric icon={Wallet} label="Ganancias totales" value="S/ 3,250.00" hint="+12% vs el mes pasado" tint="teal" />
-          <Metric icon={ClipboardCheck} label="Proyectos completados" value={`${profile.completed_jobs ?? 18}`} hint="+3 este mes" tint="blue" />
-          <Metric icon={Star} label="Valoracion promedio" value={`${profile.rating ?? "4.8"}`} hint="Excelente" tint="amber" />
-          <Metric icon={Send} label="Propuestas enviadas" value="26" hint="+6 esta semana" tint="red" />
+          <Metric icon={Package} label="Servicios" value={String(services.length)} hint={`${activeServices} activos`} tint="teal" />
+          <Metric icon={FolderKanban} label="Portafolio" value={String(portfolio.length)} hint={`${featuredProjects} destacados`} tint="blue" />
+          <Metric icon={Star} label="Valoracion promedio" value={`${profile.rating ?? "0.00"}`} hint="Dato real del perfil" tint="amber" />
+          <Metric icon={ClipboardCheck} label="Trabajos completados" value={`${profile.completed_jobs ?? 0}`} hint="Dato real del perfil" tint="red" />
         </div>
 
         <div className="grid gap-5 xl:grid-cols-[1.7fr_0.85fr_0.85fr]">
           <Card className="rounded-2xl p-6 shadow-soft">
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="font-display text-lg font-bold tracking-normal">Ganancias en los ultimos 30 dias</h2>
-              <Button variant="outline" size="sm">Este mes</Button>
+              <h2 className="font-display text-lg font-bold tracking-normal">Perfil generado</h2>
+              <Button asChild variant="outline" size="sm">
+                <Link to="/dashboard/freelancer/profile">Editar</Link>
+              </Button>
             </div>
-            <div className="relative h-72">
-              <div className="absolute inset-0 grid grid-rows-4 text-xs text-muted-foreground">
-                {["S/ 1,000", "S/ 750", "S/ 500", "S/ 250"].map((label) => (
-                  <div key={label} className="border-b border-dashed border-border">
-                    <span>{label}</span>
-                  </div>
-                ))}
+
+            <div className="grid gap-5 md:grid-cols-[1fr_220px]">
+              <div>
+                <p className="text-sm font-semibold text-secondary">
+                  {profile.headline ?? "Titulo profesional pendiente"}
+                </p>
+                <h2 className="mt-2 font-display text-3xl font-extrabold tracking-normal">
+                  {profile.experience_area ?? profile.category ?? "Area sin definir"}
+                </h2>
+                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+                  {profile.bio ?? profile.description ?? "Completa el onboarding para generar una descripcion profesional con IA."}
+                </p>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {(profile.skills ?? []).slice(0, 8).map((skill) => (
+                    <Badge key={skill} variant="outline" className="border-secondary/30 text-secondary">
+                      {skill}
+                    </Badge>
+                  ))}
+                  {(profile.skills ?? []).length === 0 ? (
+                    <span className="text-sm text-muted-foreground">Sin habilidades guardadas aun.</span>
+                  ) : null}
+                </div>
               </div>
-              <svg viewBox="0 0 720 250" className="absolute inset-x-0 bottom-0 h-60 w-full overflow-visible">
-                <defs>
-                  <linearGradient id="earningsFill" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stopColor="#00c9ba" stopOpacity="0.28" />
-                    <stop offset="100%" stopColor="#00c9ba" stopOpacity="0.03" />
-                  </linearGradient>
-                </defs>
-                <path d="M0 230 L55 210 L110 120 L165 82 L220 135 L275 112 L330 102 L385 45 L440 130 L495 90 L550 82 L605 24 L665 42 L720 5 L720 250 L0 250 Z" fill="url(#earningsFill)" />
-                <path d="M0 230 L55 210 L110 120 L165 82 L220 135 L275 112 L330 102 L385 45 L440 130 L495 90 L550 82 L605 24 L665 42 L720 5" fill="none" stroke="#00a99d" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
-                {[0, 55, 110, 165, 220, 275, 330, 385, 440, 495, 550, 605, 665, 720].map((x, index) => (
-                  <circle key={x} cx={x} cy={[230, 210, 120, 82, 135, 112, 102, 45, 130, 90, 82, 24, 42, 5][index]} r="5" fill="#00a99d" stroke="#fff" strokeWidth="3" />
-                ))}
-              </svg>
+
+              <div className="rounded-2xl border border-border bg-muted/30 p-4">
+                <div className="text-sm font-semibold text-muted-foreground">Tarifa sugerida</div>
+                <div className="mt-2 font-display text-2xl font-extrabold tracking-normal">
+                  {profile.suggested_rate ?? "Pendiente"}
+                </div>
+                <div className="mt-4 text-sm font-semibold text-muted-foreground">Fuente IA</div>
+                <div className="mt-1 text-sm">{profile.gemini_analysis?.source ?? "Sin analisis"}</div>
+              </div>
             </div>
           </Card>
 
           <Card className="rounded-2xl p-6 shadow-soft">
-            <h2 className="font-display text-lg font-bold tracking-normal">Tu perfil esta completo</h2>
+            <h2 className="font-display text-lg font-bold tracking-normal">Completitud del perfil</h2>
             <div className="mt-5 flex items-center gap-5">
-              <div className="grid h-24 w-24 shrink-0 aspect-square place-items-center rounded-full border-[8px] border-secondary text-2xl font-extrabold">78%</div>
-              <p className="text-sm text-muted-foreground">Un perfil completo te ayuda a conseguir mas proyectos.</p>
+              <div className="grid h-24 w-24 shrink-0 aspect-square place-items-center rounded-full border-[8px] border-secondary text-2xl font-extrabold">
+                {profileCompletion}%
+              </div>
+              <p className="text-sm text-muted-foreground">Calculado con datos reales guardados.</p>
             </div>
             <div className="mt-5 space-y-3 text-sm">
-              {["Foto de perfil", "Descripcion personal", "Habilidades añadidas", "Portafolio agregado"].map((item) => (
-                <div key={item} className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 shrink-0 text-success" /> {item}</div>
-              ))}
+              <ChecklistLine done={Boolean(profile.bio ?? profile.description)} label="Descripcion personal" />
+              <ChecklistLine done={(profile.skills ?? []).length > 0} label="Habilidades guardadas" />
+              <ChecklistLine done={services.length > 0} label="Servicio publicado" />
+              <ChecklistLine done={portfolio.length > 0} label="Portafolio agregado" />
             </div>
             <Button asChild className="mt-5 rounded-xl bg-gradient-primary shadow-soft">
               <Link to="/dashboard/freelancer/profile">Mejorar perfil</Link>
@@ -109,18 +155,24 @@ function FreelancerDashboard() {
 
           <div className="space-y-5">
             <Card className="rounded-2xl border-secondary/30 bg-secondary/10 p-5 shadow-soft">
-              <h2 className="font-display text-lg font-bold tracking-normal">Consejo para hoy ✨</h2>
-              <p className="mt-3 text-sm text-muted-foreground">Los perfiles con portafolio reciben 3x mas visitas de clientes potenciales.</p>
+              <h2 className="font-display text-lg font-bold tracking-normal">Consejo para hoy</h2>
+              <p className="mt-3 text-sm text-muted-foreground">
+                {profile.gemini_analysis?.recomendaciones_mejora?.[0] ??
+                  "Completa tu perfil y agrega proyectos para mejorar tu presentacion."}
+              </p>
               <Link to="/dashboard/freelancer/portfolio" className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-secondary">
-                Ver recomendaciones <ArrowRight className="h-4 w-4" />
+                Ver portafolio <ArrowRight className="h-4 w-4" />
               </Link>
             </Card>
+
             <Card className="rounded-2xl p-5 shadow-soft">
-              <h2 className="font-display text-lg font-bold tracking-normal">Actividad reciente</h2>
+              <h2 className="font-display text-lg font-bold tracking-normal">Actividad real</h2>
               <div className="mt-4 space-y-4 text-sm">
-                <Activity icon={Wallet} title="Pago recibido" detail="S/ 250.00 de Laura Martinez" />
-                <Activity icon={Star} title="Nueva valoracion" detail="5 estrellas de NutriVida" />
-                <Activity icon={Briefcase} title="Propuesta aceptada" detail="Edicion de video promocional" />
+                {services[0] ? <Activity icon={Package} title="Servicio creado" detail={services[0].title} /> : null}
+                {portfolio[0] ? <Activity icon={FolderKanban} title="Proyecto agregado" detail={portfolio[0].title} /> : null}
+                {!services[0] && !portfolio[0] ? (
+                  <p className="text-sm text-muted-foreground">{loading ? "Cargando..." : "Aun no hay actividad guardada."}</p>
+                ) : null}
               </div>
             </Card>
           </div>
@@ -129,48 +181,68 @@ function FreelancerDashboard() {
         <div className="grid gap-5 xl:grid-cols-2">
           <Card className="rounded-2xl p-5 shadow-soft">
             <div className="flex items-center justify-between">
-              <h2 className="font-display text-lg font-bold tracking-normal">Proyectos activos</h2>
+              <h2 className="font-display text-lg font-bold tracking-normal">Portafolio</h2>
               <Link to="/dashboard/freelancer/portfolio" className="text-xs font-semibold text-primary">Ver todos</Link>
             </div>
             <div className="mt-4 space-y-3">
-              {[
-                ["Diseño de logo para marca", "Laura Martinez", "En progreso", "S/ 250.00"],
-                ["Edicion de video promocional", "NutriVida", "En progreso", "S/ 450.00"],
-                ["Banners para redes sociales", "Beauty Care", "Pendiente", "S/ 150.00"],
-              ].map(([title, client, status, amount]) => (
-                <div key={title} className="flex items-center justify-between rounded-xl border border-border px-4 py-3">
+              {portfolio.slice(0, 3).map((project) => (
+                <div key={project.id} className="flex items-center justify-between gap-3 rounded-xl border border-border px-4 py-3">
                   <div>
-                    <div className="font-bold">{title}</div>
-                    <div className="text-xs text-muted-foreground">{client}</div>
+                    <div className="font-bold">{project.title}</div>
+                    <div className="text-xs text-muted-foreground">{project.category ?? "Sin categoria"}</div>
                   </div>
-                  <Badge variant="outline" className={status === "Pendiente" ? "border-warning/40 text-orange-600" : "border-blue-300 text-blue-600"}>{status}</Badge>
-                  <div className="text-right text-sm font-bold">{amount}</div>
+                  <Badge variant="outline" className={project.is_featured ? "border-secondary/40 text-secondary" : "border-border text-muted-foreground"}>
+                    {project.is_featured ? "Destacado" : "Portafolio"}
+                  </Badge>
                 </div>
               ))}
+              {portfolio.length === 0 ? (
+                <EmptyState text={loading ? "Cargando portafolio..." : "Aun no hay proyectos guardados."} />
+              ) : null}
             </div>
           </Card>
 
           <Card className="rounded-2xl p-5 shadow-soft">
             <div className="flex items-center justify-between">
-              <h2 className="font-display text-lg font-bold tracking-normal">Mensajes recientes</h2>
-              <Link to="/dashboard/messages" className="text-xs font-semibold text-primary">Ver todos</Link>
+              <h2 className="font-display text-lg font-bold tracking-normal">Servicios</h2>
+              <Link to="/dashboard/freelancer/services" className="text-xs font-semibold text-primary">Ver todos</Link>
             </div>
             <div className="mt-4 space-y-4">
-              {["Laura Martinez", "NutriVida", "Carlos Sanchez"].map((name, index) => (
-                <div key={name} className="flex items-center gap-3">
-                  <div className="grid h-10 w-10 shrink-0 aspect-square place-items-center rounded-full bg-gradient-primary text-xs font-bold text-primary-foreground">{name.slice(0, 2).toUpperCase()}</div>
-                  <div className="min-w-0 flex-1">
-                    <div className="font-bold">{name}</div>
-                    <div className="truncate text-sm text-muted-foreground">{index === 0 ? "Hola Andrea! Me encanto el diseño..." : "Listo, muchas gracias!"}</div>
+              {services.slice(0, 2).map((service) => (
+                <div key={service.id} className="rounded-xl border border-border px-4 py-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="font-bold">{service.title}</div>
+                    <Badge variant="outline" className="border-secondary/40 text-secondary">{service.status}</Badge>
                   </div>
-                  <span className="text-xs text-muted-foreground">{index === 0 ? "10:30 AM" : "Ayer"}</span>
+                  <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{service.description}</p>
+                  <div className="mt-3 text-sm font-bold">S/ {Number(service.price).toFixed(2)} - {service.delivery_days} dias</div>
                 </div>
               ))}
+              {services.length === 0 ? (
+                <EmptyState text={loading ? "Cargando servicios..." : "Aun no hay servicios guardados."} />
+              ) : null}
             </div>
           </Card>
         </div>
       </div>
     </DashboardShell>
+  );
+}
+
+function ChecklistLine({ done, label }: { done: boolean; label: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <CheckCircle2 className={`h-4 w-4 shrink-0 ${done ? "text-success" : "text-muted-foreground"}`} />
+      {label}
+    </div>
+  );
+}
+
+function EmptyState({ text }: { text: string }) {
+  return (
+    <p className="rounded-xl border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
+      {text}
+    </p>
   );
 }
 
