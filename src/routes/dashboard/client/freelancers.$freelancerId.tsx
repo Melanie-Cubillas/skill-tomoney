@@ -5,6 +5,7 @@ import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { api, resolveAssetUrl, type FreelancerDetailPayload } from "@/lib/api";
 import { getSessionUser, getToken } from "@/lib/auth";
 
@@ -67,7 +68,6 @@ function ClientFreelancerDetailPage() {
     }
   }, [contacting, freelancerId, navigate, token]);
 
-  const avatar = resolveAssetUrl(freelancer?.photo_url ?? freelancer?.profile_photo);
   const topProjects = useMemo(
     () => [...(freelancer?.portfolio ?? [])].sort((a, b) => Number(b.is_featured) - Number(a.is_featured)).slice(0, 3),
     [freelancer],
@@ -102,13 +102,11 @@ function ClientFreelancerDetailPage() {
             <Card className="rounded-2xl p-6 shadow-soft">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                 <div className="flex gap-4">
-                  {avatar ? (
-                    <img src={avatar} alt={freelancer.name} className="h-20 w-20 rounded-2xl object-cover" />
-                  ) : (
-                    <div className="grid h-20 w-20 place-items-center rounded-2xl bg-gradient-primary text-xl font-bold text-primary-foreground">
-                      {freelancer.name.slice(0, 2).toUpperCase()}
-                    </div>
-                  )}
+                  <ProfileAvatar
+                    src={freelancer.photo_url ?? freelancer.profile_photo}
+                    name={freelancer.name}
+                    className="h-20 w-20 rounded-2xl text-xl"
+                  />
                   <div>
                     <h1 className="font-display text-4xl font-extrabold tracking-normal">{freelancer.name}</h1>
                     <p className="mt-1 text-secondary">{freelancer.headline ?? freelancer.category ?? "Freelancer"}</p>

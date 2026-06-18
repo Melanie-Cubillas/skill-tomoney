@@ -10,7 +10,7 @@ import { getSessionUser, getToken } from "@/lib/auth";
 import { usePusher } from "@/hooks/use-pusher";
 
 export const Route = createFileRoute("/dashboard/messages")({
-  head: () => ({ meta: [{ title: "Mensajes - SkilltoMoney" }] }),
+  head: () => ({ meta: [{ title: "Chat - SkilltoMoney" }] }),
   validateSearch: (search: Record<string, string | undefined>) => ({
     conversation: search.conversation ? Number(search.conversation) : undefined,
   }),

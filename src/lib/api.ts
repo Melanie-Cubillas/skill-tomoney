@@ -11,11 +11,18 @@ export function resolveAssetUrl(value: string | null | undefined): string | null
   if (!value) return null;
 
   if (/^(https?:|data:|blob:)/i.test(value)) {
+    if (typeof window !== "undefined" && window.location.protocol === "https:" && value.startsWith("http://")) {
+      return value.replace(/^http:\/\//i, "https://");
+    }
+
     return value;
   }
 
   const normalizedRoot = API_ROOT_URL.replace(/\/$/, "");
-  const normalizedPath = value.startsWith("/") ? value : `/${value}`;
+  const cleanPath = value.replace(/^\/+/, "");
+  const normalizedPath = cleanPath.startsWith("api/media/")
+    ? `/${cleanPath}`
+    : `/api/media/${cleanPath}`;
 
   return `${normalizedRoot}${normalizedPath}`;
 }
@@ -127,6 +134,8 @@ export type AuthUser = {
   account_type: "freelancer" | "mype";
   email: string;
   email_verified_at?: string | null;
+  subscription_plan?: "free" | "pro";
+  subscription_status?: string | null;
 };
 
 export type AuthPayload = {
@@ -166,7 +175,8 @@ export type ProfilePayload = {
   availability_status?: string | null;
   rating?: string | null;
   completed_jobs?: number | null;
-  visibility_score?: string | null;
+  visibility_score?: string | number | null;
+  visibility?: VisibilityPayload | null;
   skills: string[] | null;
   skill_items?: ProfileSkillItemPayload[] | null;
   social_links: Record<string, string | null> | null;
@@ -175,6 +185,18 @@ export type ProfilePayload = {
   gemini_analysis?: GeminiAnalysisPayload | null;
   services_count?: number | null;
   portfolio_projects_count?: number | null;
+};
+
+export type VisibilityPayload = {
+  score: number;
+  level: "Alta" | "Media" | "Baja" | string;
+  tier: "Oro" | "Plata" | "Bronce" | string;
+  checks: {
+    label: string;
+    done: boolean;
+    points: number;
+  }[];
+  missing: string[];
 };
 
 export type ProfileSkillItemPayload = {
@@ -279,7 +301,7 @@ export type ClientProjectsPayload = {
   projects: ClientProjectPayload[];
   limits: {
     plan: "free" | "pro";
-    max_projects: number;
+    max_projects: number | null;
     can_create: boolean;
   };
 };
@@ -329,6 +351,38 @@ export type RecommendationPayload = {
   recommendations: RecommendedFreelancerItem[];
 };
 
+export type CompatibilityBreakdownPayload = {
+  skills?: {
+    weight: number;
+    points: number;
+    requested: string[];
+    matched: string[];
+  };
+  category?: {
+    weight: number;
+    points: number;
+    matched: boolean;
+    requested: string | null;
+    profile_value: string | null;
+  };
+  rating?: {
+    weight: number;
+    points: number;
+    value: number;
+  };
+  experience?: {
+    weight: number;
+    points: number;
+    completed_jobs: number;
+  };
+  price_range?: {
+    matched: boolean | null;
+    rate_amount: number | null;
+    budget_min: number | null;
+    budget_max: number | null;
+  };
+};
+
 export type MarketTrendItem = {
   label: string;
   demand_count: number;
@@ -357,6 +411,19 @@ export type PriceSuggestionPayload = {
   average_price: number | null;
   currency: string;
   source?: string;
+};
+
+export type PortfolioHealthPayload = {
+  score: number;
+  level: string;
+  signals: {
+    has_photo: boolean;
+    has_description: boolean;
+    projects_count: number;
+    skills_count: number;
+    has_headline: boolean;
+  };
+  recommendations: string[];
 };
 
 type RequestOptions = RequestInit & {
@@ -505,6 +572,196 @@ export type UnreadCountPayload = {
   total: number;
 };
 
+export type SubscriptionPaymentPayload = {
+  id: number;
+  reference: string;
+  plan: "pro";
+  amount: number;
+  currency: "PEN";
+  payment_method: "card" | "yape" | "plin";
+  card_brand: string | null;
+  card_last_four: string | null;
+  status: "succeeded";
+  saved_for_renewal: boolean;
+  paid_at: string | null;
+};
+
+export type SubscriptionPayload = {
+  plan: "free" | "pro";
+  status: string;
+  billing_cycle: "monthly" | "yearly" | null;
+  amount: number;
+  currency: "PEN";
+  starts_at: string | null;
+  ends_at: string | null;
+  features: string[];
+  last_payment: SubscriptionPaymentPayload | null;
+  payment?: SubscriptionPaymentPayload;
+};
+
+export type SubscriptionCheckoutInput = {
+  plan: "pro";
+  billing_cycle: "monthly" | "yearly";
+  payment_method: "card" | "yape" | "plin";
+  save_payment_method?: boolean;
+  payment_details: {
+    card_number?: string;
+    card_holder?: string;
+    expiry_month?: number;
+    expiry_year?: number;
+    cvv?: string;
+    phone?: string;
+    culqi_token?: string;
+    culqi_email?: string;
+  };
+};
+
+export type ContractStatus =
+  | "pending_payment"
+  | "in_escrow"
+  | "in_progress"
+  | "submitted_for_review"
+  | "revision_requested"
+  | "approved"
+  | "released"
+  | "disputed"
+  | "cancelled";
+
+export type ContractFilePayload = {
+  id: number;
+  original_name: string;
+  mime_type: string | null;
+  size: number | null;
+  is_preview: boolean;
+  is_final: boolean;
+  downloadable: boolean;
+  watermark_text: string | null;
+  download_url: string;
+};
+
+export type ContractDeliveryPayload = {
+  id: number;
+  title: string | null;
+  message: string | null;
+  status: string;
+  revision_round: number;
+  submitted_at: string | null;
+  reviewed_at: string | null;
+  review_comment: string | null;
+  files: ContractFilePayload[];
+  created_at: string;
+};
+
+export type ContractPayload = {
+  id: number;
+  contract_number: string;
+  title: string;
+  description: string | null;
+  amount: number;
+  currency: string;
+  status: ContractStatus;
+  provider: string;
+  terms: Record<string, unknown> | null;
+  mype: {
+    id: number | null;
+    name: string | null;
+    user_id: number | null;
+  };
+  freelancer: {
+    id: number | null;
+    user_id: number | null;
+    name: string | null;
+    headline: string | null;
+    skills: string[];
+  };
+  service: {
+    id: number;
+    title: string;
+    category: string | null;
+  } | null;
+  client_project: {
+    id: number;
+    title: string;
+    category: string | null;
+  } | null;
+  payment: {
+    id: number;
+    status: string;
+    provider: string;
+    paid_at: string | null;
+  } | null;
+  escrow: {
+    id: number;
+    status: string;
+    amount: number;
+    currency: string;
+    held_at: string | null;
+    released_at: string | null;
+    refunded_at: string | null;
+  } | null;
+  deliveries: ContractDeliveryPayload[];
+  disputes: {
+    id: number;
+    status: string;
+    reason: string;
+    resolution: string | null;
+    admin_comment: string | null;
+    resolved_at: string | null;
+    created_at: string;
+  }[];
+  created_at: string;
+  updated_at: string;
+  started_at: string | null;
+  submitted_at: string | null;
+  approved_at: string | null;
+  released_at: string | null;
+};
+
+export type ContractsPayload = {
+  contracts: ContractPayload[];
+};
+
+export type CreateContractInput = {
+  freelancer_profile_id: number;
+  service_id?: number | null;
+  client_project_id?: number | null;
+  title: string;
+  description?: string | null;
+  amount: number;
+  currency?: string;
+  terms?: Record<string, unknown> | null;
+};
+
+export type WalletPayload = {
+  wallet: {
+    id: number;
+    available_balance: number;
+    pending_balance: number;
+    escrow_balance: number;
+    currency: string;
+    transactions: {
+      id: number;
+      contract_id: number | null;
+      type: string;
+      direction: "credit" | "debit" | string;
+      amount: number;
+      currency: string;
+      available_after: number;
+      description: string | null;
+      created_at: string;
+    }[];
+    withdrawals: {
+      id: number;
+      amount: number;
+      currency: string;
+      provider: string;
+      status: string;
+      requested_at: string | null;
+      processed_at: string | null;
+    }[];
+  };
+};
+
 export const api = {
   health: async (): Promise<HealthPayload> => {
     const response = await fetch(`${API_URL}/health`);
@@ -574,6 +831,80 @@ export const api = {
     }).then((payload) => {
       clearApiCache();
       return payload;
+    }),
+  getSubscription: (token: string) =>
+    apiRequest<SubscriptionPayload>("/subscription", {
+      token,
+      cacheKey: `subscription:${token.slice(-12)}`,
+      cacheTtlMs: 60 * 1000,
+    }),
+  checkoutSubscription: (token: string, body: SubscriptionCheckoutInput) =>
+    apiRequest<SubscriptionPayload>("/subscription/checkout", {
+      method: "POST",
+      token,
+      body: JSON.stringify(body),
+    }).then((payload) => {
+      clearApiCache("subscription:");
+      clearApiCache("client:projects:");
+      return payload;
+    }),
+  getContracts: (token: string) =>
+    apiRequest<ContractsPayload>("/contracts", {
+      token,
+      skipCache: true,
+    }),
+  getContract: (token: string, id: number) =>
+    apiRequest<ContractPayload>(`/contracts/${id}`, {
+      token,
+      skipCache: true,
+    }),
+  createContract: (token: string, body: CreateContractInput) =>
+    apiRequest<ContractPayload>("/contracts", {
+      method: "POST",
+      token,
+      body: JSON.stringify(body),
+    }).then((payload) => {
+      clearApiCache("contracts");
+      return payload;
+    }),
+  mockPayContract: (token: string, id: number) =>
+    apiRequest<ContractPayload>(`/contracts/${id}/mock-pay`, {
+      method: "POST",
+      token,
+    }),
+  deliverContract: (token: string, id: number, body: FormData) =>
+    apiRequest<ContractPayload>(`/contracts/${id}/deliver`, {
+      method: "POST",
+      token,
+      body,
+    }),
+  requestContractRevision: (token: string, id: number, comment: string) =>
+    apiRequest<ContractPayload>(`/contracts/${id}/request-revision`, {
+      method: "POST",
+      token,
+      body: JSON.stringify({ comment }),
+    }),
+  approveContract: (token: string, id: number) =>
+    apiRequest<ContractPayload>(`/contracts/${id}/approve`, {
+      method: "POST",
+      token,
+    }),
+  disputeContract: (token: string, id: number, reason: string) =>
+    apiRequest<ContractPayload>(`/contracts/${id}/dispute`, {
+      method: "POST",
+      token,
+      body: JSON.stringify({ reason }),
+    }),
+  getWallet: (token: string) =>
+    apiRequest<WalletPayload>("/wallet", {
+      token,
+      skipCache: true,
+    }),
+  requestWithdrawal: (token: string, body: { amount: number; method?: string; destination?: string }) =>
+    apiRequest<WalletPayload>("/wallet/withdrawals", {
+      method: "POST",
+      token,
+      body: JSON.stringify(body),
     }),
   getProfile: (token: string) =>
     apiRequest<ProfilePayload>("/profile", {
@@ -665,6 +996,7 @@ export const api = {
     }).then((payload) => {
       clearApiCache("freelancer:services:");
       clearApiCache("services");
+      clearApiCache("market:portfolio-health:");
       return payload;
     }),
   updateService: (token: string, id: number, body: ServiceInput) =>
@@ -675,6 +1007,7 @@ export const api = {
     }).then((payload) => {
       clearApiCache("freelancer:services:");
       clearApiCache("services");
+      clearApiCache("market:portfolio-health:");
       return payload;
     }),
   deleteService: (token: string, id: number) =>
@@ -684,6 +1017,7 @@ export const api = {
     }).then((payload) => {
       clearApiCache("freelancer:services:");
       clearApiCache("services");
+      clearApiCache("market:portfolio-health:");
       return payload;
     }),
   getPortfolioProjects: (token: string) =>
@@ -701,6 +1035,7 @@ export const api = {
       clearApiCache("freelancer:portfolio:");
       clearApiCache("catalog:");
       clearApiCache("catalog:item:");
+      clearApiCache("market:portfolio-health:");
       return payload;
     }),
   updatePortfolioProject: (token: string, id: number, body: FormData) =>
@@ -712,6 +1047,7 @@ export const api = {
       clearApiCache("freelancer:portfolio:");
       clearApiCache("catalog:");
       clearApiCache("catalog:item:");
+      clearApiCache("market:portfolio-health:");
       return payload;
     }),
   deletePortfolioProject: (token: string, id: number) =>
@@ -722,6 +1058,7 @@ export const api = {
       clearApiCache("freelancer:portfolio:");
       clearApiCache("catalog:");
       clearApiCache("catalog:item:");
+      clearApiCache("market:portfolio-health:");
       return payload;
     }),
   getFreelancerRecommendations: (token: string, params?: Record<string, string | number>) => {
@@ -757,6 +1094,12 @@ export const api = {
       cacheTtlMs: 60 * 1000,
     });
   },
+  getPortfolioHealth: (token: string) =>
+    apiRequest<PortfolioHealthPayload>("/market/portfolio-health", {
+      token,
+      cacheKey: `market:portfolio-health:${token.slice(-12)}`,
+      cacheTtlMs: 60 * 1000,
+    }),
   analyzeFreelancer: (
     token: string,
     data: {
@@ -1032,6 +1375,8 @@ export type FreelancerItem = {
   skills: string[];
   availability_status: string | null;
   views_count?: number | null;
+  visibility_score?: number | string | null;
+  visibility_level?: string | null;
 };
 
 export type FreelancerDetailPayload = FreelancerItem & {
@@ -1053,6 +1398,9 @@ export type FreelancerDetailPayload = FreelancerItem & {
 
 export type RecommendedFreelancerItem = FreelancerItem & {
   score: number;
+  compatibility_score?: number;
+  compatibility_level?: string;
+  compatibility_breakdown?: CompatibilityBreakdownPayload;
   reasons: string[];
 };
 

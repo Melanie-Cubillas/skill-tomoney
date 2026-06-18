@@ -19,7 +19,7 @@ import { api, type ProfilePayload } from "@/lib/api";
 import { getSessionUser, getToken } from "@/lib/auth";
 
 export const Route = createFileRoute("/dashboard/client/profile")({
-  head: () => ({ meta: [{ title: "Dashboard MYPE · SkilltoMoney" }] }),
+  head: () => ({ meta: [{ title: "Perfil MYPE · SkilltoMoney" }] }),
   component: MypeProfilePage,
 });
 
@@ -117,7 +117,7 @@ function MypeProfilePage() {
     <DashboardShell role="client" profilePhotoUrl={visiblePhotoUrl}>
       <div className="space-y-5">
         <div>
-          <h1 className="font-display text-4xl font-extrabold tracking-normal">Dashboard MYPE</h1>
+          <h1 className="font-display text-4xl font-extrabold tracking-normal">Perfil MYPE</h1>
           <p className="mt-1 text-muted-foreground">Gestiona la información de tu negocio.</p>
         </div>
 

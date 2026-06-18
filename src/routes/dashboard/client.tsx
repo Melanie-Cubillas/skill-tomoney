@@ -84,7 +84,7 @@ function ClientDashboard() {
           <Metric icon={FileText} label="Publicaciones creadas" value={String(projects.length)} hint="Datos reales de tu cuenta" />
           <Metric icon={Briefcase} label="Proyectos activos" value={String(activeProjects)} hint={`${publishedProjects} publicados`} />
           <Metric icon={Star} label="Favoritos guardados" value={String(favoritesCount)} hint="Freelancers guardados" />
-          <Metric icon={Store} label="Dashboard MYPE" value={`${profileCompletion}%`} hint="Completitud del perfil" />
+          <Metric icon={Store} label="Perfil MYPE" value={`${profileCompletion}%`} hint="Completitud del perfil" />
         </div>
 
         <div className="grid gap-5 xl:grid-cols-[1fr_0.8fr]">

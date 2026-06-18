@@ -1,6 +1,6 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Briefcase, Building2, CalendarDays, Loader2 } from "lucide-react";
+import { ArrowLeft, Briefcase, Building2, CalendarDays, Loader2, MessageSquare } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,12 +14,14 @@ export const Route = createFileRoute("/dashboard/freelancer/projects/$projectId"
 });
 
 function FreelancerProjectDetailPage() {
+  const navigate = useNavigate();
   const token = getToken();
   const user = getSessionUser();
   const isFreelancer = user?.account_type === "freelancer";
   const { projectId } = Route.useParams();
   const [project, setProject] = useState<ClientProjectDetailPayload | null>(null);
   const [loading, setLoading] = useState(true);
+  const [contacting, setContacting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -45,6 +47,30 @@ function FreelancerProjectDetailPage() {
 
     void load();
   }, [isFreelancer, projectId, token]);
+
+  const contactMype = async () => {
+    if (!token || !project?.mype.id || contacting) return;
+
+    setContacting(true);
+    setError(null);
+
+    try {
+      const response = await api.createConversation(token, {
+        mype_profile_id: project.mype.id,
+        message: `Hola, me interesa el proyecto "${project.title}". ¿Podemos revisar los detalles?`,
+      });
+
+      await navigate({
+        to: "/dashboard/messages",
+        search: { conversation: response.data?.conversation.id },
+      });
+    } catch (err: unknown) {
+      const payload = err as { message?: string };
+      setError(payload?.message ?? "No se pudo contactar a la MYPE.");
+    } finally {
+      setContacting(false);
+    }
+  };
 
   return (
     <DashboardShell role="freelancer">
@@ -97,11 +123,17 @@ function FreelancerProjectDetailPage() {
                 </div>
               ) : null}
               {project.mype.id ? (
-                <Button asChild className="mt-6 w-full rounded-xl bg-gradient-primary shadow-soft">
-                  <Link to="/dashboard/freelancer/mypes/$mypeId" params={{ mypeId: String(project.mype.id) }}>
-                    Ver perfil de la MYPE
-                  </Link>
-                </Button>
+                <div className="mt-6 grid gap-2">
+                  <Button onClick={() => void contactMype()} disabled={contacting} className="w-full rounded-xl bg-gradient-primary shadow-soft">
+                    {contacting ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
+                    Contactar MYPE
+                  </Button>
+                  <Button asChild variant="outline" className="w-full rounded-xl">
+                    <Link to="/dashboard/freelancer/mypes/$mypeId" params={{ mypeId: String(project.mype.id) }}>
+                      Ver perfil de la MYPE
+                    </Link>
+                  </Button>
+                </div>
               ) : null}
             </Card>
           </div>
