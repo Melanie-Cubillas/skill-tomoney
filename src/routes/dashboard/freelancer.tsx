@@ -87,7 +87,7 @@ function FreelancerDashboard() {
         <div>
           <h1 className="font-display text-4xl font-extrabold tracking-normal">Hola, {firstName}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Este es tu resumen real segun tu perfil, servicios y portafolio guardados.
+            Este es tu resumen real según tu perfil, servicios y portafolio guardados.
           </p>
         </div>
 
@@ -110,13 +110,13 @@ function FreelancerDashboard() {
             <div className="grid gap-5 md:grid-cols-[1fr_220px]">
               <div>
                 <p className="text-sm font-semibold text-secondary">
-                  {profile.headline ?? "Titulo profesional pendiente"}
+                  {profile.headline ?? "Título profesional pendiente"}
                 </p>
                 <h2 className="mt-2 font-display text-3xl font-extrabold tracking-normal">
                   {profile.experience_area ?? profile.category ?? "Area sin definir"}
                 </h2>
                 <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-                  {profile.bio ?? profile.description ?? "Completa el onboarding para generar una descripcion profesional con Skill Bot."}
+                  {profile.bio ?? profile.description ?? "Completa el onboarding para generar una descripción profesional con Skill Bot."}
                 </p>
                 <div className="mt-5 flex flex-wrap gap-2">
                   {(profile.skills ?? []).slice(0, 8).map((skill) => (
@@ -153,7 +153,7 @@ function FreelancerDashboard() {
             </div>
             <div className="mt-5 space-y-3 text-sm">
               {(profile.visibility?.checks ?? [
-                { label: "Descripcion personal", done: Boolean(profile.bio ?? profile.description), points: 20 },
+                { label: "Descripción personal", done: Boolean(profile.bio ?? profile.description), points: 20 },
                 { label: "Habilidades guardadas", done: (profile.skills ?? []).length > 0, points: 20 },
                 { label: "Portafolio agregado", done: portfolio.length > 0, points: 20 },
               ]).map((check) => (
@@ -237,7 +237,7 @@ function FreelancerDashboard() {
 
           <Card className="rounded-2xl p-5 shadow-soft">
             <h2 className="font-display text-lg font-bold tracking-normal">Rango de precio del mercado</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Promedio interno segun publicaciones MYPE relacionadas con tus habilidades.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Promedio interno según publicaciones MYPE relacionadas con tus habilidades.</p>
             {priceSuggestion?.has_data ? (
               <div className="mt-5 rounded-2xl border border-secondary/30 bg-secondary/10 p-4">
                 <div className="text-sm text-muted-foreground">Rango sugerido</div>
@@ -245,7 +245,7 @@ function FreelancerDashboard() {
                   S/ {priceSuggestion.recommended_min?.toFixed(0)} - S/ {priceSuggestion.recommended_max?.toFixed(0)}
                 </div>
                 <div className="mt-2 text-xs text-muted-foreground">
-                  Promedio S/ {priceSuggestion.average_price?.toFixed(0)} basado en {priceSuggestion.sample_count} publicacion{priceSuggestion.sample_count === 1 ? "" : "es"}.
+                  Promedio S/ {priceSuggestion.average_price?.toFixed(0)} basado en {priceSuggestion.sample_count} publicación{priceSuggestion.sample_count === 1 ? "" : "es"}.
                 </div>
               </div>
             ) : (

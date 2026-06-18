@@ -26,7 +26,7 @@ export const Route = createFileRoute("/mype-onboarding")({
   component: MypeOnboarding,
 });
 
-const INDUSTRIES = ["Alimentos y bebidas", "Moda", "Servicios profesionales", "Educacion", "Salud", "Tecnologia", "Retail", "Turismo"];
+const INDUSTRIES = ["Alimentos y bebidas", "Moda", "Servicios profesionales", "Educación", "Salud", "Tecnología", "Retail", "Turismo"];
 
 function MypeOnboarding() {
   const navigate = useNavigate();
@@ -46,7 +46,7 @@ function MypeOnboarding() {
     const token = getToken();
 
     if (!token) {
-      setError("Sesion no encontrada. Inicia sesion otra vez.");
+      setError("Sesión no encontrada. Inicia sesión otra vez.");
       return;
     }
 
@@ -65,7 +65,7 @@ function MypeOnboarding() {
     } catch (err: unknown) {
       const payload = err as { message?: string; errors?: Record<string, string[]> };
       const firstError = Object.values(payload?.errors ?? {})[0]?.[0];
-      setError(firstError ?? payload?.message ?? "No se pudo registrar la informacion.");
+      setError(firstError ?? payload?.message ?? "No se pudo registrar la información.");
     } finally {
       setLoading(false);
     }
@@ -120,7 +120,7 @@ function MypeOnboarding() {
         </div>
 
         <form onSubmit={onSubmit} className="mt-8 grid gap-6 lg:grid-cols-2">
-          <FormCard icon={Store} title="Informacion del negocio" subtitle="Datos basicos para identificar tu negocio.">
+          <FormCard icon={Store} title="Información del negocio" subtitle="Datos básicos para identificar tu negocio.">
             <div className="grid gap-5 md:grid-cols-2">
               <Field icon={Store} label="Nombre del negocio">
                 <Input value={businessName} onChange={(event) => setBusinessName(event.target.value)} placeholder="Ej. Panaderia Dulce Hogar" className="h-12 rounded-xl bg-background/60 pl-10" required />
@@ -141,7 +141,7 @@ function MypeOnboarding() {
             </div>
           </FormCard>
 
-          <FormCard icon={MessageSquare} title="Descripcion" subtitle="Cuentanos que hace tu negocio y que lo hace unico.">
+          <FormCard icon={MessageSquare} title="Descripción" subtitle="Cuéntanos qué hace tu negocio y qué lo hace único.">
             <div className="relative">
               <MessageSquare className="absolute left-4 top-5 h-4 w-4 text-primary" />
               <Textarea
@@ -172,7 +172,7 @@ function MypeOnboarding() {
             <span className="grid h-9 w-9 place-items-center rounded-full bg-secondary/15 text-secondary">
               <ShieldCheck className="h-4 w-4" />
             </span>
-            Tu informacion esta segura con nosotros.
+            Tu información está segura con nosotros.
             {error ? <span className="ml-auto text-red-600">{error}</span> : null}
           </div>
 

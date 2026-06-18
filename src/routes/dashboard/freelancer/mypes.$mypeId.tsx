@@ -78,7 +78,7 @@ function FreelancerMypeDetailPage() {
         </Button>
 
         {!isFreelancer ? (
-          <EmptyState title="Vista disponible solo para freelancers" detail="Inicia sesion como freelancer para ver MYPES." />
+          <EmptyState title="Vista disponible solo para freelancers" detail="Inicia sesión como freelancer para ver MYPES." />
         ) : loading ? (
           <div className="grid place-items-center py-24">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -97,7 +97,7 @@ function FreelancerMypeDetailPage() {
                     <h1 className="font-display text-4xl font-extrabold tracking-normal">{mype.name}</h1>
                     <p className="mt-1 text-secondary">{mype.industry ?? "MYPE"}</p>
                     <p className="mt-4 max-w-3xl text-sm leading-relaxed text-muted-foreground">
-                      {mype.description ?? "Esta MYPE aun no tiene descripcion registrada."}
+                      {mype.description ?? "Esta MYPE aún no tiene descripción registrada."}
                     </p>
                   </div>
                 </div>
@@ -150,7 +150,7 @@ function FreelancerMypeDetailPage() {
                   </div>
                 ))}
                 {mype.projects.length === 0 ? (
-                  <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">Esta MYPE aun no tiene publicaciones activas.</p>
+                  <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">Esta MYPE aún no tiene publicaciones activas.</p>
                 ) : null}
               </div>
             </Card>

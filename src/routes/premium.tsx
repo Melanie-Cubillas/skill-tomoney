@@ -9,7 +9,7 @@ export const Route = createFileRoute("/premium")({
   head: () => ({
     meta: [
       { title: "SkillPro · SkilltoMoney" },
-      { name: "description", content: "Activa SkillPro para tener mas visibilidad, limites ampliados y mejores herramientas." },
+      { name: "description", content: "Activa SkillPro para tener más visibilidad, límites ampliados y mejores herramientas." },
     ],
   }),
   component: () => (
@@ -21,9 +21,9 @@ export const Route = createFileRoute("/premium")({
             <Crown className="mr-1 h-3 w-3" />
             SkillPro
           </Badge>
-          <h1 className="mt-4 font-display text-5xl font-bold">Mas alcance para vender y contratar mejor</h1>
+          <h1 className="mt-4 font-display text-5xl font-bold">Más alcance para vender y contratar mejor</h1>
           <p className="mt-4 text-white/75">
-            Amplia tus limites, mejora tu visibilidad y trabaja con herramientas pensadas para el marketplace.
+            Amplía tus límites, mejora tu visibilidad y trabaja con herramientas pensadas para el marketplace.
           </p>
         </div>
       </section>
@@ -35,21 +35,21 @@ export const Route = createFileRoute("/premium")({
             price="S/ 0"
             description="Para empezar a probar SkilltoMoney."
             cta="Crear cuenta gratis"
-            features={["Perfil basico", "1 publicacion o servicio inicial", "Chat con usuarios", "Pagos protegidos"]}
+            features={["Perfil básico", "1 publicación o servicio inicial", "Chat con usuarios", "Pagos protegidos"]}
           />
           <PlanCard
             name="SkillPro"
             price="S/ 29"
-            description="Para crecer con mas limites y mejor posicionamiento."
+            description="Para crecer con más límites y mejor posicionamiento."
             cta="Ver SkillPro"
             highlight
-            features={["Servicios o publicaciones ampliadas", "Mayor visibilidad", "Skill Bot ampliado", "Analitica de perfil"]}
+            features={["Servicios o publicaciones ampliadas", "Mayor visibilidad", "Skill Bot ampliado", "Analítica de perfil"]}
           />
         </div>
 
         <div className="mt-14 grid gap-5 md:grid-cols-3">
-          <Benefit icon={TrendingUp} title="Mejor visibilidad" text="Tu perfil o proyecto puede destacar mas dentro del marketplace." />
-          <Benefit icon={Sparkles} title="Skill Bot ampliado" text="Mas apoyo para mejorar perfil, servicios y presentacion." />
+          <Benefit icon={TrendingUp} title="Mejor visibilidad" text="Tu perfil o proyecto puede destacar más dentro del marketplace." />
+          <Benefit icon={Sparkles} title="Skill Bot ampliado" text="Más apoyo para mejorar perfil, servicios y presentación." />
           <Benefit icon={ShieldCheck} title="Pagos protegidos" text="Compatible con el flujo de pagos protegidos de la plataforma." />
         </div>
       </section>

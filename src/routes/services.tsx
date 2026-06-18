@@ -128,7 +128,7 @@ function ServicesPage() {
             <div className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-soft">
               <div className="grid gap-4 md:grid-cols-4">
                 <label className="text-sm font-semibold">
-                  Categoria
+                  Categoría
                   <select
                     value={category}
                     onChange={(event) => setCategory(event.target.value)}
@@ -203,7 +203,7 @@ function ServicesPage() {
       <section className="mx-auto max-w-7xl px-6 py-10">
         {!token ? (
           <EmptyState
-            title="Inicia sesion para explorar servicios"
+            title="Inicia sesión para explorar servicios"
             description="Esta vista usa servicios reales publicados por freelancers registrados."
           />
         ) : loading ? (

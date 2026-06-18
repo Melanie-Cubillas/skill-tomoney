@@ -151,7 +151,7 @@ function ClientServicesPage() {
   if (!isMype) {
     return (
       <DashboardShell role="client">
-        <EmptyState title="Vista disponible solo para MYPES" detail="Inicia sesion como MYPE para explorar servicios." />
+        <EmptyState title="Vista disponible solo para MYPES" detail="Inicia sesión como MYPE para explorar servicios." />
       </DashboardShell>
     );
   }
@@ -204,7 +204,7 @@ function ClientServicesPage() {
           {showFilters ? (
             <div className="mt-4 grid gap-3 md:grid-cols-4">
               <label className="text-sm font-semibold">
-                Categoria
+                Categoría
                 <select
                   value={category}
                   onChange={(event) => setCategory(event.target.value)}

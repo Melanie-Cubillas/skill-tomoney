@@ -109,7 +109,7 @@ function ClientServiceDetailPage() {
         </Button>
 
         {!isMype ? (
-          <EmptyState title="Vista disponible solo para MYPES" detail="Inicia sesion como MYPE para ver servicios." />
+          <EmptyState title="Vista disponible solo para MYPES" detail="Inicia sesión como MYPE para ver servicios." />
         ) : loading ? (
           <div className="grid place-items-center py-24">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
