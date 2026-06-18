@@ -114,7 +114,7 @@ function DashboardPremiumPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-1 shadow-soft">
+          {!isPro ? <div className="rounded-2xl border border-border bg-card p-1 shadow-soft">
             <button
               type="button"
               onClick={() => setCycle("monthly")}
@@ -129,7 +129,7 @@ function DashboardPremiumPage() {
             >
               Anual
             </button>
-          </div>
+          </div> : null}
         </div>
 
         {search.upgraded === "1" ? (
@@ -165,11 +165,20 @@ function DashboardPremiumPage() {
                   : "Tu cuenta sigue en Free. Puedes usar las funciones base y subir a Pro cuando quieras ampliar tus límites."}
               </p>
 
-              {isPro && subscription?.last_payment ? (
+              {false && isPro && subscription?.ends_at ? (
                 <div className="mt-5 rounded-xl border border-secondary/25 bg-background/70 p-4 text-sm">
                   <div className="font-semibold text-foreground">Último pago confirmado</div>
                   <p className="mt-1 text-muted-foreground">
                     Referencia: {subscription.last_payment.reference}. Renovación: {subscription.ends_at ? formatDate(subscription.ends_at) : "sin fecha registrada"}.
+                  </p>
+                </div>
+              ) : null}
+
+              {isPro && subscription?.ends_at ? (
+                <div className="mt-5 rounded-xl border border-secondary/25 bg-background/70 p-4 text-sm">
+                  <div className="font-semibold text-foreground">Plan activo</div>
+                  <p className="mt-1 text-muted-foreground">
+                    Tu acceso SkillPro se mantiene activo hasta el {formatDate(subscription.ends_at)}.
                   </p>
                 </div>
               ) : null}
