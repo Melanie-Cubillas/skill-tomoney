@@ -202,7 +202,7 @@ function PortfolioPage() {
           </h2>
           <form onSubmit={saveProject} className="rounded-2xl border border-border p-4">
             <div className="grid gap-5 xl:grid-cols-4">
-              <Field label="Categoria">
+              <Field label="Categoría">
                 <Select value={form.category_id ? String(form.category_id) : ""} onValueChange={(value) => setForm((prev) => ({ ...prev, category_id: Number(value) }))}>
                   <SelectTrigger className="h-11 rounded-xl">
                     <SelectValue placeholder="Selecciona una categoria" />
@@ -227,7 +227,7 @@ function PortfolioPage() {
                   <span className="text-sm text-muted-foreground">Si, mostrar como destacado</span>
                 </div>
               </div>
-              <Field label="Descripcion del proyecto">
+              <Field label="Descripción del proyecto">
                 <Textarea value={form.description} onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))} placeholder="Describe el proyecto..." className="min-h-28 resize-none rounded-xl" />
               </Field>
               <FileField icon={ImageIcon} label="Imagen del proyecto" file={form.image} accept="image/*" onChange={(file) => setForm((prev) => ({ ...prev, image: file }))} />
@@ -278,7 +278,7 @@ function PortfolioPage() {
                 <TableHead>#</TableHead>
                 <TableHead>Vista previa</TableHead>
                 <TableHead>Titulo del proyecto</TableHead>
-                <TableHead>Categoria</TableHead>
+                <TableHead>Categoría</TableHead>
                 <TableHead>Destacado</TableHead>
                 <TableHead>Orden</TableHead>
                 <TableHead>Link externo</TableHead>

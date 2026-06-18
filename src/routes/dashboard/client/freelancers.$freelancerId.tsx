@@ -76,7 +76,7 @@ function ClientFreelancerDetailPage() {
   if (!isMype) {
     return (
       <DashboardShell role="client">
-        <EmptyState title="Vista disponible solo para MYPES" detail="Inicia sesion como MYPE para ver perfiles freelancer." />
+        <EmptyState title="Vista disponible solo para MYPES" detail="Inicia sesión como MYPE para ver perfiles freelancer." />
       </DashboardShell>
     );
   }
@@ -141,7 +141,7 @@ function ClientFreelancerDetailPage() {
                 </div>
               </div>
               <p className="mt-6 max-w-4xl text-sm leading-relaxed text-muted-foreground">
-                {freelancer.bio ?? "Este freelancer aun no tiene descripcion registrada."}
+                {freelancer.bio ?? "Este freelancer aún no tiene descripción registrada."}
               </p>
             </Card>
 
@@ -194,7 +194,7 @@ function ClientFreelancerDetailPage() {
                           </a>
                         ) : null}
                       </div>
-                      <p className="mt-2 text-sm text-muted-foreground">{project.description ?? "Sin descripcion."}</p>
+                      <p className="mt-2 text-sm text-muted-foreground">{project.description ?? "Sin descripción."}</p>
                     </div>
                   ))}
                   {topProjects.length === 0 ? (

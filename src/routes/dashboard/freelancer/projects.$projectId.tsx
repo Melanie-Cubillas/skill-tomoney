@@ -83,7 +83,7 @@ function FreelancerProjectDetailPage() {
         </Button>
 
         {!isFreelancer ? (
-          <EmptyState title="Vista disponible solo para freelancers" detail="Inicia sesion como freelancer para ver proyectos MYPE." />
+          <EmptyState title="Vista disponible solo para freelancers" detail="Inicia sesión como freelancer para ver proyectos MYPE." />
         ) : loading ? (
           <div className="grid place-items-center py-24">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -114,7 +114,7 @@ function FreelancerProjectDetailPage() {
                 </div>
               </div>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                {project.mype.description ?? "Esta MYPE aun no tiene descripcion registrada."}
+                {project.mype.description ?? "Esta MYPE aún no tiene descripción registrada."}
               </p>
               {project.created_at ? (
                 <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">

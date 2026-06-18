@@ -200,8 +200,8 @@ function FreelancerPortfolioPage() {
       <section className="mx-auto max-w-7xl px-6 py-10">
         {!token ? (
           <EmptyState
-            title="Inicia sesion para ver el portafolio"
-            description="Esta vista usa informacion real del freelancer y requiere una sesion activa."
+            title="Inicia sesión para ver el portafolio"
+            description="Esta vista usa información real del freelancer y requiere una sesión activa."
           />
         ) : loading ? (
           <div className="flex items-center justify-center py-24">
@@ -212,7 +212,7 @@ function FreelancerPortfolioPage() {
         ) : !freelancer ? (
           <EmptyState
             title="Freelancer no encontrado"
-            description="No encontramos informacion disponible para este portafolio."
+            description="No encontramos información disponible para este portafolio."
           />
         ) : (
           <div className="space-y-8">
@@ -356,7 +356,7 @@ function FreelancerPortfolioPage() {
               {showFilters ? (
                 <div className="mt-4 grid gap-4 rounded-2xl border border-border bg-background p-4 md:grid-cols-3">
                   <label className="text-sm font-semibold">
-                    Categoria
+                    Categoría
                     <select
                       value={categoryFilter}
                       onChange={(event) => setCategoryFilter(event.target.value)}
@@ -378,7 +378,7 @@ function FreelancerPortfolioPage() {
                       className="mt-1 h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"
                     >
                       <option value="featured">Destacados primero</option>
-                      <option value="recent">Mas recientes</option>
+                      <option value="recent">Más recientes</option>
                       <option value="alphabetical">Orden alfabetico</option>
                     </select>
                   </label>
@@ -527,7 +527,7 @@ function PortfolioCard({ project }: { project: CatalogPortfolioItem }) {
         </div>
 
         <p className="line-clamp-3 min-h-[72px] text-sm leading-6 text-muted-foreground">
-          {project.description || "Proyecto sin descripcion registrada."}
+          {project.description || "Proyecto sin descripción registrada."}
         </p>
 
         <div className="flex items-center justify-between border-t border-border pt-4">

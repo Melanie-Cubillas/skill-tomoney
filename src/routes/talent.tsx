@@ -310,7 +310,7 @@ function TalentPage() {
               <div>
                 <h2 className="font-display text-xl font-bold">Freelancers recomendados</h2>
                 <p className="text-sm text-muted-foreground">
-                  Ordenados segun tu busqueda, categoria, presupuesto y reputacion.
+                  Ordenados según tu búsqueda, categoría, presupuesto y reputación.
                 </p>
               </div>
               <Sparkles className="h-5 w-5 text-secondary" />
@@ -374,7 +374,7 @@ function TalentPage() {
           <div className="py-20 text-center">
             <Search className="mx-auto h-12 w-12 text-muted-foreground/50" />
             <h3 className="mt-4 font-display text-xl font-semibold">
-              Inicia sesion para buscar freelancers
+              Inicia sesión para buscar freelancers
             </h3>
             <p className="mt-2 text-sm text-muted-foreground">
               Esta vista usa freelancers reales registrados y requiere una sesion activa.

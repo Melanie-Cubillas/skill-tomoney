@@ -95,7 +95,7 @@ const EXTRA_CERTIFICATE_OPTIONS = [
   "Curso de Community Management",
   "Curso de Copywriting",
   "Curso de Branding Digital",
-  "Curso de Analitica Digital",
+  "Curso de Analítica Digital",
   "Curso de Inteligencia Artificial Aplicada",
 ];
 

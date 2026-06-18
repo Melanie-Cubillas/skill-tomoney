@@ -413,10 +413,7 @@ function HowItWorksSection() {
             Sin enredos. Solo tú, tu talento y oportunidades reales.
           </p>
           <div className="mt-14 max-w-sm lg:mt-52">
-            <div className="text-sm font-extrabold uppercase tracking-[0.18em] text-[#071014]">
-              Para MYPES
-            </div>
-            <h3 className="mt-3 font-display text-3xl font-extrabold leading-tight text-white sm:text-4xl">
+            <h3 className="font-display text-4xl font-extrabold leading-tight text-white sm:text-5xl">
               Encuentra talento
               <br />
               en <span className="text-[#061013]">3 simples pasos</span>

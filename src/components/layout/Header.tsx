@@ -131,7 +131,7 @@ export function Header() {
                     className="mt-2 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left font-semibold text-white/75 transition hover:bg-white/10 hover:text-white"
                   >
                     <LogOut className="h-4 w-4" />
-                    Cerrar sesion
+                    Cerrar sesión
                   </button>
                 </div>
               ) : null}

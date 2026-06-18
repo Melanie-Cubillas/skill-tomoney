@@ -186,7 +186,7 @@ function ServicesPage() {
           </h2>
           <form onSubmit={saveService} className="rounded-2xl border border-border p-4">
             <div className="grid gap-5 xl:grid-cols-4">
-              <Field label="Categoria">
+              <Field label="Categoría">
                 <Select value={form.category_id ? String(form.category_id) : ""} onValueChange={(value) => setForm((prev) => ({ ...prev, category_id: Number(value) }))}>
                   <SelectTrigger className="h-11 rounded-xl">
                     <SelectValue placeholder="Selecciona una categoria" />
@@ -215,7 +215,7 @@ function ServicesPage() {
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label="Descripcion del servicio">
+              <Field label="Descripción del servicio">
                 <Textarea value={form.description} onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))} placeholder="Describe en detalle que incluye tu servicio..." className="min-h-28 resize-none rounded-xl" required />
               </Field>
               <Field label="Tiempo estimado">
@@ -260,7 +260,7 @@ function ServicesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Categoria</TableHead>
+                <TableHead>Categoría</TableHead>
                 <TableHead>Titulo</TableHead>
                 <TableHead>Precio</TableHead>
                 <TableHead>Moneda</TableHead>
@@ -354,12 +354,12 @@ function PriceSuggestionBox({ suggestion }: { suggestion: PriceSuggestionPayload
             S/ {suggestion.recommended_min?.toFixed(0)} - S/ {suggestion.recommended_max?.toFixed(0)}
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            Promedio S/ {suggestion.average_price?.toFixed(0)} basado en {suggestion.sample_count} publicacion{suggestion.sample_count === 1 ? "" : "es"} MYPE relacionada{suggestion.sample_count === 1 ? "" : "s"}.
+            Promedio S/ {suggestion.average_price?.toFixed(0)} basado en {suggestion.sample_count} publicación{suggestion.sample_count === 1 ? "" : "es"} MYPE relacionada{suggestion.sample_count === 1 ? "" : "s"}.
           </p>
         </>
       ) : (
         <p className="mt-2 text-sm text-muted-foreground">
-          Aun no hay datos suficientes de publicaciones MYPE para recomendar un precio real.
+          Aún no hay datos suficientes de publicaciones MYPE para recomendar un precio real.
         </p>
       )}
     </div>

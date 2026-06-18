@@ -23,7 +23,7 @@ export const Route = createFileRoute("/dashboard/client/profile")({
   component: MypeProfilePage,
 });
 
-const INDUSTRIES = ["Alimentos y bebidas", "Moda", "Servicios profesionales", "Educacion", "Salud", "Tecnologia", "Retail", "Turismo"];
+const INDUSTRIES = ["Alimentos y bebidas", "Moda", "Servicios profesionales", "Educación", "Salud", "Tecnología", "Retail", "Turismo"];
 
 const isFilled = (value: unknown) => typeof value === "string" ? value.trim().length > 0 : Boolean(value);
 
@@ -71,7 +71,7 @@ function MypeProfilePage() {
   const profileCompletion = Math.round((profileCompletionFields.filter(isFilled).length / profileCompletionFields.length) * 100);
 
   const requireToken = () => {
-    if (!token) setError("Sesion no encontrada. Inicia sesion otra vez.");
+    if (!token) setError("Sesión no encontrada. Inicia sesión otra vez.");
     return token;
   };
 
@@ -170,20 +170,20 @@ function MypeProfilePage() {
                     </Select>
                   </Field>
                   <Field label="Ubicación">
-                    <Input value={profile.location ?? ""} onChange={(event) => setProfile((prev) => ({ ...prev, location: event.target.value }))} placeholder="Ej. Lima, Peru" className="h-11 rounded-xl" />
+                    <Input value={profile.location ?? ""} onChange={(event) => setProfile((prev) => ({ ...prev, location: event.target.value }))} placeholder="Ej. Lima, Perú" className="h-11 rounded-xl" />
                   </Field>
                 </div>
               </Card>
 
               <div className="space-y-6">
                 <Card className="rounded-2xl p-5 shadow-soft">
-                  <PanelTitle icon={ShieldCheck} title="Descripcion de la empresa" />
-                  <Textarea value={profile.description ?? ""} onChange={(event) => setProfile((prev) => ({ ...prev, description: event.target.value.slice(0, 1000) }))} placeholder="Cuentanos brevemente sobre tu empresa, que productos o servicios ofreces..." className="mt-5 min-h-48 resize-none rounded-xl" maxLength={1000} />
+                  <PanelTitle icon={ShieldCheck} title="Descripción de la empresa" />
+                  <Textarea value={profile.description ?? ""} onChange={(event) => setProfile((prev) => ({ ...prev, description: event.target.value.slice(0, 1000) }))} placeholder="Cuéntanos brevemente sobre tu empresa, qué productos o servicios ofreces..." className="mt-5 min-h-48 resize-none rounded-xl" maxLength={1000} />
                   <div className="mt-3 text-right text-xs text-muted-foreground">{(profile.description ?? "").length}/1000</div>
                 </Card>
 
                 <Card className="rounded-2xl p-5 shadow-soft">
-                  <PanelTitle icon={LinkIcon} title="Pagina web o red social del negocio" />
+                  <PanelTitle icon={LinkIcon} title="Página web o red social del negocio" />
                   <Input value={profile.website ?? ""} onChange={(event) => setProfile((prev) => ({ ...prev, website: event.target.value }))} placeholder="Ej: https://tusitio.com o @tunegocio" className="mt-5 h-11 rounded-xl" />
                 </Card>
               </div>
@@ -208,15 +208,15 @@ function MypeProfilePage() {
               </div>
             </Card>
 
-            <Card className="flex items-center justify-between rounded-2xl border-secondary/30 bg-secondary/10 p-5 shadow-soft">
+            <Card className="flex items-start justify-between gap-6 rounded-2xl border-secondary/30 bg-secondary/10 p-5 shadow-soft">
               <div className="flex items-center gap-4">
                 <span className="grid h-12 w-12 place-items-center rounded-xl bg-secondary/15 text-secondary"><ShieldCheck className="h-5 w-5" /></span>
                 <div>
-                  <h2 className="font-display text-lg font-bold tracking-normal">Tu información esta protegida</h2>
+                  <h2 className="font-display text-lg font-bold tracking-normal">Tu información está protegida</h2>
                   <p className="text-sm text-muted-foreground">Cuidamos tus datos y los usamos solo para mejorar tu experiencia.</p>
                 </div>
               </div>
-              <div className="hidden gap-8 text-center text-xs md:flex">
+              <div className="hidden flex-1 items-start justify-end gap-10 pt-1 text-center text-xs md:flex">
                 <span>Datos seguros</span>
                 <span>Privacidad garantizada</span>
                 <span>Sin spam</span>
@@ -239,7 +239,7 @@ function MypeProfilePage() {
               <div className="p-5">
                 <h2 className="font-display text-lg font-bold tracking-normal">Consejos para un perfil exitoso</h2>
                 <div className="mt-5 space-y-5">
-                  {["Completa todos los campos", "Usa un logo profesional", "Describe tu propuesta de valor", "Manten tus datos actualizados"].map((item) => (
+                  {["Completa todos los campos", "Usa un logo profesional", "Describe tu propuesta de valor", "Mantén tus datos actualizados"].map((item) => (
                     <div key={item} className="flex gap-2 text-sm">
                       <CheckCircle2 className="mt-0.5 h-4 w-4 text-secondary" />
                       <span>{item}</span>

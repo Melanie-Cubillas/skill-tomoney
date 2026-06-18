@@ -152,7 +152,7 @@ function ClientDashboard() {
                 ["Nombre comercial", profile.business_name],
                 ["RUC", profile.ruc],
                 ["Rubro", profile.industry],
-                ["Descripcion", profile.description],
+                ["Descripción", profile.description],
               ].map(([item, value]) => (
                 <div key={item} className="flex items-center gap-2">
                   <CheckCircle2 className={`h-4 w-4 ${value ? "text-success" : "text-muted-foreground"}`} />
@@ -170,7 +170,7 @@ function ClientDashboard() {
           <EmptyBlock
             icon={Search}
             title="Buscar freelancers"
-            detail="Filtra por profesion, habilidades, precio y reputacion dentro del dashboard MYPE."
+            detail="Filtra por profesión, habilidades, precio y reputación dentro del dashboard MYPE."
             actionLabel="Buscar talento"
             to="/dashboard/client/search"
           />

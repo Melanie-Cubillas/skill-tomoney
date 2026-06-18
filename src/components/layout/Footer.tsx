@@ -1,4 +1,4 @@
-﻿import { Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { Instagram, Linkedin } from "lucide-react";
 
 const footerColumns = [
@@ -6,6 +6,19 @@ const footerColumns = [
   { title: "Cuenta", links: [["Soy Freelancer", "/register?role=freelancer"], ["Soy Cliente", "/register?role=mype"], ["Iniciar sesión", "/login"], ["Registro", "/register"]] },
   { title: "Recursos", links: [["Blog", ""], ["Centro de ayuda", ""], ["IA para freelancers", "/premium"], ["Comunidad", "/#comunidad"]] },
   { title: "Legal", links: [["Términos", ""], ["Privacidad", ""], ["Cookies", ""], ["Política de pagos", ""]] },
+];
+
+const socialLinks = [
+  {
+    href: "https://www.instagram.com/skill_to_money111/?utm_source=ig_web_button_share_sheet",
+    label: "Instagram de Skill-to-Money",
+    icon: Instagram,
+  },
+  {
+    href: "#",
+    label: "LinkedIn de Skill-to-Money",
+    icon: Linkedin,
+  },
 ];
 
 export function Footer() {
@@ -22,8 +35,15 @@ export function Footer() {
           </Link>
           <p className="mt-4 max-w-[220px] text-sm leading-relaxed text-white/65">Convertimos habilidades digitales en ingresos reales.</p>
           <div className="mt-6 flex gap-3">
-            {[Instagram, Linkedin].map((Icon, index) => (
-              <a key={index} href="#" className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/5 text-white/75 transition hover:border-accent/70 hover:text-accent">
+            {socialLinks.map(({ href, label, icon: Icon }) => (
+              <a
+                key={label}
+                href={href}
+                aria-label={label}
+                target={href.startsWith("http") ? "_blank" : undefined}
+                rel={href.startsWith("http") ? "noreferrer" : undefined}
+                className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/5 text-white/75 transition hover:border-accent/70 hover:text-accent"
+              >
                 <Icon className="h-4 w-4" />
               </a>
             ))}
@@ -54,4 +74,3 @@ export function Footer() {
     </footer>
   );
 }
-

@@ -129,7 +129,7 @@ function ClientProjectsPage() {
     setDraftPriceSuggestion(null);
 
     if (!canCreate) {
-      setError("Tu plan Free permite crear 1 proyecto. Actualiza a Pro para publicar mas proyectos.");
+      setError("Tu plan Free permite crear 1 proyecto. Actualiza a Pro para publicar más proyectos.");
       return;
     }
 
@@ -288,7 +288,7 @@ function ClientProjectsPage() {
   if (!isMype) {
     return (
       <DashboardShell role="client">
-        <EmptyState title="Vista disponible solo para MYPES" detail="Inicia sesion como MYPE para gestionar proyectos." />
+        <EmptyState title="Vista disponible solo para MYPES" detail="Inicia sesión como MYPE para gestionar proyectos." />
       </DashboardShell>
     );
   }
@@ -299,7 +299,7 @@ function ClientProjectsPage() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="font-display text-3xl font-bold">Mis proyectos</h1>
-            <p className="text-muted-foreground">Crea publicaciones reales para encontrar freelancers segun tus necesidades.</p>
+            <p className="text-muted-foreground">Crea publicaciones reales para encontrar freelancers según tus necesidades.</p>
           </div>
           <Button onClick={startCreate} className="rounded-xl bg-gradient-primary shadow-soft">
             <Plus className="h-4 w-4" />
@@ -332,12 +332,12 @@ function ClientProjectsPage() {
                 <Field label="Titulo del proyecto">
                   <Input value={form.title} onChange={(event) => setFormValue("title", event.target.value, setForm)} required maxLength={150} />
                 </Field>
-                <Field label="Categoria">
+                <Field label="Categoría">
                   <Input value={form.category ?? ""} onChange={(event) => setFormValue("category", event.target.value, setForm)} placeholder="Ej. Marketing, Diseno, Web" />
                 </Field>
               </div>
 
-              <Field label="Descripcion">
+              <Field label="Descripción">
                 <Textarea
                   value={form.description}
                   onChange={(event) => setFormValue("description", event.target.value, setForm)}
@@ -412,8 +412,8 @@ function ClientProjectsPage() {
           </div>
         ) : projects.length === 0 ? (
           <EmptyState
-            title="Aun no tienes proyectos"
-            detail="Crea tu primera publicacion para que los freelancers puedan entender que necesitas."
+            title="Aún no tienes proyectos"
+            detail="Crea tu primera publicación para que los freelancers puedan entender qué necesitas."
           />
         ) : (
           <div className="space-y-4">
@@ -489,7 +489,7 @@ function ClientProjectsPage() {
                           ))}
                         </div>
                       ) : (
-                        <p className="text-sm text-muted-foreground">Aun no hay freelancers compatibles con datos suficientes.</p>
+                        <p className="text-sm text-muted-foreground">Aún no hay freelancers compatibles con datos suficientes.</p>
                       )}
                       {projectRecommendations[0]?.compatibility_breakdown ? (
                         <div className="mt-3 rounded-lg border border-border bg-background px-3 py-2 text-xs text-muted-foreground">
@@ -574,11 +574,11 @@ function PriceSuggestionBox({ suggestion }: { suggestion: PriceSuggestionPayload
             S/ {suggestion.recommended_min?.toFixed(0)} - S/ {suggestion.recommended_max?.toFixed(0)}
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            Promedio S/ {suggestion.average_price?.toFixed(0)} basado en {suggestion.sample_count} publicacion{suggestion.sample_count === 1 ? "" : "es"} real{suggestion.sample_count === 1 ? "" : "es"}.
+            Promedio S/ {suggestion.average_price?.toFixed(0)} basado en {suggestion.sample_count} publicación{suggestion.sample_count === 1 ? "" : "es"} real{suggestion.sample_count === 1 ? "" : "es"}.
           </p>
         </>
       ) : (
-        <p className="mt-2 text-sm text-muted-foreground">Aun no hay datos suficientes para calcular un rango real.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Aún no hay datos suficientes para calcular un rango real.</p>
       )}
     </Card>
   );

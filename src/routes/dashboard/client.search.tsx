@@ -144,7 +144,7 @@ function ClientSearchPage() {
   if (!isMype) {
     return (
       <DashboardShell role="client">
-        <EmptyState title="Vista disponible solo para MYPES" detail="Inicia sesion como MYPE para buscar freelancers." />
+        <EmptyState title="Vista disponible solo para MYPES" detail="Inicia sesión como MYPE para buscar freelancers." />
       </DashboardShell>
     );
   }
@@ -156,7 +156,7 @@ function ClientSearchPage() {
           <div>
             <h1 className="font-display text-4xl font-extrabold tracking-normal">Buscar freelancers</h1>
             <p className="mt-1 text-muted-foreground">
-              Encuentra freelancers registrados y filtra por nombre, profesion, habilidades, precio y reputacion.
+              Encuentra freelancers registrados y filtra por nombre, profesión, habilidades, precio y reputación.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -177,7 +177,7 @@ function ClientSearchPage() {
               <Input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Buscar por nombre, profesion o descripcion..."
+                placeholder="Buscar por nombre, profesión o descripción..."
                 className="h-11 rounded-xl pl-9 pr-9"
               />
               {search ? (
@@ -202,7 +202,7 @@ function ClientSearchPage() {
           {showFilters ? (
             <div className="mt-4 grid gap-3 md:grid-cols-5">
               <label className="text-sm font-semibold">
-                Categoria
+                Categoría
                 <select
                   value={category}
                   onChange={(event) => setCategory(event.target.value)}

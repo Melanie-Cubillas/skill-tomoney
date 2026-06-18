@@ -125,7 +125,7 @@ function FreelancerProfilePage() {
       : "Completa tus campos para mejorar tu visibilidad.";
 
   const requireToken = () => {
-    if (!token) setError("Sesion no encontrada. Inicia sesion otra vez.");
+    if (!token) setError("Sesión no encontrada. Inicia sesión otra vez.");
     return token;
   };
 
@@ -281,7 +281,7 @@ function FreelancerProfilePage() {
           </Card>
 
           <Card className="rounded-2xl p-5 shadow-soft">
-            <PanelTitle icon={UserRound} title="Descripcion personal" />
+            <PanelTitle icon={UserRound} title="Descripción personal" />
             <Textarea value={profile.bio ?? profile.description ?? ""} onChange={(event) => setProfile((prev) => ({ ...prev, bio: event.target.value }))} placeholder="Cuéntanos sobre ti y tu propuesta de valor" className="mt-5 min-h-36 resize-none rounded-xl" />
             <div className="mt-5 flex items-center justify-between">
               <p className="text-xs text-muted-foreground">Se claro, especifico y muestra como ayudas a tus clientes.</p>
