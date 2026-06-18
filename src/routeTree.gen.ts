@@ -23,15 +23,18 @@ import { Route as ForgotRouteImport } from './routes/forgot'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TalentFreelancerIdRouteImport } from './routes/talent.$freelancerId'
 import { Route as FreelancerPortfolioFreelancerIdRouteImport } from './routes/freelancer-portfolio.$freelancerId'
+import { Route as DashboardSubscriptionCheckoutRouteImport } from './routes/dashboard/subscription-checkout'
 import { Route as DashboardPremiumRouteImport } from './routes/dashboard/premium'
 import { Route as DashboardPaymentsRouteImport } from './routes/dashboard/payments'
 import { Route as DashboardMessagesRouteImport } from './routes/dashboard/messages'
 import { Route as DashboardFreelancerRouteImport } from './routes/dashboard/freelancer'
+import { Route as DashboardContractsRouteImport } from './routes/dashboard/contracts'
 import { Route as DashboardClientRouteImport } from './routes/dashboard/client'
 import { Route as DashboardFreelancerServicesRouteImport } from './routes/dashboard/freelancer.services'
 import { Route as DashboardFreelancerProjectsRouteImport } from './routes/dashboard/freelancer.projects'
 import { Route as DashboardFreelancerProfileRouteImport } from './routes/dashboard/freelancer.profile'
 import { Route as DashboardFreelancerPortfolioRouteImport } from './routes/dashboard/freelancer.portfolio'
+import { Route as DashboardContractsContractIdRouteImport } from './routes/dashboard/contracts.$contractId'
 import { Route as DashboardClientServicesRouteImport } from './routes/dashboard/client.services'
 import { Route as DashboardClientSearchRouteImport } from './routes/dashboard/client.search'
 import { Route as DashboardClientProjectsRouteImport } from './routes/dashboard/client.projects'
@@ -112,6 +115,12 @@ const FreelancerPortfolioFreelancerIdRoute =
     path: '/freelancer-portfolio/$freelancerId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const DashboardSubscriptionCheckoutRoute =
+  DashboardSubscriptionCheckoutRouteImport.update({
+    id: '/dashboard/subscription-checkout',
+    path: '/dashboard/subscription-checkout',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const DashboardPremiumRoute = DashboardPremiumRouteImport.update({
   id: '/dashboard/premium',
   path: '/dashboard/premium',
@@ -130,6 +139,11 @@ const DashboardMessagesRoute = DashboardMessagesRouteImport.update({
 const DashboardFreelancerRoute = DashboardFreelancerRouteImport.update({
   id: '/dashboard/freelancer',
   path: '/dashboard/freelancer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardContractsRoute = DashboardContractsRouteImport.update({
+  id: '/dashboard/contracts',
+  path: '/dashboard/contracts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardClientRoute = DashboardClientRouteImport.update({
@@ -160,6 +174,12 @@ const DashboardFreelancerPortfolioRoute =
     id: '/portfolio',
     path: '/portfolio',
     getParentRoute: () => DashboardFreelancerRoute,
+  } as any)
+const DashboardContractsContractIdRoute =
+  DashboardContractsContractIdRouteImport.update({
+    id: '/$contractId',
+    path: '/$contractId',
+    getParentRoute: () => DashboardContractsRoute,
   } as any)
 const DashboardClientServicesRoute = DashboardClientServicesRouteImport.update({
   id: '/services',
@@ -220,16 +240,19 @@ export interface FileRoutesByFullPath {
   '/talent': typeof TalentRouteWithChildren
   '/verify-email': typeof VerifyEmailRoute
   '/dashboard/client': typeof DashboardClientRouteWithChildren
+  '/dashboard/contracts': typeof DashboardContractsRouteWithChildren
   '/dashboard/freelancer': typeof DashboardFreelancerRouteWithChildren
   '/dashboard/messages': typeof DashboardMessagesRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/premium': typeof DashboardPremiumRoute
+  '/dashboard/subscription-checkout': typeof DashboardSubscriptionCheckoutRoute
   '/freelancer-portfolio/$freelancerId': typeof FreelancerPortfolioFreelancerIdRoute
   '/talent/$freelancerId': typeof TalentFreelancerIdRoute
   '/dashboard/client/profile': typeof DashboardClientProfileRoute
   '/dashboard/client/projects': typeof DashboardClientProjectsRoute
   '/dashboard/client/search': typeof DashboardClientSearchRoute
   '/dashboard/client/services': typeof DashboardClientServicesRouteWithChildren
+  '/dashboard/contracts/$contractId': typeof DashboardContractsContractIdRoute
   '/dashboard/freelancer/portfolio': typeof DashboardFreelancerPortfolioRoute
   '/dashboard/freelancer/profile': typeof DashboardFreelancerProfileRoute
   '/dashboard/freelancer/projects': typeof DashboardFreelancerProjectsRouteWithChildren
@@ -253,16 +276,19 @@ export interface FileRoutesByTo {
   '/talent': typeof TalentRouteWithChildren
   '/verify-email': typeof VerifyEmailRoute
   '/dashboard/client': typeof DashboardClientRouteWithChildren
+  '/dashboard/contracts': typeof DashboardContractsRouteWithChildren
   '/dashboard/freelancer': typeof DashboardFreelancerRouteWithChildren
   '/dashboard/messages': typeof DashboardMessagesRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/premium': typeof DashboardPremiumRoute
+  '/dashboard/subscription-checkout': typeof DashboardSubscriptionCheckoutRoute
   '/freelancer-portfolio/$freelancerId': typeof FreelancerPortfolioFreelancerIdRoute
   '/talent/$freelancerId': typeof TalentFreelancerIdRoute
   '/dashboard/client/profile': typeof DashboardClientProfileRoute
   '/dashboard/client/projects': typeof DashboardClientProjectsRoute
   '/dashboard/client/search': typeof DashboardClientSearchRoute
   '/dashboard/client/services': typeof DashboardClientServicesRouteWithChildren
+  '/dashboard/contracts/$contractId': typeof DashboardContractsContractIdRoute
   '/dashboard/freelancer/portfolio': typeof DashboardFreelancerPortfolioRoute
   '/dashboard/freelancer/profile': typeof DashboardFreelancerProfileRoute
   '/dashboard/freelancer/projects': typeof DashboardFreelancerProjectsRouteWithChildren
@@ -287,16 +313,19 @@ export interface FileRoutesById {
   '/talent': typeof TalentRouteWithChildren
   '/verify-email': typeof VerifyEmailRoute
   '/dashboard/client': typeof DashboardClientRouteWithChildren
+  '/dashboard/contracts': typeof DashboardContractsRouteWithChildren
   '/dashboard/freelancer': typeof DashboardFreelancerRouteWithChildren
   '/dashboard/messages': typeof DashboardMessagesRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/premium': typeof DashboardPremiumRoute
+  '/dashboard/subscription-checkout': typeof DashboardSubscriptionCheckoutRoute
   '/freelancer-portfolio/$freelancerId': typeof FreelancerPortfolioFreelancerIdRoute
   '/talent/$freelancerId': typeof TalentFreelancerIdRoute
   '/dashboard/client/profile': typeof DashboardClientProfileRoute
   '/dashboard/client/projects': typeof DashboardClientProjectsRoute
   '/dashboard/client/search': typeof DashboardClientSearchRoute
   '/dashboard/client/services': typeof DashboardClientServicesRouteWithChildren
+  '/dashboard/contracts/$contractId': typeof DashboardContractsContractIdRoute
   '/dashboard/freelancer/portfolio': typeof DashboardFreelancerPortfolioRoute
   '/dashboard/freelancer/profile': typeof DashboardFreelancerProfileRoute
   '/dashboard/freelancer/projects': typeof DashboardFreelancerProjectsRouteWithChildren
@@ -322,16 +351,19 @@ export interface FileRouteTypes {
     | '/talent'
     | '/verify-email'
     | '/dashboard/client'
+    | '/dashboard/contracts'
     | '/dashboard/freelancer'
     | '/dashboard/messages'
     | '/dashboard/payments'
     | '/dashboard/premium'
+    | '/dashboard/subscription-checkout'
     | '/freelancer-portfolio/$freelancerId'
     | '/talent/$freelancerId'
     | '/dashboard/client/profile'
     | '/dashboard/client/projects'
     | '/dashboard/client/search'
     | '/dashboard/client/services'
+    | '/dashboard/contracts/$contractId'
     | '/dashboard/freelancer/portfolio'
     | '/dashboard/freelancer/profile'
     | '/dashboard/freelancer/projects'
@@ -355,16 +387,19 @@ export interface FileRouteTypes {
     | '/talent'
     | '/verify-email'
     | '/dashboard/client'
+    | '/dashboard/contracts'
     | '/dashboard/freelancer'
     | '/dashboard/messages'
     | '/dashboard/payments'
     | '/dashboard/premium'
+    | '/dashboard/subscription-checkout'
     | '/freelancer-portfolio/$freelancerId'
     | '/talent/$freelancerId'
     | '/dashboard/client/profile'
     | '/dashboard/client/projects'
     | '/dashboard/client/search'
     | '/dashboard/client/services'
+    | '/dashboard/contracts/$contractId'
     | '/dashboard/freelancer/portfolio'
     | '/dashboard/freelancer/profile'
     | '/dashboard/freelancer/projects'
@@ -388,16 +423,19 @@ export interface FileRouteTypes {
     | '/talent'
     | '/verify-email'
     | '/dashboard/client'
+    | '/dashboard/contracts'
     | '/dashboard/freelancer'
     | '/dashboard/messages'
     | '/dashboard/payments'
     | '/dashboard/premium'
+    | '/dashboard/subscription-checkout'
     | '/freelancer-portfolio/$freelancerId'
     | '/talent/$freelancerId'
     | '/dashboard/client/profile'
     | '/dashboard/client/projects'
     | '/dashboard/client/search'
     | '/dashboard/client/services'
+    | '/dashboard/contracts/$contractId'
     | '/dashboard/freelancer/portfolio'
     | '/dashboard/freelancer/profile'
     | '/dashboard/freelancer/projects'
@@ -422,10 +460,12 @@ export interface RootRouteChildren {
   TalentRoute: typeof TalentRouteWithChildren
   VerifyEmailRoute: typeof VerifyEmailRoute
   DashboardClientRoute: typeof DashboardClientRouteWithChildren
+  DashboardContractsRoute: typeof DashboardContractsRouteWithChildren
   DashboardFreelancerRoute: typeof DashboardFreelancerRouteWithChildren
   DashboardMessagesRoute: typeof DashboardMessagesRoute
   DashboardPaymentsRoute: typeof DashboardPaymentsRoute
   DashboardPremiumRoute: typeof DashboardPremiumRoute
+  DashboardSubscriptionCheckoutRoute: typeof DashboardSubscriptionCheckoutRoute
   FreelancerPortfolioFreelancerIdRoute: typeof FreelancerPortfolioFreelancerIdRoute
 }
 
@@ -529,6 +569,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FreelancerPortfolioFreelancerIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/subscription-checkout': {
+      id: '/dashboard/subscription-checkout'
+      path: '/dashboard/subscription-checkout'
+      fullPath: '/dashboard/subscription-checkout'
+      preLoaderRoute: typeof DashboardSubscriptionCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/premium': {
       id: '/dashboard/premium'
       path: '/dashboard/premium'
@@ -555,6 +602,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/freelancer'
       fullPath: '/dashboard/freelancer'
       preLoaderRoute: typeof DashboardFreelancerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/contracts': {
+      id: '/dashboard/contracts'
+      path: '/dashboard/contracts'
+      fullPath: '/dashboard/contracts'
+      preLoaderRoute: typeof DashboardContractsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/client': {
@@ -591,6 +645,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/freelancer/portfolio'
       preLoaderRoute: typeof DashboardFreelancerPortfolioRouteImport
       parentRoute: typeof DashboardFreelancerRoute
+    }
+    '/dashboard/contracts/$contractId': {
+      id: '/dashboard/contracts/$contractId'
+      path: '/$contractId'
+      fullPath: '/dashboard/contracts/$contractId'
+      preLoaderRoute: typeof DashboardContractsContractIdRouteImport
+      parentRoute: typeof DashboardContractsRoute
     }
     '/dashboard/client/services': {
       id: '/dashboard/client/services'
@@ -698,6 +759,17 @@ const DashboardClientRouteWithChildren = DashboardClientRoute._addFileChildren(
   DashboardClientRouteChildren,
 )
 
+interface DashboardContractsRouteChildren {
+  DashboardContractsContractIdRoute: typeof DashboardContractsContractIdRoute
+}
+
+const DashboardContractsRouteChildren: DashboardContractsRouteChildren = {
+  DashboardContractsContractIdRoute: DashboardContractsContractIdRoute,
+}
+
+const DashboardContractsRouteWithChildren =
+  DashboardContractsRoute._addFileChildren(DashboardContractsRouteChildren)
+
 interface DashboardFreelancerProjectsRouteChildren {
   DashboardFreelancerProjectsProjectIdRoute: typeof DashboardFreelancerProjectsProjectIdRoute
 }
@@ -747,10 +819,12 @@ const rootRouteChildren: RootRouteChildren = {
   TalentRoute: TalentRouteWithChildren,
   VerifyEmailRoute: VerifyEmailRoute,
   DashboardClientRoute: DashboardClientRouteWithChildren,
+  DashboardContractsRoute: DashboardContractsRouteWithChildren,
   DashboardFreelancerRoute: DashboardFreelancerRouteWithChildren,
   DashboardMessagesRoute: DashboardMessagesRoute,
   DashboardPaymentsRoute: DashboardPaymentsRoute,
   DashboardPremiumRoute: DashboardPremiumRoute,
+  DashboardSubscriptionCheckoutRoute: DashboardSubscriptionCheckoutRoute,
   FreelancerPortfolioFreelancerIdRoute: FreelancerPortfolioFreelancerIdRoute,
 }
 export const routeTree = rootRouteImport

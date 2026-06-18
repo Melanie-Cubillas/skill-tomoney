@@ -1,12 +1,13 @@
-﻿import { Link, createFileRoute } from "@tanstack/react-router";
+﻿import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Clock, Loader2, Search, SlidersHorizontal, Star, X } from "lucide-react";
+import { Clock, FileCheck2, Loader2, MessageSquare, Search, SlidersHorizontal, Star, X } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { api, resolveAssetUrl, type ServiceItem } from "@/lib/api";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { api, type ServiceItem } from "@/lib/api";
 import { getSessionUser, getToken } from "@/lib/auth";
 
 export const Route = createFileRoute("/dashboard/client/services")({
@@ -15,20 +16,24 @@ export const Route = createFileRoute("/dashboard/client/services")({
 });
 
 const FALLBACK_CATEGORIES = [
-  "Diseno Grafico",
-  "Edicion de Video",
+  "Diseño gráfico",
+  "Edición de video",
   "Marketing",
-  "Desarrollo Web",
+  "Desarrollo web",
   "UX/UI",
-  "Skill Bot & Automatización",
+  "IA y Automatización",
 ];
 
 function ClientServicesPage() {
+  const navigate = useNavigate();
   const token = getToken();
   const user = getSessionUser();
   const isMype = user?.account_type === "mype";
   const [services, setServices] = useState<ServiceItem[]>([]);
+  const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
   const [loading, setLoading] = useState(true);
+  const [creatingContract, setCreatingContract] = useState(false);
+  const [contactingId, setContactingId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
@@ -84,6 +89,63 @@ function ClientServicesPage() {
     setMinPrice("");
     setMaxPrice("");
     setMaxDeliveryDays("");
+  };
+
+  const createContract = async (service: ServiceItem) => {
+    if (!token || creatingContract || !service.freelancer.id) return;
+
+    setCreatingContract(true);
+    setError(null);
+
+    try {
+      const response = await api.createContract(token, {
+        freelancer_profile_id: service.freelancer.id,
+        service_id: service.id,
+        title: service.title,
+        description: service.description,
+        amount: Number(service.price),
+        currency: service.currency,
+        terms: {
+          delivery_days: service.delivery_days,
+          source: "service_modal",
+        },
+      });
+
+      await api.createConversation(token, {
+        freelancer_profile_id: service.freelancer.id,
+        message: `Hola, creé un contrato protegido para el servicio "${service.title}". ¿Podemos revisarlo?`,
+      }).catch(() => null);
+
+      await navigate({
+        to: "/dashboard/contracts/$contractId",
+        params: { contractId: String(response.data?.id) },
+      });
+    } catch (err: unknown) {
+      const payload = err as { message?: string };
+      setError(payload?.message ?? "No se pudo crear el contrato.");
+    } finally {
+      setCreatingContract(false);
+    }
+  };
+
+  const contactFreelancer = async (service: ServiceItem) => {
+    if (!token || contactingId !== null || !service.freelancer.id) return;
+
+    setContactingId(service.freelancer.id);
+
+    try {
+      const response = await api.createConversation(token, {
+        freelancer_profile_id: service.freelancer.id,
+        message: `Hola, me interesa tu servicio "${service.title}". ¿Podemos hablar?`,
+      });
+
+      await navigate({
+        to: "/dashboard/messages",
+        search: { conversation: response.data?.conversation.id },
+      });
+    } finally {
+      setContactingId(null);
+    }
   };
 
   if (!isMype) {
@@ -174,10 +236,21 @@ function ClientServicesPage() {
         ) : (
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {services.map((service) => (
-              <ServiceCard key={service.id} service={service} />
+              <ServiceCard key={service.id} service={service} onOpenDetail={() => setSelectedService(service)} />
             ))}
           </div>
         )}
+
+        {selectedService ? (
+          <ServiceDetailModal
+            service={selectedService}
+            creatingContract={creatingContract}
+            contacting={contactingId === selectedService.freelancer.id}
+            onClose={() => setSelectedService(null)}
+            onCreateContract={() => void createContract(selectedService)}
+            onContact={() => void contactFreelancer(selectedService)}
+          />
+        ) : null}
       </div>
     </DashboardShell>
   );
@@ -211,16 +284,7 @@ function FilterInput({
   );
 }
 
-function ServiceCard({ service }: { service: ServiceItem }) {
-  const avatar = service.freelancer.name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-
-  const imageUrl = resolveAssetUrl(service.freelancer.photo_url ?? service.freelancer.profile_photo);
-
+function ServiceCard({ service, onOpenDetail }: { service: ServiceItem; onOpenDetail: () => void }) {
   return (
     <Card className="overflow-hidden rounded-2xl p-0 shadow-soft transition hover:-translate-y-0.5 hover:shadow-elegant">
       <div className="border-b border-border bg-muted/30 p-5">
@@ -234,13 +298,11 @@ function ServiceCard({ service }: { service: ServiceItem }) {
 
       <div className="p-5">
         <div className="flex items-center gap-3">
-          {imageUrl ? (
-            <img src={imageUrl} alt={service.freelancer.name} className="h-10 w-10 rounded-full object-cover" />
-          ) : (
-            <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-primary text-xs font-bold text-primary-foreground">
-              {avatar || "FR"}
-            </div>
-          )}
+          <ProfileAvatar
+            src={service.freelancer.photo_url ?? service.freelancer.profile_photo}
+            name={service.freelancer.name}
+            className="h-10 w-10 rounded-full text-xs"
+          />
           <div>
             <div className="text-sm font-semibold">{service.freelancer.name}</div>
             <div className="text-xs text-muted-foreground">{service.freelancer.headline ?? "Freelancer"}</div>
@@ -271,10 +333,8 @@ function ServiceCard({ service }: { service: ServiceItem }) {
         </div>
 
         <div className="mt-4 grid gap-2">
-          <Button asChild className="rounded-xl bg-gradient-primary shadow-soft">
-            <Link to="/dashboard/client/services/$serviceId" params={{ serviceId: String(service.id) }}>
-              Ver detalle del servicio
-            </Link>
+          <Button type="button" onClick={onOpenDetail} className="rounded-xl bg-gradient-primary shadow-soft">
+            Ver detalle del servicio
           </Button>
           {service.freelancer.id ? (
             <Button asChild variant="outline" className="rounded-xl">
@@ -286,6 +346,99 @@ function ServiceCard({ service }: { service: ServiceItem }) {
         </div>
       </div>
     </Card>
+  );
+}
+
+function ServiceDetailModal({
+  service,
+  creatingContract,
+  contacting,
+  onClose,
+  onCreateContract,
+  onContact,
+}: {
+  service: ServiceItem;
+  creatingContract: boolean;
+  contacting: boolean;
+  onClose: () => void;
+  onCreateContract: () => void;
+  onContact: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/45 p-4">
+      <button type="button" className="absolute inset-0 cursor-default" aria-label="Cerrar detalle" onClick={onClose} />
+      <Card className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl p-0 shadow-elegant">
+        <div className="border-b border-border bg-muted/30 p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <Badge className="bg-secondary/15 text-secondary">{service.category ?? "Servicio digital"}</Badge>
+              <h2 className="mt-3 font-display text-3xl font-extrabold tracking-normal">{service.title}</h2>
+              <p className="mt-3 leading-relaxed text-muted-foreground">{service.description}</p>
+            </div>
+            <button type="button" onClick={onClose} className="rounded-full p-2 text-muted-foreground transition hover:bg-background hover:text-foreground" aria-label="Cerrar">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="grid gap-5 p-6 lg:grid-cols-[1fr_280px]">
+          <div className="space-y-4">
+            <div className="grid gap-3 sm:grid-cols-3">
+              <InfoBox label="Precio" value={formatPrice(service.price, service.currency)} />
+              <InfoBox label="Entrega estimada" value={`${service.delivery_days} dias`} />
+              <InfoBox label="Vistas" value={String(service.views_count ?? 0)} />
+            </div>
+            <div className="rounded-xl border border-border bg-muted/20 p-4 text-sm text-muted-foreground">
+              El contrato protegido se crea con este servicio como referencia. Luego la MYPE confirma el pago mock escrow y el freelancer puede entregar avances para revisión.
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-border p-4">
+            <div className="flex items-center gap-3">
+              <ProfileAvatar
+                src={service.freelancer.photo_url ?? service.freelancer.profile_photo}
+                name={service.freelancer.name}
+                className="h-12 w-12 rounded-2xl"
+              />
+              <div>
+                <div className="font-display text-lg font-bold">{service.freelancer.name}</div>
+                <div className="text-sm text-muted-foreground">{service.freelancer.headline ?? "Freelancer"}</div>
+              </div>
+            </div>
+            <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+              <Star className="h-4 w-4 fill-warning text-warning" />
+              {formatRating(service.freelancer.rating)} - {service.freelancer.completed_jobs ?? 0} trabajos
+            </div>
+            <div className="mt-4 grid gap-2">
+              <Button onClick={onCreateContract} disabled={creatingContract || !service.freelancer.id} className="rounded-xl bg-gradient-primary shadow-soft">
+                {creatingContract ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileCheck2 className="h-4 w-4" />}
+                Crear contrato protegido
+              </Button>
+              <Button onClick={onContact} disabled={contacting || !service.freelancer.id} variant="outline" className="rounded-xl">
+                {contacting ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
+                Contactar freelancer
+              </Button>
+              {service.freelancer.id ? (
+                <Button asChild variant="outline" className="rounded-xl">
+                  <Link to="/dashboard/client/freelancers/$freelancerId" params={{ freelancerId: String(service.freelancer.id) }}>
+                    Ver perfil
+                  </Link>
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function InfoBox({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-border bg-background px-3 py-2">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="font-bold">{value}</div>
+    </div>
   );
 }
 

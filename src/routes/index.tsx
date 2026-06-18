@@ -1,5 +1,5 @@
 ﻿import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   BadgeCheck,
@@ -45,7 +45,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Plataforma para freelancers, MYPES y talento digital con pagos seguros e Skill Bot incluido.",
+          "Plataforma para freelancers, MYPES y talento digital con pagos seguros e IA incluida.",
       },
     ],
   }),
@@ -56,14 +56,14 @@ const categories = [
   {
     icon: Palette,
     title: "Diseño Gráfico",
-    count: "142",
+    count: "42",
     tone: "from-[#051b1e] to-[#063b3b]",
     iconTone: "bg-[#ff3dca]",
   },
   {
     icon: Clapperboard,
     title: "Edición de Video",
-    count: "98",
+    count: "31",
     tone: "from-[#ffe4d9] to-[#fff2e8]",
     iconTone: "bg-[#ff442f]",
     light: true,
@@ -71,7 +71,7 @@ const categories = [
   {
     icon: Megaphone,
     title: "Marketing & CM",
-    count: "76",
+    count: "28",
     tone: "from-[#d9fbf5] to-[#ecfffb]",
     iconTone: "bg-[#00bfae]",
     light: true,
@@ -79,7 +79,7 @@ const categories = [
   {
     icon: Monitor,
     title: "Desarrollo Web",
-    count: "121",
+    count: "36",
     tone: "from-[#dcd7ff] to-[#f4f1ff]",
     iconTone: "bg-[#6c5cff]",
     light: true,
@@ -87,14 +87,14 @@ const categories = [
   {
     icon: WandSparkles,
     title: "Diseño UX/UI",
-    count: "64",
+    count: "19",
     tone: "from-[#120928] to-[#251052]",
     iconTone: "bg-[#8d5cff]",
   },
   {
     icon: Bot,
-    title: "Skill Bot & Automatización",
-    count: "53",
+    title: "IA y Automatización",
+    count: "16",
     tone: "from-[#ccecff] to-[#eaf7ff]",
     iconTone: "bg-[#5b8cff]",
     light: true,
@@ -133,9 +133,21 @@ const freelancers = [
 
 const testimonials = [
   {
-    text: "En 2 semanas conseguí 4 clientes. La Skill Bot me ayudó a fijar mejores precios y mi portafolio se ve mucho más pro.",
+    text: "La IA me ayudó a ordenar mis servicios y presentar mejor mi portafolio para clientes pequeños.",
     name: "Camila R.",
     role: "Diseñadora Gráfica",
+    city: "Lima, Perú",
+  },
+  {
+    text: "Pude publicar un proyecto y comparar perfiles sin perder tiempo buscando por mi cuenta.",
+    name: "María A.",
+    role: "MYPE de moda",
+    city: "Lima, Perú",
+  },
+  {
+    text: "El flujo de pagos protegidos me dio más confianza para aceptar mi primer proyecto formal.",
+    name: "Luis S.",
+    role: "Desarrollador Web",
     city: "Lima, Perú",
   },
   {
@@ -229,18 +241,11 @@ function HeroSection() {
             <div className="mt-8 flex flex-wrap gap-3">
               <HeroPill icon={Gift} text="Recomendaciones personalizadas" />
               <HeroPill icon={ShieldCheck} text="Pagos protegidos" />
-              <HeroPill icon={Clock3} text="Skill Bot incluido" />
+              <HeroPill icon={Clock3} text="IA incluida" />
             </div>
           </div>
 
           <HeroVisual />
-        </div>
-
-        <div className="mt-10 grid overflow-hidden rounded-2xl border border-white/10 bg-white/[0.045] shadow-ring backdrop-blur md:grid-cols-4">
-          <StatItem icon={UserRound} value="12K+" label="Freelancers activos" />
-          <StatItem icon={Gift} value="3K+" label="Proyectos publicados" />
-          <StatItem icon={BriefcaseBusiness} value="+3,240" label="Oportunidades activas" />
-          <StatItem icon={MapPin} value="98%" label="Satisfacción" last />
         </div>
       </div>
     </section>
@@ -252,30 +257,6 @@ function HeroPill({ icon: Icon, text }: { icon: typeof Wallet; text: string }) {
     <div className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-black/25 px-4 py-2 text-sm font-bold text-white shadow-ring">
       <Icon className="h-4 w-4 text-accent" />
       {text}
-    </div>
-  );
-}
-
-function StatItem({
-  icon: Icon,
-  value,
-  label,
-  last = false,
-}: {
-  icon: typeof UserRound;
-  value: string;
-  label: string;
-  last?: boolean;
-}) {
-  return (
-    <div
-      className={`flex items-center gap-4 px-6 py-5 ${last ? "" : "border-b border-white/10 md:border-b-0 md:border-r"}`}
-    >
-      <Icon className="h-7 w-7 text-primary" />
-      <div>
-        <div className="font-display text-xl font-extrabold leading-none text-white">{value}</div>
-        <div className="mt-1 text-xs font-semibold text-white/70">{label}</div>
-      </div>
     </div>
   );
 }
@@ -292,10 +273,10 @@ function HeroVisual() {
 
       <div className="absolute right-0 top-10 w-[260px] rounded-2xl border border-white/14 bg-[#081217]/90 p-5 shadow-elegant backdrop-blur">
         <div className="text-sm font-semibold text-white/70">Oportunidades activas</div>
-        <div className="mt-3 font-display text-3xl font-extrabold text-accent">+3,240</div>
+        <div className="mt-3 font-display text-3xl font-extrabold text-accent">1,850</div>
         <div className="mt-3 flex items-center gap-2 text-xs font-bold text-accent">
           <TrendingUp className="h-4 w-4" />
-          +22% vs. mes pasado
+          Proyección TAM/SAM/SOM
         </div>
         <div className="absolute right-4 top-4 h-12 w-12 dot-field opacity-70" />
       </div>
@@ -373,12 +354,12 @@ function CategoriesSection() {
           </a>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {categories.map((category) => (
             <a
               key={category.title}
               href="/register?role=mype"
-              className={`group relative min-h-[168px] overflow-hidden rounded-[1.35rem] bg-gradient-to-br ${category.tone} p-6 shadow-elegant ring-1 ring-black/5 transition hover:-translate-y-1`}
+              className={`group relative min-h-[215px] overflow-hidden rounded-[1.6rem] bg-gradient-to-br ${category.tone} p-7 shadow-elegant ring-1 ring-black/5 transition hover:-translate-y-1`}
             >
               <Sparkles
                 className={`absolute right-8 top-6 h-4 w-4 ${category.light ? "text-accent/45" : "text-white/35"}`}
@@ -389,8 +370,8 @@ function CategoriesSection() {
                 >
                   <category.icon className="h-9 w-9" />
                 </span>
-                <div className={category.light ? "text-[#071014]" : "text-white"}>
-                  <h3 className="font-display text-2xl font-extrabold leading-[1.04]">
+                <div className={`min-w-0 ${category.light ? "text-[#071014]" : "text-white"}`}>
+                  <h3 className="max-w-[145px] break-words font-display text-[1.35rem] font-extrabold leading-[1.06] sm:text-2xl">
                     {category.title}
                   </h3>
                 </div>
@@ -398,7 +379,7 @@ function CategoriesSection() {
               <div
                 className={`absolute bottom-6 left-6 ${category.light ? "text-[#071014]" : "text-white"}`}
               >
-                <p className="text-2xl font-extrabold leading-none">{category.count}</p>
+                <p className="text-3xl font-extrabold leading-none">{category.count}</p>
                 <p className="text-sm font-semibold opacity-75">freelancers activos</p>
               </div>
               <span className="absolute right-6 top-[54%] grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full border border-white/70 bg-white/88 text-accent shadow-soft transition group-hover:-translate-y-[55%] group-hover:translate-x-1">
@@ -429,47 +410,64 @@ function HowItWorksSection() {
             en <span className="text-[#061013]">3 simples pasos</span>
           </h2>
           <p className="mt-5 max-w-sm text-sm font-semibold leading-relaxed text-white/85">
-            Sin enredos. Sin comisiones ocultas. Solo tú, tu talento y oportunidades reales.
+            Sin enredos. Solo tú, tu talento y oportunidades reales.
           </p>
         </div>
-        <div className="relative grid gap-5 md:grid-cols-3">
-          <StepConnector className="left-[30.5%]" />
-          <StepConnector className="left-[64.5%]" />
-          <StepCard
-            number="01"
-            icon={UserRound}
-            title="Crea tu perfil"
-            text="Completa tu información, muestra tus habilidades y destaca tu talento."
-          />
-          <StepCard
-            dark
-            number="02"
-            icon={Rocket}
-            title="Publica tu servicio"
-            text="Define qué ofreces, tu precio y tiempo de entrega. Skill Bot te ayuda a optimizarlo."
-          />
-          <StepCard
-            number="03"
-            icon={ShieldCheck}
-            title="Cobra protegido"
-            text="El cliente paga con escrow y recibes tu dinero de forma segura y sin sustos."
-          />
+        <div className="space-y-7">
+          <FlowBlock title="Para freelancers">
+            <StepCard
+              number="01"
+              icon={UserRound}
+              title="Crea tu perfil"
+              text="Completa tu información, muestra tus habilidades y destaca tu talento."
+            />
+            <StepCard
+              dark
+              number="02"
+              icon={Rocket}
+              title="Publica tu servicio"
+              text="Define qué ofreces, tu precio y tiempo de entrega. La IA te ayuda a optimizarlo."
+            />
+            <StepCard
+              number="03"
+              icon={ShieldCheck}
+              title="Cobra protegido"
+              text="El cliente paga con escrow y recibes tu dinero de forma segura y sin sustos."
+            />
+          </FlowBlock>
+
+          <FlowBlock title="Para MYPES">
+            <StepCard
+              number="01"
+              icon={UserRound}
+              title="Crea tu perfil"
+              text="Registra tu negocio y completa los datos básicos para generar confianza."
+            />
+            <StepCard
+              dark
+              number="02"
+              icon={BriefcaseBusiness}
+              title="Publica tus proyectos"
+              text="Describe lo que necesitas, presupuesto y tiempos para encontrar talento compatible."
+            />
+            <StepCard
+              number="03"
+              icon={ShieldCheck}
+              title="Paga seguro"
+              text="Usa contratos protegidos para revisar entregas antes de liberar el pago."
+            />
+          </FlowBlock>
         </div>
       </div>
     </section>
   );
 }
 
-function StepConnector({ className }: { className: string }) {
+function FlowBlock({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div
-      className={`pointer-events-none absolute top-1/2 z-20 hidden w-[8.5%] -translate-y-1/2 md:block ${className}`}
-      aria-hidden="true"
-    >
-      <div className="border-t-2 border-dashed border-[#071014]/75" />
-      <span className="absolute left-1/2 top-1/2 grid h-8 w-8 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white text-[#071014] shadow-soft ring-4 ring-primary">
-        <ArrowRight className="h-4 w-4" />
-      </span>
+    <div>
+      <div className="mb-3 text-sm font-extrabold uppercase tracking-[0.18em] text-[#071014]">{title}</div>
+      <div className="grid gap-5 md:grid-cols-3">{children}</div>
     </div>
   );
 }
@@ -633,7 +631,7 @@ function AudienceSection() {
           {[
             "Publica servicios ilimitados",
             "Pagos protegidos con escrow",
-            "Skill Bot te ayuda a vender más",
+            "IA te ayuda a vender más",
             "Comunidad y soporte 24/7",
           ].map((item) => (
             <li key={item} className="flex items-center gap-2">
@@ -650,12 +648,6 @@ function AudienceSection() {
           Crear mi perfil
           <ArrowRight className="h-4 w-4" />
         </Link>
-        <div className="relative mt-9 w-fit rounded-2xl border border-white/10 bg-[#061013]/78 p-5 shadow-elegant backdrop-blur">
-          <div className="text-xs font-bold text-white/60">Ganancias este mes</div>
-          <div className="mt-1 font-display text-2xl font-extrabold text-accent">S/ 4,560</div>
-          <div className="mt-2 text-xs font-bold text-accent">+31% vs. mes pasado</div>
-          <div className="absolute right-4 top-4 h-10 w-10 dot-field opacity-70" />
-        </div>
       </div>
 
       <div className="relative min-h-[430px] overflow-hidden bg-gradient-primary px-6 py-16 text-white lg:px-[max(1.5rem,calc((100vw-80rem)/2+1.5rem))]">
@@ -703,6 +695,14 @@ function AudienceSection() {
 }
 
 function CommunitySection() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const visibleTestimonials = useMemo(
+    () => [0, 1, 2].map((offset) => testimonials[(activeIndex + offset) % testimonials.length]),
+    [activeIndex],
+  );
+  const previous = () => setActiveIndex((current) => (current - 1 + testimonials.length) % testimonials.length);
+  const next = () => setActiveIndex((current) => (current + 1) % testimonials.length);
+
   return (
     <section id="comunidad" className="relative overflow-hidden bg-[#020608] py-16 text-white">
       <div className="absolute inset-0 grid-pattern opacity-35" />
@@ -713,21 +713,19 @@ function CommunitySection() {
           <h2 className="mt-3 font-display text-4xl font-extrabold leading-tight sm:text-5xl">
             Lo que dicen quienes ya construyen <span className="text-primary">su futuro</span>
           </h2>
-          <div className="mt-8 grid grid-cols-3 gap-3">
-            <MiniStat icon={BriefcaseBusiness} value="12K+" label="Freelancers activos" />
-            <MiniStat icon={CircleDollarSign} value="S/ 2M+" label="Ingresos generados" />
-            <MiniStat icon={ShieldCheck} value="98%" label="Tasa de satisfacción" />
-          </div>
+          <p className="mt-5 max-w-md text-sm font-semibold leading-relaxed text-white/65">
+            Historias de freelancers y MYPES que ya usan la plataforma para conectar, conversar y trabajar con pagos protegidos.
+          </p>
         </div>
 
         <div className="relative">
-          <button className="absolute -left-5 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/8 text-white ring-1 ring-white/10 lg:grid">
+          <button onClick={previous} className="absolute -left-5 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/8 text-white ring-1 ring-white/10 transition hover:bg-white/15 lg:grid" aria-label="Comentario anterior">
             <ChevronLeft className="h-5 w-5" />
           </button>
           <div className="grid gap-5 md:grid-cols-3">
-            {testimonials.map((testimonial, index) => (
+            {visibleTestimonials.map((testimonial, index) => (
               <article
-                key={testimonial.name}
+                key={`${testimonial.name}-${activeIndex}`}
                 className="min-h-[310px] rounded-2xl border border-white/10 bg-white/[0.055] p-7 shadow-ring backdrop-blur"
               >
                 <div
@@ -756,13 +754,18 @@ function CommunitySection() {
               </article>
             ))}
           </div>
-          <button className="absolute -right-5 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/8 text-white ring-1 ring-white/10 lg:grid">
+          <button onClick={next} className="absolute -right-5 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/8 text-white ring-1 ring-white/10 transition hover:bg-white/15 lg:grid" aria-label="Siguiente comentario">
             <ChevronRight className="h-5 w-5" />
           </button>
           <div className="mt-6 flex justify-center gap-2">
-            <span className="h-2 w-8 rounded-full bg-accent" />
-            <span className="h-2 w-2 rounded-full bg-white/25" />
-            <span className="h-2 w-2 rounded-full bg-white/25" />
+            {testimonials.map((testimonial, index) => (
+              <button
+                key={testimonial.name}
+                onClick={() => setActiveIndex(index)}
+                className={`h-2 rounded-full transition ${activeIndex === index ? "w-8 bg-accent" : "w-2 bg-white/25 hover:bg-white/45"}`}
+                aria-label={`Ver comentario ${index + 1}`}
+              />
+            ))}
           </div>
         </div>
       </div>

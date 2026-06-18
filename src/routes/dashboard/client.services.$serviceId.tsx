@@ -1,11 +1,12 @@
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, Clock, Loader2, MessageSquare, Star } from "lucide-react";
+import { ArrowLeft, Clock, FileCheck2, Loader2, MessageSquare, Star } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { api, resolveAssetUrl, type ServiceItem } from "@/lib/api";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { api, type ServiceItem } from "@/lib/api";
 import { getSessionUser, getToken } from "@/lib/auth";
 
 export const Route = createFileRoute("/dashboard/client/services/$serviceId")({
@@ -20,6 +21,7 @@ function ClientServiceDetailPage() {
   const isMype = user?.account_type === "mype";
   const { serviceId } = Route.useParams();
   const [contacting, setContacting] = useState(false);
+  const [creatingContract, setCreatingContract] = useState(false);
   const [service, setService] = useState<ServiceItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -67,7 +69,34 @@ function ClientServiceDetailPage() {
     }
   }, [contacting, navigate, service?.freelancer.id, token]);
 
-  const imageUrl = resolveAssetUrl(service?.freelancer.photo_url ?? service?.freelancer.profile_photo);
+  const createContract = useCallback(async () => {
+    if (!token || creatingContract || !service?.freelancer.id) return;
+    setCreatingContract(true);
+    setError(null);
+    try {
+      const response = await api.createContract(token, {
+        freelancer_profile_id: service.freelancer.id,
+        service_id: service.id,
+        title: service.title,
+        description: service.description,
+        amount: Number(service.price),
+        currency: service.currency,
+        terms: {
+          delivery_days: service.delivery_days,
+          source: "service_detail",
+        },
+      });
+      await navigate({
+        to: "/dashboard/contracts/$contractId",
+        params: { contractId: String(response.data?.id) },
+      });
+    } catch (err: unknown) {
+      const payload = err as { message?: string };
+      setError(payload?.message ?? "No se pudo crear el contrato.");
+    } finally {
+      setCreatingContract(false);
+    }
+  }, [creatingContract, navigate, service, token]);
 
   return (
     <DashboardShell role="client">
@@ -111,13 +140,11 @@ function ClientServiceDetailPage() {
 
             <Card className="rounded-2xl p-6 shadow-soft">
               <div className="flex items-center gap-3">
-                {imageUrl ? (
-                  <img src={imageUrl} alt={service.freelancer.name} className="h-14 w-14 rounded-2xl object-cover" />
-                ) : (
-                  <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-primary text-sm font-bold text-primary-foreground">
-                    {service.freelancer.name.slice(0, 2).toUpperCase()}
-                  </div>
-                )}
+                <ProfileAvatar
+                  src={service.freelancer.photo_url ?? service.freelancer.profile_photo}
+                  name={service.freelancer.name}
+                  className="h-14 w-14 rounded-2xl"
+                />
                 <div>
                   <div className="font-display text-xl font-bold">{service.freelancer.name}</div>
                   <div className="text-sm text-muted-foreground">{service.freelancer.headline ?? "Freelancer"}</div>
@@ -135,9 +162,22 @@ function ClientServiceDetailPage() {
               {service.freelancer.id ? (
                 <div className="mt-6 grid gap-2">
                   <Button
+                    onClick={() => void createContract()}
+                    disabled={creatingContract}
+                    className="w-full rounded-xl bg-gradient-primary shadow-soft"
+                  >
+                    {creatingContract ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <FileCheck2 className="h-4 w-4" />
+                    )}
+                    Crear contrato protegido
+                  </Button>
+                  <Button
                     onClick={() => void contactFreelancer()}
                     disabled={contacting}
-                    className="w-full rounded-xl bg-gradient-primary shadow-soft"
+                    variant="outline"
+                    className="w-full rounded-xl"
                   >
                     {contacting ? (
                       <Loader2 className="h-4 w-4 animate-spin" />

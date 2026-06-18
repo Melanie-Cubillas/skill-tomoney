@@ -5,7 +5,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { api, resolveAssetUrl, type ServiceItem } from "@/lib/api";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { api, type ServiceItem } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import { Clock, Loader2, Search, SlidersHorizontal, Star, X } from "lucide-react";
 
@@ -20,12 +21,12 @@ export const Route = createFileRoute("/services")({
 });
 
 const FALLBACK_CATEGORIES = [
-  "Diseno Grafico",
-  "Edicion de Video",
+  "Diseño gráfico",
+  "Edición de video",
   "Marketing",
-  "Desarrollo Web",
+  "Desarrollo web",
   "UX/UI",
-  "Skill Bot & Automatización",
+  "IA y Automatización",
 ];
 
 function ServicesPage() {
@@ -227,13 +228,6 @@ function ServicesPage() {
 }
 
 function ServiceCard({ service }: { service: ServiceItem }) {
-  const avatar = service.freelancer.name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-
   return (
     <Card className="group overflow-hidden p-0 transition hover:-translate-y-1 hover:shadow-elegant">
       <div className="border-b border-border bg-muted/40 p-5">
@@ -247,18 +241,11 @@ function ServiceCard({ service }: { service: ServiceItem }) {
 
       <div className="p-5">
         <div className="flex items-center gap-3">
-          {resolveAssetUrl(service.freelancer.photo_url ?? service.freelancer.profile_photo) ? (
-            <img
-              src={resolveAssetUrl(service.freelancer.photo_url ?? service.freelancer.profile_photo) ?? undefined}
-              alt={service.freelancer.name}
-              loading="lazy"
-              className="h-9 w-9 rounded-full object-cover"
-            />
-          ) : (
-            <div className="grid h-9 w-9 place-items-center rounded-full bg-gradient-primary text-xs font-bold text-primary-foreground">
-              {avatar || "FR"}
-            </div>
-          )}
+          <ProfileAvatar
+            src={service.freelancer.photo_url ?? service.freelancer.profile_photo}
+            name={service.freelancer.name}
+            className="h-9 w-9 rounded-full text-xs"
+          />
           <div>
             <div className="text-sm font-semibold">{service.freelancer.name}</div>
             <div className="text-xs text-muted-foreground">

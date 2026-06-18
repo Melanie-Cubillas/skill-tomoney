@@ -6,11 +6,11 @@ import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { api, type MarketTrendItem, type PortfolioProjectPayload, type PriceSuggestionPayload, type ProfilePayload, type ServicePayload } from "@/lib/api";
+import { api, type MarketTrendItem, type PortfolioHealthPayload, type PortfolioProjectPayload, type PriceSuggestionPayload, type ProfilePayload, type ServicePayload } from "@/lib/api";
 import { getSessionUser, getToken } from "@/lib/auth";
 
 export const Route = createFileRoute("/dashboard/freelancer")({
-  head: () => ({ meta: [{ title: "Dashboard Freelancer - SkilltoMoney" }] }),
+  head: () => ({ meta: [{ title: "Dashboard - SkilltoMoney" }] }),
   component: FreelancerRoute,
 });
 
@@ -32,6 +32,7 @@ function FreelancerDashboard() {
   const [portfolio, setPortfolio] = useState<PortfolioProjectPayload[]>([]);
   const [marketTrends, setMarketTrends] = useState<MarketTrendItem[]>([]);
   const [priceSuggestion, setPriceSuggestion] = useState<PriceSuggestionPayload | null>(null);
+  const [portfolioHealth, setPortfolioHealth] = useState<PortfolioHealthPayload | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -46,11 +47,12 @@ function FreelancerDashboard() {
         const priceCategory = profileData.category ?? profileData.experience_area ?? "";
         const priceSearch = (profileData.skills ?? []).join(" ");
 
-        const [serviceResponse, portfolioResponse, trendsResponse, priceResponse] = await Promise.all([
+        const [serviceResponse, portfolioResponse, trendsResponse, priceResponse, healthResponse] = await Promise.all([
           api.getFreelancerServices(token),
           api.getPortfolioProjects(token),
           api.getMarketTrends(token).catch(() => ({ data: { trends: [], has_data: false, keywords: [] } })),
           api.getPriceSuggestion(token, { category: priceCategory, search: priceSearch }).catch(() => ({ data: null })),
+          api.getPortfolioHealth(token).catch(() => ({ data: null })),
         ]);
 
         setProfile(profileData);
@@ -58,12 +60,14 @@ function FreelancerDashboard() {
         setPortfolio(portfolioResponse.data ?? []);
         setMarketTrends(trendsResponse.data?.trends ?? []);
         setPriceSuggestion(priceResponse.data ?? null);
+        setPortfolioHealth(healthResponse.data ?? null);
       } catch {
         setProfile({});
         setServices([]);
         setPortfolio([]);
         setMarketTrends([]);
         setPriceSuggestion(null);
+        setPortfolioHealth(null);
       } finally {
         setLoading(false);
       }
@@ -75,16 +79,7 @@ function FreelancerDashboard() {
   const firstName = (user?.name ?? "Tu perfil").split(" ")[0] || "Tu perfil";
   const activeServices = services.filter((service) => service.status === "active").length;
   const featuredProjects = portfolio.filter((project) => project.is_featured).length;
-  const completionFields = [
-    profile.headline,
-    profile.bio ?? profile.description,
-    profile.experience_area ?? profile.category,
-    profile.skills?.length,
-    services.length,
-    portfolio.length,
-    profile.social_links?.linkedin || profile.social_links?.instagram || profile.website,
-  ];
-  const profileCompletion = Math.round((completionFields.filter(Boolean).length / completionFields.length) * 100);
+  const profileVisibility = Number(profile.visibility?.score ?? profile.visibility_score ?? 0);
 
   return (
     <DashboardShell role="freelancer" profilePhotoUrl={profile.photo_url ?? null}>
@@ -147,18 +142,23 @@ function FreelancerDashboard() {
           </Card>
 
           <Card className="rounded-2xl p-6 shadow-soft">
-            <h2 className="font-display text-lg font-bold tracking-normal">Completitud del perfil</h2>
+              <h2 className="font-display text-lg font-bold tracking-normal">Visibilidad del perfil</h2>
             <div className="mt-5 flex items-center gap-5">
               <div className="grid h-24 w-24 shrink-0 aspect-square place-items-center rounded-full border-[8px] border-secondary text-2xl font-extrabold">
-                {profileCompletion}%
+                {profileVisibility}%
               </div>
-              <p className="text-sm text-muted-foreground">Calculado con datos reales guardados.</p>
+              <p className="text-sm text-muted-foreground">
+                {profile.visibility?.level ?? "Sin nivel"} · Nivel {profile.visibility?.tier ?? "pendiente"}
+              </p>
             </div>
             <div className="mt-5 space-y-3 text-sm">
-              <ChecklistLine done={Boolean(profile.bio ?? profile.description)} label="Descripcion personal" />
-              <ChecklistLine done={(profile.skills ?? []).length > 0} label="Habilidades guardadas" />
-              <ChecklistLine done={services.length > 0} label="Servicio publicado" />
-              <ChecklistLine done={portfolio.length > 0} label="Portafolio agregado" />
+              {(profile.visibility?.checks ?? [
+                { label: "Descripcion personal", done: Boolean(profile.bio ?? profile.description), points: 20 },
+                { label: "Habilidades guardadas", done: (profile.skills ?? []).length > 0, points: 20 },
+                { label: "Portafolio agregado", done: portfolio.length > 0, points: 20 },
+              ]).map((check) => (
+                <ChecklistLine key={check.label} done={check.done} label={`${check.label} (${check.points} pts)`} />
+              ))}
             </div>
             <Button asChild className="mt-5 rounded-xl bg-gradient-primary shadow-soft">
               <Link to="/dashboard/freelancer/profile">Mejorar perfil</Link>
@@ -178,13 +178,18 @@ function FreelancerDashboard() {
             </Card>
 
             <Card className="rounded-2xl p-5 shadow-soft">
-              <h2 className="font-display text-lg font-bold tracking-normal">Actividad real</h2>
+              <h2 className="font-display text-lg font-bold tracking-normal">Diagnóstico de portafolio</h2>
               <div className="mt-4 space-y-4 text-sm">
-                {services[0] ? <Activity icon={Package} title="Servicio creado" detail={services[0].title} /> : null}
-                {portfolio[0] ? <Activity icon={FolderKanban} title="Proyecto agregado" detail={portfolio[0].title} /> : null}
-                {!services[0] && !portfolio[0] ? (
-                  <p className="text-sm text-muted-foreground">{loading ? "Cargando..." : "Aún no hay actividad guardada."}</p>
-                ) : null}
+                {portfolioHealth ? (
+                  <>
+                    <Activity icon={FolderKanban} title={`${portfolioHealth.score}/100 · ${portfolioHealth.level}`} detail={`${portfolioHealth.signals.projects_count} proyectos y ${portfolioHealth.signals.skills_count} habilidades`} />
+                    {(portfolioHealth.recommendations.length > 0 ? portfolioHealth.recommendations : ["Tu portafolio tiene una base sólida. Mantén tus proyectos actualizados."]).slice(0, 2).map((item) => (
+                      <p key={item} className="rounded-xl bg-muted/40 px-3 py-2 text-xs text-muted-foreground">{item}</p>
+                    ))}
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground">{loading ? "Cargando..." : "Aún no hay diagnóstico disponible."}</p>
+                )}
               </div>
             </Card>
           </div>

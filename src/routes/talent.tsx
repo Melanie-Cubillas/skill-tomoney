@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import {
   Search,
   MapPin,
@@ -32,12 +33,12 @@ export const Route = createFileRoute("/talent")({
 });
 
 const CATEGORIES = [
-  "Diseño Gráfico",
-  "Edición de Video",
+  "Diseño gráfico",
+  "Edición de video",
   "Marketing",
-  "Desarrollo Web",
+  "Desarrollo web",
   "UX/UI",
-  "Skill Bot & Automatización",
+  "IA y Automatización",
 ];
 
 function TalentPage() {
@@ -406,18 +407,11 @@ function TalentPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <div className="relative">
-                        {resolveAssetUrl(f.photo_url ?? f.profile_photo) ? (
-                          <img
-                            src={resolveAssetUrl(f.photo_url ?? f.profile_photo) ?? undefined}
-                            alt={f.name}
-                            loading="lazy"
-                            className="h-12 w-12 rounded-2xl object-cover shadow-soft"
-                          />
-                        ) : (
-                          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-primary font-bold text-primary-foreground shadow-soft">
-                            {(f.name ?? "F").charAt(0).toUpperCase()}
-                          </div>
-                        )}
+                        <ProfileAvatar
+                          src={f.photo_url ?? f.profile_photo}
+                          name={f.name}
+                          className="h-12 w-12 rounded-2xl shadow-soft"
+                        />
                         <span className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-card bg-success" />
                       </div>
                       <div>

@@ -30,8 +30,8 @@ import { getSessionUser, getToken } from "@/lib/auth";
 export const Route = createFileRoute("/freelancer-onboarding")({
   head: () => ({
     meta: [
-      { title: "Crear Dashboard Freelancer · SkilltoMoney" },
-      { name: "description", content: "Completa tu dashboard freelancer inicial." },
+      { title: "Crear Perfil Freelancer · SkilltoMoney" },
+      { name: "description", content: "Completa tu perfil freelancer inicial." },
     ],
   }),
   component: FreelancerOnboarding,
@@ -302,7 +302,7 @@ function FreelancerOnboarding() {
         <main className="grid min-h-[calc(100vh-57px)] place-items-center px-6">
           <div className="text-center">
             <p className="max-w-xl font-display text-xl font-bold leading-tight">
-              {geminiError ? "Error al procesar" : "Preparando tu dashboard freelancer..."}
+              {geminiError ? "Error al procesar" : "Preparando tu perfil freelancer..."}
               <br />
               {geminiError
                 ? "Continuando de todos modos."
@@ -539,7 +539,7 @@ function FreelancerOnboarding() {
     <FreelancerFrame avatarLabel={avatarLabel}>
       <main className="mx-auto w-full max-w-[1240px] px-5 py-6 lg:px-8">
         <div>
-          <h1 className="font-display text-3xl font-bold">Crear Dashboard Freelancer</h1>
+          <h1 className="font-display text-3xl font-bold">Crear Perfil Freelancer</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Gestiona tu perfil real conectado al backend.
           </p>

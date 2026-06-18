@@ -13,7 +13,7 @@ import { getSessionUser, getToken } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/dashboard/freelancer/profile")({
-  head: () => ({ meta: [{ title: "Dashboard Freelancer · SkilltoMoney" }] }),
+  head: () => ({ meta: [{ title: "Perfil Freelancer · SkilltoMoney" }] }),
   component: FreelancerProfilePage,
 });
 
@@ -94,9 +94,6 @@ function FreelancerProfilePage() {
     return {
       linkedin: raw.linkedin ?? "",
       instagram: raw.instagram ?? "",
-      facebook: raw.facebook ?? "",
-      x: raw.x ?? "",
-      website: raw.website ?? "",
     };
   }, [profile.social_links]);
 
@@ -114,14 +111,11 @@ function FreelancerProfilePage() {
   const profileCompletionFields = [
     profile.experience_area,
     profile.location,
-    profile.website || socialLinks.website,
     profile.bio ?? profile.description,
     skillNames.length > 0,
     visiblePhotoUrl,
     socialLinks.linkedin,
     socialLinks.instagram,
-    socialLinks.facebook,
-    socialLinks.x,
   ];
   const profileCompletion = Math.round((profileCompletionFields.filter(isFilled).length / profileCompletionFields.length) * 100);
   const completionHint = profileCompletion >= 100
@@ -153,13 +147,10 @@ function FreelancerProfilePage() {
         experience_area: profile.experience_area?.trim() || "No especificada",
         bio: profile.bio ?? profile.description ?? null,
         location: profile.location ?? null,
-        website: profile.website || socialLinks.website || null,
+        website: null,
         social_links: {
           linkedin: socialLinks.linkedin || null,
           instagram: socialLinks.instagram || null,
-          facebook: socialLinks.facebook || null,
-          x: socialLinks.x || null,
-          website: socialLinks.website || profile.website || null,
         },
       });
 
@@ -213,7 +204,7 @@ function FreelancerProfilePage() {
     <DashboardShell role="freelancer" profilePhotoUrl={visiblePhotoUrl}>
       <div className="space-y-5">
         <div>
-          <h1 className="font-display text-4xl font-extrabold tracking-normal">Dashboard freelancer</h1>
+          <h1 className="font-display text-4xl font-extrabold tracking-normal">Perfil freelancer</h1>
           <p className="mt-1 text-muted-foreground">Gestiona tu perfil profesional, habilidades y presencia digital.</p>
         </div>
 
@@ -280,9 +271,6 @@ function FreelancerProfilePage() {
                   ))}
                 </select>
               </Field>
-              <Field label="Website">
-                <Input value={profile.website ?? ""} onChange={(event) => setProfile((prev) => ({ ...prev, website: event.target.value }))} placeholder="alejandro.dev" className="h-11 rounded-xl" />
-              </Field>
               <Field label="Ubicación">
                 <Input value={profile.location ?? ""} onChange={(event) => setProfile((prev) => ({ ...prev, location: event.target.value }))} placeholder="Lima, Peru" className="h-11 rounded-xl" />
               </Field>
@@ -333,8 +321,8 @@ function FreelancerProfilePage() {
           <Card className="rounded-2xl p-5 shadow-soft">
             <PanelTitle icon={Globe2} title="Redes sociales" />
             <div className="mt-5 grid gap-3 md:grid-cols-2">
-              {(["linkedin", "instagram", "facebook", "x", "website"] as const).map((key) => (
-                <Input key={key} value={socialLinks[key]} onChange={(event) => setProfile((prev) => ({ ...prev, social_links: { ...(prev.social_links ?? {}), [key]: event.target.value } }))} placeholder={key === "x" ? "X / Twitter" : key} className="h-11 rounded-xl" />
+              {(["linkedin", "instagram"] as const).map((key) => (
+                <Input key={key} value={socialLinks[key]} onChange={(event) => setProfile((prev) => ({ ...prev, social_links: { ...(prev.social_links ?? {}), [key]: event.target.value } }))} placeholder={key === "linkedin" ? "LinkedIn" : "Instagram"} className="h-11 rounded-xl" />
               ))}
             </div>
           </Card>

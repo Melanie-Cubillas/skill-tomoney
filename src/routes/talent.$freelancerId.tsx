@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { api, resolveAssetUrl, type CatalogPortfolioItem, type FreelancerDetailPayload } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import {
@@ -219,18 +220,11 @@ function FreelancerPortfolioPage() {
               <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                 <div className="flex flex-1 items-start gap-4">
                   <div className="relative shrink-0">
-                    {resolveAssetUrl(freelancer.photo_url ?? freelancer.profile_photo) ? (
-                      <img
-                        src={resolveAssetUrl(freelancer.photo_url ?? freelancer.profile_photo) ?? undefined}
-                        alt={freelancer.name}
-                        loading="lazy"
-                        className="h-24 w-24 rounded-3xl object-cover shadow-soft"
-                      />
-                    ) : (
-                      <div className="grid h-24 w-24 place-items-center rounded-3xl bg-gradient-primary text-3xl font-bold text-primary-foreground shadow-soft">
-                        {freelancer.name.charAt(0).toUpperCase()}
-                      </div>
-                    )}
+                    <ProfileAvatar
+                      src={freelancer.photo_url ?? freelancer.profile_photo}
+                      name={freelancer.name}
+                      className="h-24 w-24 rounded-3xl text-3xl shadow-soft"
+                    />
                     <span className="absolute right-2 top-2 h-3.5 w-3.5 rounded-full bg-success ring-4 ring-background" />
                   </div>
 

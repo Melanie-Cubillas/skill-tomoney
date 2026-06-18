@@ -1,6 +1,6 @@
-﻿import { Link, createFileRoute } from "@tanstack/react-router";
+﻿import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Edit3, FileText, Loader2, Plus, Save, Star, Trash2, Users } from "lucide-react";
+import { Edit3, FileCheck2, FileText, Loader2, MessageSquare, Plus, Save, Star, Trash2, Users } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,7 @@ const STATUS_LABELS: Record<ClientProjectPayload["status"], string> = {
 };
 
 function ClientProjectsPage() {
+  const navigate = useNavigate();
   const token = getToken();
   const user = getSessionUser();
   const isMype = user?.account_type === "mype";
@@ -53,6 +54,8 @@ function ClientProjectsPage() {
   const [projectPriceSuggestion, setProjectPriceSuggestion] = useState<PriceSuggestionPayload | null>(null);
   const [projectRecommendations, setProjectRecommendations] = useState<RecommendedFreelancerItem[]>([]);
   const [draftPriceSuggestion, setDraftPriceSuggestion] = useState<PriceSuggestionPayload | null>(null);
+  const [contractingFreelancerId, setContractingFreelancerId] = useState<number | null>(null);
+  const [contactingFreelancerId, setContactingFreelancerId] = useState<number | null>(null);
 
   const loadProjects = useCallback(async () => {
     if (!token || !isMype) {
@@ -221,6 +224,67 @@ function ClientProjectsPage() {
     }
   };
 
+  const contactFreelancerForProject = async (project: ClientProjectPayload, freelancer: RecommendedFreelancerItem) => {
+    if (!token || contactingFreelancerId !== null) return;
+
+    setContactingFreelancerId(freelancer.id);
+    setError(null);
+
+    try {
+      const response = await api.createConversation(token, {
+        freelancer_profile_id: freelancer.id,
+        message: `Hola, vi que tu perfil encaja con mi proyecto "${project.title}". ¿Podemos conversar los detalles?`,
+      });
+
+      await navigate({
+        to: "/dashboard/messages",
+        search: { conversation: response.data?.conversation.id },
+      });
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "No se pudo contactar al freelancer."));
+    } finally {
+      setContactingFreelancerId(null);
+    }
+  };
+
+  const createProjectContract = async (project: ClientProjectPayload, freelancer: RecommendedFreelancerItem) => {
+    if (!token || contractingFreelancerId !== null) return;
+
+    setContractingFreelancerId(freelancer.id);
+    setError(null);
+
+    try {
+      const amount = Number(project.budget_max ?? project.budget_min ?? 1);
+      const response = await api.createContract(token, {
+        freelancer_profile_id: freelancer.id,
+        client_project_id: project.id,
+        title: project.title,
+        description: project.description,
+        amount: amount > 0 ? amount : 1,
+        currency: "PEN",
+        terms: {
+          expected_delivery_days: project.expected_delivery_days,
+          source: "client_project_match",
+          compatibility_score: freelancer.score,
+        },
+      });
+
+      await api.createConversation(token, {
+        freelancer_profile_id: freelancer.id,
+        message: `Hola, creé un contrato protegido para mi proyecto "${project.title}". ¿Puedes revisarlo?`,
+      }).catch(() => null);
+
+      await navigate({
+        to: "/dashboard/contracts/$contractId",
+        params: { contractId: String(response.data?.id) },
+      });
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "No se pudo crear el contrato."));
+    } finally {
+      setContractingFreelancerId(null);
+    }
+  };
+
   if (!isMype) {
     return (
       <DashboardShell role="client">
@@ -253,7 +317,7 @@ function ClientProjectsPage() {
           <Card className="rounded-2xl border-secondary/30 bg-secondary/10 p-5">
             <div className="font-display text-lg font-bold">Limite del plan Free alcanzado</div>
             <p className="mt-1 text-sm text-muted-foreground">
-              Puedes editar o eliminar tu proyecto actual. Para crear mas publicaciones, activa el plan Pro desde Premium.
+              Puedes editar o eliminar tu proyecto actual. Para crear más publicaciones, activa SkillPro.
             </p>
           </Card>
         ) : null}
@@ -381,26 +445,63 @@ function ClientProjectsPage() {
                       {projectRecommendations.length > 0 ? (
                         <div className="space-y-2">
                           {projectRecommendations.map((freelancer) => (
-                            <Link
+                            <div
                               key={freelancer.id}
-                              to="/dashboard/client/freelancers/$freelancerId"
-                              params={{ freelancerId: String(freelancer.id) }}
-                              className="flex items-center justify-between gap-3 rounded-lg bg-background px-3 py-2 text-sm transition hover:bg-muted"
+                              className="rounded-lg bg-background px-3 py-2 text-sm"
                             >
-                              <div>
-                                <div className="font-semibold">{freelancer.name}</div>
-                                <div className="text-xs text-muted-foreground">{freelancer.headline ?? freelancer.category ?? "Freelancer"}</div>
+                              <div className="flex items-center justify-between gap-3">
+                                <div>
+                                  <div className="font-semibold">{freelancer.name}</div>
+                                  <div className="text-xs text-muted-foreground">{freelancer.headline ?? freelancer.category ?? "Freelancer"}</div>
+                                </div>
+                                <span className="flex items-center gap-1 text-xs font-semibold text-secondary">
+                                  <Star className="h-3.5 w-3.5 fill-current" />
+                                  {Math.round(freelancer.score)}%
+                                </span>
                               </div>
-                              <span className="flex items-center gap-1 text-xs font-semibold text-secondary">
-                                <Star className="h-3.5 w-3.5 fill-current" />
-                                {Math.round(freelancer.score)}%
-                              </span>
-                            </Link>
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                <Button asChild size="sm" variant="outline" className="h-8 rounded-lg">
+                                  <Link to="/dashboard/client/freelancers/$freelancerId" params={{ freelancerId: String(freelancer.id) }}>
+                                    Ver perfil
+                                  </Link>
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-8 rounded-lg"
+                                  disabled={contactingFreelancerId === freelancer.id}
+                                  onClick={() => void contactFreelancerForProject(project, freelancer)}
+                                >
+                                  {contactingFreelancerId === freelancer.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <MessageSquare className="h-3.5 w-3.5" />}
+                                  Contactar
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  className="h-8 rounded-lg bg-gradient-primary"
+                                  disabled={contractingFreelancerId === freelancer.id}
+                                  onClick={() => void createProjectContract(project, freelancer)}
+                                >
+                                  {contractingFreelancerId === freelancer.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileCheck2 className="h-3.5 w-3.5" />}
+                                  Crear contrato
+                                </Button>
+                              </div>
+                            </div>
                           ))}
                         </div>
                       ) : (
                         <p className="text-sm text-muted-foreground">Aun no hay freelancers compatibles con datos suficientes.</p>
                       )}
+                      {projectRecommendations[0]?.compatibility_breakdown ? (
+                        <div className="mt-3 rounded-lg border border-border bg-background px-3 py-2 text-xs text-muted-foreground">
+                          <div className="mb-1 font-semibold text-foreground">Cálculo del mejor match</div>
+                          <div className="grid gap-1 sm:grid-cols-2">
+                            <span>Habilidades: {projectRecommendations[0].compatibility_breakdown.skills?.points ?? 0}/40</span>
+                            <span>Categoría: {projectRecommendations[0].compatibility_breakdown.category?.points ?? 0}/20</span>
+                            <span>Rating: {projectRecommendations[0].compatibility_breakdown.rating?.points ?? 0}/20</span>
+                            <span>Experiencia: {projectRecommendations[0].compatibility_breakdown.experience?.points ?? 0}/20</span>
+                          </div>
+                        </div>
+                      ) : null}
                     </Card>
                   </div>
                 ) : null}

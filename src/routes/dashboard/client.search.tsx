@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { api, resolveAssetUrl, type FreelancerItem } from "@/lib/api";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { api, type FreelancerItem } from "@/lib/api";
 import { getSessionUser, getToken } from "@/lib/auth";
 
 export const Route = createFileRoute("/dashboard/client/search")({
@@ -15,12 +16,12 @@ export const Route = createFileRoute("/dashboard/client/search")({
 });
 
 const CATEGORIES = [
-  "Diseno Grafico",
-  "Edicion de Video",
+  "Diseño gráfico",
+  "Edición de video",
   "Marketing",
-  "Desarrollo Web",
+  "Desarrollo web",
   "UX/UI",
-  "Skill Bot & Automatización",
+  "IA y Automatización",
 ];
 
 function ClientSearchPage() {
@@ -314,20 +315,17 @@ function FreelancerCard({
   onContact: () => void;
   onOpenProfile: () => void;
 }) {
-  const imageUrl = resolveAssetUrl(freelancer.photo_url ?? freelancer.profile_photo);
   const rate = freelancer.suggested_rate || (freelancer.rate_amount ? `S/ ${freelancer.rate_amount}` : null);
 
   return (
     <Card className="rounded-2xl p-5 shadow-soft transition hover:-translate-y-0.5 hover:shadow-elegant">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          {imageUrl ? (
-            <img src={imageUrl} alt={freelancer.name} className="h-12 w-12 rounded-2xl object-cover" />
-          ) : (
-            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-primary text-sm font-bold text-white">
-              {freelancer.name.slice(0, 2).toUpperCase()}
-            </div>
-          )}
+          <ProfileAvatar
+            src={freelancer.photo_url ?? freelancer.profile_photo}
+            name={freelancer.name}
+            className="h-12 w-12 rounded-2xl"
+          />
           <div>
             <h2 className="font-display text-lg font-bold">{freelancer.name}</h2>
             <p className="text-sm text-muted-foreground">{freelancer.headline ?? freelancer.category ?? "Freelancer"}</p>
