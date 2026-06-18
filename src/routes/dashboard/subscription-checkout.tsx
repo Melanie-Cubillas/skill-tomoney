@@ -64,6 +64,7 @@ function SubscriptionCheckoutPage() {
   const navigate = useNavigate();
   const search = useSearch({ from: Route.id });
   const role = user?.account_type === "mype" ? "client" : "freelancer";
+  const isMype = user?.account_type === "mype";
   const checkoutRef = useRef<CulqiCheckoutInstance | null>(null);
   const [cycle, setCycle] = useState<BillingCycle>(search.cycle);
   const [culqiReady, setCulqiReady] = useState(false);
@@ -72,10 +73,17 @@ function SubscriptionCheckoutPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const amount = cycle === "monthly" ? 29 : 290;
+  const amount = cycle === "monthly"
+    ? (isMype ? 49 : 29)
+    : (isMype ? 490 : 290);
   const amountInCents = useMemo(() => Math.round(amount * 100), [amount]);
   const renewalText = cycle === "monthly" ? "Renovación mensual" : "Renovación anual";
-  const savingsText = cycle === "yearly" ? "Ahorra S/ 58 frente al pago mensual." : "Puedes cambiar a anual antes de pagar.";
+  const monthlyPrice = isMype ? 49 : 29;
+  const yearlyPrice = isMype ? 490 : 290;
+  const savings = yearlyPrice - monthlyPrice * 12;
+  const savingsText = cycle === "yearly"
+    ? `Ahorra S/ ${Math.abs(savings)} frente al pago mensual.`
+    : "Puedes cambiar a anual antes de pagar.";
 
   const completeCulqiPayment = useCallback(async (
     culqiToken: string,
@@ -399,14 +407,14 @@ function SubscriptionCheckoutPage() {
                 <BillingButton
                   active={cycle === "monthly"}
                   label="Mensual"
-                  price="S/ 29"
+                  price={isMype ? "S/ 49" : "S/ 29"}
                   detail="Pago cada mes"
                   onClick={() => setCycle("monthly")}
                 />
                 <BillingButton
                   active={cycle === "yearly"}
                   label="Anual"
-                  price="S/ 290"
+                  price={isMype ? "S/ 490" : "S/ 290"}
                   detail="Mejor valor"
                   onClick={() => setCycle("yearly")}
                 />

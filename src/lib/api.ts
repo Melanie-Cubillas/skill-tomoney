@@ -11,8 +11,12 @@ export function resolveAssetUrl(value: string | null | undefined): string | null
   if (!value) return null;
 
   if (/^(https?:|data:|blob:)/i.test(value)) {
-    if (typeof window !== "undefined" && window.location.protocol === "https:" && value.startsWith("http://")) {
-      return value.replace(/^http:\/\//i, "https://");
+    if (value.startsWith("http://")) {
+      const isHttpsPage = typeof window !== "undefined" && window.location.protocol === "https:";
+      const isHttpsApi = API_ROOT_URL.startsWith("https://");
+      if (isHttpsPage || isHttpsApi) {
+        return value.replace(/^http:\/\//i, "https://");
+      }
     }
 
     return value;
