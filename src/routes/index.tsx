@@ -272,12 +272,8 @@ function HeroVisual() {
       <div className="absolute left-40 top-28 h-[115px] w-[115px] rounded-full bg-[#020608]/20 blur-2xl sm:left-56" />
 
       <div className="absolute right-0 top-10 w-[260px] rounded-2xl border border-white/14 bg-[#081217]/90 p-5 shadow-elegant backdrop-blur">
-        <div className="text-sm font-semibold text-white/70">Oportunidades activas</div>
-        <div className="mt-3 font-display text-3xl font-extrabold text-accent">1,850</div>
-        <div className="mt-3 flex items-center gap-2 text-xs font-bold text-accent">
-          <TrendingUp className="h-4 w-4" />
-          Proyección TAM/SAM/SOM
-        </div>
+        <div className="font-display text-4xl font-extrabold text-accent">7800</div>
+        <div className="mt-1 text-sm font-semibold text-white/70">oportunidades activas</div>
         <div className="absolute right-4 top-4 h-12 w-12 dot-field opacity-70" />
       </div>
 
