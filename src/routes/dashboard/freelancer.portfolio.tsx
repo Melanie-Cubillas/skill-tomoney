@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Edit3, Eye, ExternalLink, FileText, FolderKanban, ImageIcon, LinkIcon, Save, Search, Star, Trash2 } from "lucide-react";
+import { Edit3, ExternalLink, FileText, FolderKanban, ImageIcon, LinkIcon, Save, Search, Star, Trash2 } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -99,8 +99,6 @@ function PortfolioPage() {
     });
   }, [projects, search, categoryFilter]);
 
-  const featuredCount = projects.filter((project) => project.is_featured).length;
-
   const resetForm = () => {
     setForm(emptyForm);
     setEditingId(null);
@@ -184,12 +182,6 @@ function PortfolioPage() {
             <h1 className="font-display text-4xl font-extrabold tracking-normal">Portafolio de proyectos</h1>
             <p className="mt-1 text-muted-foreground">Crea, edita y organiza los proyectos que muestras en tu portafolio profesional.</p>
           </div>
-        </div>
-
-        <div className="grid gap-4 xl:grid-cols-3">
-          <Metric icon={FolderKanban} label="Proyectos publicados" value={String(projects.length)} hint="Total registrado" />
-          <Metric icon={Star} label="Proyectos destacados" value={String(featuredCount)} hint="Marcados como destacados" />
-          <Metric icon={Eye} label="Visitas al portafolio" value="N/D" hint="Requiere contador backend" />
         </div>
 
         {error ? <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">{error}</p> : null}
@@ -334,23 +326,6 @@ function PortfolioPage() {
         </Card>
       </div>
     </DashboardShell>
-  );
-}
-
-function Metric({ icon: Icon, label, value, hint }: { icon: LucideIcon; label: string; value: string; hint: string }) {
-  return (
-    <Card className="rounded-2xl p-5 shadow-soft">
-      <div className="flex items-center gap-5">
-        <span className="grid h-16 w-16 place-items-center rounded-2xl bg-secondary/15 text-secondary">
-          <Icon className="h-7 w-7" />
-        </span>
-        <div>
-          <div className="text-sm font-semibold text-muted-foreground">{label}</div>
-          <div className="font-display text-3xl font-extrabold tracking-normal">{value}</div>
-          <div className="mt-1 text-xs font-bold text-success">{hint}</div>
-        </div>
-      </div>
-    </Card>
   );
 }
 
