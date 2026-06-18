@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import type { LucideIcon } from "lucide-react";
-import { CheckCircle2, Edit3, Eye, Package, Save, Search, Trash2 } from "lucide-react";
+import { Edit3, Package, Save, Search, Trash2 } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -72,9 +71,6 @@ function ServicesPage() {
     () => services.filter((service) => service.title.toLowerCase().includes(search.toLowerCase())),
     [services, search],
   );
-
-  const activeServices = services.filter((service) => service.status === "active").length;
-  const totalViews = services.reduce((total, service) => total + service.views_count, 0);
 
   const resetForm = () => {
     setForm(emptyForm);
@@ -168,12 +164,6 @@ function ServicesPage() {
             <h1 className="font-display text-4xl font-extrabold tracking-normal">Gestion de servicios</h1>
             <p className="mt-1 text-muted-foreground">Crea, edita y administra los servicios que ofreceras en la plataforma.</p>
           </div>
-        </div>
-
-        <div className="grid gap-4 xl:grid-cols-3">
-          <Metric icon={Package} label="Total servicios" value={String(services.length)} hint="Total registrado" />
-          <Metric icon={CheckCircle2} label="Servicios activos" value={String(activeServices)} hint="Disponibles para clientes" />
-          <Metric icon={Eye} label="Total de vistas" value={totalViews.toLocaleString()} hint="Suma real de vistas" />
         </div>
 
         {error ? <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">{error}</p> : null}
@@ -304,23 +294,6 @@ function ServicesPage() {
         </Card>
       </div>
     </DashboardShell>
-  );
-}
-
-function Metric({ icon: Icon, label, value, hint }: { icon: LucideIcon; label: string; value: string; hint: string }) {
-  return (
-    <Card className="rounded-2xl p-5 shadow-soft">
-      <div className="flex items-center gap-5">
-        <span className="grid h-16 w-16 place-items-center rounded-2xl bg-secondary/15 text-secondary">
-          <Icon className="h-7 w-7" />
-        </span>
-        <div>
-          <div className="text-sm font-semibold text-muted-foreground">{label}</div>
-          <div className="font-display text-3xl font-extrabold tracking-normal">{value}</div>
-          <div className="mt-1 text-xs font-bold text-success">{hint}</div>
-        </div>
-      </div>
-    </Card>
   );
 }
 
