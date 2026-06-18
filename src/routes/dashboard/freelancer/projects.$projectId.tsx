@@ -1,10 +1,11 @@
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Briefcase, Building2, CalendarDays, Loader2, MessageSquare } from "lucide-react";
+import { ArrowLeft, Briefcase, CalendarDays, Loader2, MessageSquare } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { api, type ClientProjectDetailPayload } from "@/lib/api";
 import { getSessionUser, getToken } from "@/lib/auth";
 
@@ -76,9 +77,9 @@ function FreelancerProjectDetailPage() {
     <DashboardShell role="freelancer">
       <div className="space-y-6">
         <Button asChild variant="outline" className="rounded-xl">
-          <Link to="/dashboard/freelancer">
+          <Link to="/dashboard/freelancer/projects">
             <ArrowLeft className="h-4 w-4" />
-            Volver al dashboard
+            Volver a proyectos
           </Link>
         </Button>
 
@@ -105,9 +106,12 @@ function FreelancerProjectDetailPage() {
 
             <Card className="rounded-2xl p-6 shadow-soft">
               <div className="flex items-center gap-3">
-                <span className="grid h-14 w-14 place-items-center rounded-2xl bg-secondary/15 text-secondary">
-                  <Building2 className="h-6 w-6" />
-                </span>
+                <ProfileAvatar
+                  src={project.mype.photo_url ?? project.mype.profile_photo}
+                  name={project.mype.name}
+                  className="h-14 w-14 rounded-2xl"
+                  fallbackClassName="bg-secondary/15 text-secondary"
+                />
                 <div>
                   <div className="font-display text-xl font-bold">{project.mype.name}</div>
                   <div className="text-sm text-muted-foreground">{project.mype.industry ?? "MYPE"}</div>

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Briefcase, Building2, CalendarDays, Eye, Loader2, Search } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
@@ -15,6 +15,7 @@ export const Route = createFileRoute("/dashboard/freelancer/projects")({
 });
 
 function FreelancerProjectSearchPage() {
+  const navigate = useNavigate();
   const token = getToken();
   const user = useMemo(() => getSessionUser(), []);
   const [projects, setProjects] = useState<ClientProjectDetailPayload[]>([]);
@@ -134,17 +135,28 @@ function FreelancerProjectSearchPage() {
                 </div>
 
                 <div className="mt-5 flex flex-wrap gap-3">
-                  <Button asChild className="rounded-xl bg-gradient-primary">
-                    <Link to="/dashboard/freelancer/projects/$projectId" params={{ projectId: String(project.id) }}>
-                      <Briefcase className="h-4 w-4" />
-                      Ver proyecto
-                    </Link>
+                  <Button
+                    type="button"
+                    onClick={() => void navigate({
+                      to: "/dashboard/freelancer/projects/$projectId",
+                      params: { projectId: String(project.id) },
+                    })}
+                    className="rounded-xl bg-gradient-primary"
+                  >
+                    <Briefcase className="h-4 w-4" />
+                    Ver proyecto
                   </Button>
                   {project.mype.id ? (
-                    <Button asChild variant="outline" className="rounded-xl">
-                      <Link to="/dashboard/freelancer/mypes/$mypeId" params={{ mypeId: String(project.mype.id) }}>
-                        Ver MYPE
-                      </Link>
+                    <Button
+                      type="button"
+                      onClick={() => void navigate({
+                        to: "/dashboard/freelancer/mypes/$mypeId",
+                        params: { mypeId: String(project.mype.id) },
+                      })}
+                      variant="outline"
+                      className="rounded-xl"
+                    >
+                      Ver MYPE
                     </Button>
                   ) : null}
                 </div>
