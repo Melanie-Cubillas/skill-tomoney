@@ -1,11 +1,19 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { BadgeCheck, CheckCircle2, Crown, Loader2, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  ArrowRight,
+  BadgeCheck,
+  CheckCircle2,
+  Crown,
+  Loader2,
+  Sparkles,
+  TrendingUp,
+} from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { api, type SubscriptionPayload } from "@/lib/api";
-import { getSessionUser, getToken } from "@/lib/auth";
+import { getSessionUser, getToken, saveSession } from "@/lib/auth";
 
 export const Route = createFileRoute("/dashboard/premium")({
   head: () => ({ meta: [{ title: "SkillPro - SkilltoMoney" }] }),
@@ -13,6 +21,37 @@ export const Route = createFileRoute("/dashboard/premium")({
 });
 
 type BillingCycle = "monthly" | "yearly";
+
+const mypeFreeFeatures = ["1 publicación activa", "Buscar freelancers", "Guardar favoritos", "Explorar servicios"];
+const freelancerFreeFeatures = ["Perfil freelancer", "Portafolio básico", "1 servicio recomendado", "Visibilidad estándar"];
+
+const mypeProFeatures = [
+  "Publicaciones ilimitadas",
+  "Mayor visibilidad para tus proyectos",
+  "Recomendaciones avanzadas de freelancers",
+  "Soporte prioritario",
+];
+
+const freelancerProFeatures = [
+  "Servicios ilimitados",
+  "Más visibilidad en el marketplace",
+  "Skill Bot ampliado",
+  "Analítica de perfil",
+];
+
+const mypeUpgradeChanges = [
+  "Puedes publicar más de un proyecto activo.",
+  "Tus proyectos se muestran con mayor prioridad.",
+  "Accedes a recomendaciones más completas de freelancers compatibles.",
+  "Mantienes búsqueda, favoritos, servicios y contacto con talento.",
+];
+
+const freelancerUpgradeChanges = [
+  "Puedes publicar más servicios sin quedar limitado al plan Free.",
+  "Tu perfil gana mayor visibilidad frente a MYPES.",
+  "Skill Bot puede ayudarte con mejoras más completas.",
+  "Accedes a analítica para entender el rendimiento de tu perfil.",
+];
 
 function DashboardPremiumPage() {
   const token = getToken();
@@ -26,14 +65,14 @@ function DashboardPremiumPage() {
 
   const isPro = subscription?.plan === "pro" || user?.subscription_plan === "pro";
   const proPrice = cycle === "monthly" ? "S/ 29" : "S/ 290";
+  const freeFeatures = isMype ? mypeFreeFeatures : freelancerFreeFeatures;
+  const proFeatures = isMype ? mypeProFeatures : freelancerProFeatures;
+  const upgradeChanges = isMype ? mypeUpgradeChanges : freelancerUpgradeChanges;
 
-  const freeFeatures = isMype
-    ? ["1 publicación activa", "Buscar freelancers", "Guardar favoritos", "Explorar servicios"]
-    : ["Perfil freelancer", "Portafolio básico", "1 servicio recomendado", "Visibilidad estándar"];
-
-  const proFeatures = isMype
-    ? ["Publicaciones ilimitadas", "Mayor visibilidad para tus proyectos", "Recomendaciones avanzadas", "Soporte prioritario"]
-    : ["Servicios ilimitados", "Más visibilidad", "Skill Bot ampliado", "Analítica de perfil"];
+  const currentFeatures = useMemo(() => {
+    if (subscription?.features?.length) return subscription.features;
+    return isPro ? proFeatures : freeFeatures;
+  }, [freeFeatures, isPro, proFeatures, subscription?.features]);
 
   useEffect(() => {
     if (!token) {
@@ -42,7 +81,16 @@ function DashboardPremiumPage() {
     }
 
     api.getSubscription(token)
-      .then((response) => setSubscription(response.data))
+      .then((response) => {
+        setSubscription(response.data);
+        if (user) {
+          saveSession(token, {
+            ...user,
+            subscription_plan: response.data.plan,
+            subscription_status: response.data.status,
+          });
+        }
+      })
       .catch(() => setError("No se pudo cargar tu suscripción."))
       .finally(() => setLoading(false));
   }, [token]);
@@ -58,7 +106,7 @@ function DashboardPremiumPage() {
             </Badge>
             <h1 className="mt-3 font-display text-4xl font-extrabold tracking-normal">Elige tu SkillPro</h1>
             <p className="mt-1 max-w-2xl text-muted-foreground">
-              Compara Free y Pro. Cuando elijas Pro, pasarás al checkout seguro de SkillPro.
+              Compara tu plan Free con Pro. Cuando el pago se aprueba, tu cuenta cambia automáticamente a Pro.
             </p>
           </div>
 
@@ -81,6 +129,52 @@ function DashboardPremiumPage() {
         </div>
 
         {error ? <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</div> : null}
+
+        <Card className={`overflow-hidden rounded-2xl p-0 shadow-soft ${isPro ? "border-secondary/40" : "border-border"}`}>
+          <div className="grid gap-0 lg:grid-cols-[0.95fr_1.05fr]">
+            <div className={isPro ? "bg-secondary/12 p-6" : "bg-muted/30 p-6"}>
+              <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground">
+                {isPro ? <BadgeCheck className="h-4 w-4 text-secondary" /> : <Crown className="h-4 w-4 text-primary" />}
+                Estado actual de tu cuenta
+              </div>
+              <div className="mt-4 flex flex-wrap items-end gap-3">
+                <span className="font-display text-4xl font-extrabold">{isPro ? "SkillPro activo" : "Plan Free"}</span>
+                <Badge className={isPro ? "bg-secondary text-secondary-foreground" : "bg-muted text-muted-foreground"}>
+                  {isPro ? "Pagado" : "Sin pago activo"}
+                </Badge>
+              </div>
+              <p className="mt-3 max-w-xl text-sm text-muted-foreground">
+                {isPro
+                  ? "Tu cuenta ya tiene las funciones Pro habilitadas. El dashboard y los límites se comportan según este plan."
+                  : "Tu cuenta sigue en Free. Puedes usar las funciones base y subir a Pro cuando quieras ampliar tus límites."}
+              </p>
+
+              {isPro && subscription?.last_payment ? (
+                <div className="mt-5 rounded-xl border border-secondary/25 bg-background/70 p-4 text-sm">
+                  <div className="font-semibold text-foreground">Último pago confirmado</div>
+                  <p className="mt-1 text-muted-foreground">
+                    Referencia: {subscription.last_payment.reference}. Renovación: {subscription.ends_at ? formatDate(subscription.ends_at) : "sin fecha registrada"}.
+                  </p>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="p-6">
+              <div className="flex items-center gap-2 text-sm font-bold">
+                <TrendingUp className="h-4 w-4 text-secondary" />
+                Funciones disponibles ahora
+              </div>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {currentFeatures.map((feature) => (
+                  <div key={feature} className="flex gap-2 rounded-xl border border-border bg-background px-3 py-2 text-sm">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
+                    <span>{feature}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Card>
 
         <div className="grid gap-5 lg:grid-cols-2">
           <PlanCard
@@ -107,23 +201,38 @@ function DashboardPremiumPage() {
           />
         </div>
 
+        {!isPro ? (
+          <Card className="rounded-2xl border-secondary/30 bg-secondary/10 p-5 shadow-soft">
+            <div className="flex items-center gap-2 font-display text-lg font-bold">
+              <Sparkles className="h-5 w-5 text-secondary" />
+              ¿Qué cambia cuando pasas de Free a Pro?
+            </div>
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              {upgradeChanges.map((change) => (
+                <div key={change} className="flex gap-2 rounded-xl bg-background/70 p-3 text-sm">
+                  <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <span>{change}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        ) : (
+          <Card className="rounded-2xl border-secondary/30 bg-secondary/10 p-5 shadow-soft">
+            <div className="flex items-center gap-2 font-display text-lg font-bold text-secondary">
+              <BadgeCheck className="h-5 w-5" />
+              Cambio aplicado correctamente
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Tu usuario pasó de Free a Pro. Las funciones Pro ya se muestran como activas en el dashboard.
+            </p>
+          </Card>
+        )}
+
         {loading ? (
           <div className="flex items-center gap-2 rounded-2xl border border-border bg-card px-5 py-4 text-sm text-muted-foreground shadow-soft">
             <Loader2 className="h-4 w-4 animate-spin" />
             Cargando estado de suscripción...
           </div>
-        ) : null}
-
-        {isPro && subscription?.last_payment ? (
-          <Card className="rounded-2xl p-5 shadow-soft">
-            <div className="flex items-center gap-2 font-semibold text-secondary">
-              <BadgeCheck className="h-5 w-5" />
-              Tu plan Pro está activo
-            </div>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Último pago: {subscription.last_payment.reference}. Renovación: {subscription.ends_at ? formatDate(subscription.ends_at) : "sin fecha registrada"}.
-            </p>
-          </Card>
         ) : null}
       </div>
     </DashboardShell>
@@ -160,7 +269,7 @@ function PlanCard({
   }`;
 
   return (
-    <Card className={`relative rounded-2xl p-7 shadow-soft ${highlight ? "border-primary/40" : "border-secondary/30"}`}>
+    <Card className={`relative rounded-2xl p-7 shadow-soft ${highlight ? "border-primary/40" : "border-secondary/30"} ${active ? "ring-2 ring-secondary/25" : ""}`}>
       {highlight ? (
         <div className="absolute right-5 top-5">
           <Badge className="bg-gradient-primary text-primary-foreground">
