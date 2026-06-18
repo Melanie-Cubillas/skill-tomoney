@@ -315,6 +315,7 @@ export type MypeSummaryPayload = {
   website: string | null;
   location: string | null;
   profile_photo: string | null;
+  photo_url?: string | null;
   views_count: number | null;
 };
 

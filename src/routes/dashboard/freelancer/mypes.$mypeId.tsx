@@ -1,10 +1,11 @@
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, Building2, ExternalLink, FileText, Loader2, MessageSquare } from "lucide-react";
+import { ArrowLeft, ExternalLink, FileText, Loader2, MessageSquare } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { api, type MypeDetailPayload } from "@/lib/api";
 import { getSessionUser, getToken } from "@/lib/auth";
 
@@ -71,9 +72,9 @@ function FreelancerMypeDetailPage() {
     <DashboardShell role="freelancer">
       <div className="space-y-6">
         <Button asChild variant="outline" className="rounded-xl">
-          <Link to="/dashboard/freelancer">
+          <Link to="/dashboard/freelancer/projects">
             <ArrowLeft className="h-4 w-4" />
-            Volver al dashboard
+            Volver a proyectos
           </Link>
         </Button>
 
@@ -90,9 +91,12 @@ function FreelancerMypeDetailPage() {
             <Card className="rounded-2xl p-6 shadow-soft">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="flex gap-4">
-                  <span className="grid h-20 w-20 place-items-center rounded-2xl bg-secondary/15 text-secondary">
-                    <Building2 className="h-9 w-9" />
-                  </span>
+                  <ProfileAvatar
+                    src={mype.photo_url ?? mype.profile_photo}
+                    name={mype.name}
+                    className="h-20 w-20 rounded-2xl"
+                    fallbackClassName="bg-secondary/15 text-secondary"
+                  />
                   <div>
                     <h1 className="font-display text-4xl font-extrabold tracking-normal">{mype.name}</h1>
                     <p className="mt-1 text-secondary">{mype.industry ?? "MYPE"}</p>
