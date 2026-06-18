@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Briefcase, Building2, CalendarDays, Eye, Loader2, Search } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
@@ -11,8 +11,18 @@ import { getSessionUser, getToken } from "@/lib/auth";
 
 export const Route = createFileRoute("/dashboard/freelancer/projects")({
   head: () => ({ meta: [{ title: "Buscar proyectos MYPE - SkilltoMoney" }] }),
-  component: FreelancerProjectSearchPage,
+  component: FreelancerProjectsRoute,
 });
+
+function FreelancerProjectsRoute() {
+  const path = useRouterState({ select: (state) => state.location.pathname });
+
+  if (path !== "/dashboard/freelancer/projects") {
+    return <Outlet />;
+  }
+
+  return <FreelancerProjectSearchPage />;
+}
 
 function FreelancerProjectSearchPage() {
   const navigate = useNavigate();

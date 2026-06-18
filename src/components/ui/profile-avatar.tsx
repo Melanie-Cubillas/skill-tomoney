@@ -73,19 +73,29 @@ function buildImageCandidates(value?: string | null): string[] {
     resolveAssetUrl(cleanValue),
   ];
 
-  const storageMatch = cleanValue.match(/\/storage\/(.+)$/i);
+  const storageMatch = cleanValue.match(/(?:^|\/)storage\/(.+)$/i);
   if (storageMatch?.[1]) {
     candidates.push(`${normalizedRoot}/api/media/${storageMatch[1].replace(/^\/+/, "")}`);
   }
 
   const mediaMatch = cleanValue.match(/\/api\/media\/(.+)$/i);
   if (mediaMatch?.[1]) {
-    candidates.push(`${normalizedRoot}/api/media/${mediaMatch[1].replace(/^\/+/, "")}`);
+    const mediaPath = mediaMatch[1].replace(/^\/+/, "");
+    candidates.push(`${normalizedRoot}/api/media/${mediaPath}`);
+
+    if (mediaPath.toLowerCase().startsWith("storage/")) {
+      candidates.push(`${normalizedRoot}/api/media/${mediaPath.replace(/^storage\/+/i, "")}`);
+    }
   }
 
   const profilePhotoMatch = cleanValue.match(/(profile[_-]?photos\/.+)$/i);
   if (profilePhotoMatch?.[1]) {
     candidates.push(`${normalizedRoot}/api/media/${profilePhotoMatch[1].replace(/^\/+/, "")}`);
+  }
+
+  const profilesMatch = cleanValue.match(/(?:^|\/)(profiles\/.+)$/i);
+  if (profilesMatch?.[1]) {
+    candidates.push(`${normalizedRoot}/api/media/${profilesMatch[1].replace(/^\/+/, "")}`);
   }
 
   if (!/^https?:\/\//i.test(cleanValue)) {
