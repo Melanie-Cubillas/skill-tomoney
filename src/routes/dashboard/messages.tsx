@@ -89,8 +89,10 @@ function MessagesPage() {
     }
   }, [selectedId, loadMessages, token]);
 
+  const userChannel = user?.id ? `user.${user.id}` : null;
+
   usePusher(
-    selectedId ? [`conversation.${selectedId}`] : [],
+    [userChannel, selectedId ? `conversation.${selectedId}` : undefined].filter(Boolean) as string[],
     (event) => {
       if (event.event === "message.sent") {
         const data = event.data as { sender_user_id: number; message: string };
@@ -110,8 +112,11 @@ function MessagesPage() {
           void loadConversations();
         }
       }
+      if (event.event === "conversation.created") {
+        void loadConversations();
+      }
     },
-    Boolean(selectedId && token),
+    Boolean(token && user?.id),
   );
 
   const selectConversation = (id: number) => {
