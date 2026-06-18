@@ -68,7 +68,9 @@ function DashboardPremiumPage() {
   const [error, setError] = useState<string | null>(null);
 
   const isPro = subscription?.plan === "pro" || user?.subscription_plan === "pro";
-  const proPrice = cycle === "monthly" ? "S/ 29" : "S/ 290";
+  const proPrice = cycle === "monthly"
+    ? (isMype ? "S/ 49" : "S/ 29")
+    : (isMype ? "S/ 490" : "S/ 290");
   const freeFeatures = isMype ? mypeFreeFeatures : freelancerFreeFeatures;
   const proFeatures = isMype ? mypeProFeatures : freelancerProFeatures;
   const upgradeChanges = isMype ? mypeUpgradeChanges : freelancerUpgradeChanges;
