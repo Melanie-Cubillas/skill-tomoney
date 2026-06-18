@@ -7,8 +7,8 @@ import { clearSession, getSessionUser, getToken, type SessionUser } from "@/lib/
 
 const navItems = [
   { href: "/#inicio", label: "Inicio" },
-  { href: "/#como-funciona", label: "Cómo funciona" },
   { href: "/#categorias", label: "Categorías" },
+  { href: "/#como-funciona", label: "Cómo funciona" },
   { href: "/#freelancers", label: "Freelancers" },
   { href: "/#mypes", label: "MYPES" },
   { href: "/#comunidad", label: "Comunidad" },

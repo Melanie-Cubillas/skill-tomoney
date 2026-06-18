@@ -334,7 +334,7 @@ function CategoriesSection() {
           strokeLinejoin="round"
         />
       </svg>
-      <div className="mx-auto grid max-w-7xl gap-9 px-6 lg:grid-cols-[0.58fr_1.42fr]">
+      <div className="mx-auto grid max-w-7xl gap-9 px-6 lg:grid-cols-[0.48fr_1.52fr]">
         <div className="relative flex flex-col justify-center">
           <SectionEyebrow tone="teal" text="CATEGORÍAS" />
           <h2 className="mt-4 font-display text-4xl font-extrabold leading-[1.02] sm:text-5xl">
@@ -354,35 +354,35 @@ function CategoriesSection() {
           </a>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-7 md:grid-cols-2">
           {categories.map((category) => (
             <a
               key={category.title}
               href="/register?role=mype"
-              className={`group relative min-h-[215px] overflow-hidden rounded-[1.6rem] bg-gradient-to-br ${category.tone} p-7 shadow-elegant ring-1 ring-black/5 transition hover:-translate-y-1`}
+              className={`group relative min-h-[230px] overflow-hidden rounded-[1.7rem] bg-gradient-to-br ${category.tone} p-8 shadow-elegant ring-1 ring-black/5 transition hover:-translate-y-1`}
             >
               <Sparkles
                 className={`absolute right-8 top-6 h-4 w-4 ${category.light ? "text-accent/45" : "text-white/35"}`}
               />
-              <div className="relative z-10 flex items-start gap-5 pr-14">
+              <div className="relative z-10 flex items-start gap-6 pr-16">
                 <span
-                  className={`grid h-16 w-16 shrink-0 place-items-center rounded-2xl ${category.iconTone} text-white shadow-soft`}
+                  className={`grid h-[72px] w-[72px] shrink-0 place-items-center rounded-2xl ${category.iconTone} text-white shadow-soft`}
                 >
-                  <category.icon className="h-9 w-9" />
+                  <category.icon className="h-10 w-10" />
                 </span>
                 <div className={`min-w-0 ${category.light ? "text-[#071014]" : "text-white"}`}>
-                  <h3 className="max-w-[145px] break-words font-display text-[1.35rem] font-extrabold leading-[1.06] sm:text-2xl">
+                  <h3 className="max-w-[230px] whitespace-normal font-display text-2xl font-extrabold leading-[1.08] sm:text-[1.7rem]">
                     {category.title}
                   </h3>
                 </div>
               </div>
               <div
-                className={`absolute bottom-6 left-6 ${category.light ? "text-[#071014]" : "text-white"}`}
+                className={`absolute bottom-7 left-8 ${category.light ? "text-[#071014]" : "text-white"}`}
               >
                 <p className="text-3xl font-extrabold leading-none">{category.count}</p>
                 <p className="text-sm font-semibold opacity-75">freelancers activos</p>
               </div>
-              <span className="absolute right-6 top-[54%] grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full border border-white/70 bg-white/88 text-accent shadow-soft transition group-hover:-translate-y-[55%] group-hover:translate-x-1">
+              <span className="absolute right-8 top-[54%] grid h-14 w-14 -translate-y-1/2 place-items-center rounded-full border border-white/70 bg-white/88 text-accent shadow-soft transition group-hover:-translate-y-[55%] group-hover:translate-x-1">
                 <ArrowRight className="h-5 w-5" />
               </span>
             </a>
@@ -412,6 +412,19 @@ function HowItWorksSection() {
           <p className="mt-5 max-w-sm text-sm font-semibold leading-relaxed text-white/85">
             Sin enredos. Solo tú, tu talento y oportunidades reales.
           </p>
+          <div className="mt-14 max-w-sm lg:mt-52">
+            <div className="text-sm font-extrabold uppercase tracking-[0.18em] text-[#071014]">
+              Para MYPES
+            </div>
+            <h3 className="mt-3 font-display text-3xl font-extrabold leading-tight text-white sm:text-4xl">
+              Encuentra talento
+              <br />
+              en <span className="text-[#061013]">3 simples pasos</span>
+            </h3>
+            <p className="mt-5 text-sm font-semibold leading-relaxed text-white/85">
+              Publica lo que necesitas, compara perfiles compatibles y paga con contratos protegidos.
+            </p>
+          </div>
         </div>
         <div className="space-y-7">
           <FlowBlock title="Para freelancers">
