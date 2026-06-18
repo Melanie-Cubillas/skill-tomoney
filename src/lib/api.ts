@@ -613,6 +613,14 @@ export type SubscriptionCheckoutInput = {
     phone?: string;
     culqi_token?: string;
     culqi_email?: string;
+    device_finger_print_id?: string;
+    authentication_3ds?: {
+      eci?: string;
+      xid?: string;
+      cavv?: string;
+      protocolVersion?: string;
+      directoryServerTransactionId?: string;
+    };
   };
 };
 

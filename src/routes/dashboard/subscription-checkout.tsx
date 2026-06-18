@@ -22,9 +22,27 @@ type CulqiCheckoutInstance = {
   culqi?: () => void;
 };
 
+type Culqi3DSParameters = {
+  eci?: string;
+  xid?: string;
+  cavv?: string;
+  protocolVersion?: string;
+  directoryServerTransactionId?: string;
+};
+
+type Culqi3DSInstance = {
+  publicKey?: string;
+  settings?: Record<string, unknown>;
+  options?: Record<string, unknown>;
+  generateDevice: () => Promise<string | null>;
+  initAuthentication: (tokenId?: string) => Promise<void>;
+  reset: () => void;
+};
+
 declare global {
   interface Window {
     CulqiCheckout?: new (publicKey: string, config: Record<string, unknown>) => CulqiCheckoutInstance;
+    Culqi3DS?: Culqi3DSInstance;
   }
 }
 
@@ -49,6 +67,7 @@ function SubscriptionCheckoutPage() {
   const checkoutRef = useRef<CulqiCheckoutInstance | null>(null);
   const [cycle, setCycle] = useState<BillingCycle>(search.cycle);
   const [culqiReady, setCulqiReady] = useState(false);
+  const [culqi3dsReady, setCulqi3dsReady] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -58,7 +77,14 @@ function SubscriptionCheckoutPage() {
   const renewalText = cycle === "monthly" ? "Renovación mensual" : "Renovación anual";
   const savingsText = cycle === "yearly" ? "Ahorra S/ 58 frente al pago mensual." : "Puedes cambiar a anual antes de pagar.";
 
-  const completeCulqiPayment = useCallback(async (culqiToken: string, culqiEmail?: string) => {
+  const completeCulqiPayment = useCallback(async (
+    culqiToken: string,
+    culqiEmail?: string,
+    security?: {
+      deviceFingerPrintId?: string | null;
+      authentication3DS?: Culqi3DSParameters;
+    },
+  ) => {
     if (!token || !user) return;
 
     setProcessing(true);
@@ -74,6 +100,8 @@ function SubscriptionCheckoutPage() {
         payment_details: {
           culqi_token: culqiToken,
           culqi_email: culqiEmail ?? user.email,
+          device_finger_print_id: security?.deviceFingerPrintId ?? undefined,
+          authentication_3ds: security?.authentication3DS,
         },
       });
 
@@ -92,6 +120,95 @@ function SubscriptionCheckoutPage() {
       setProcessing(false);
     }
   }, [cycle, navigate, token, user]);
+
+  const authenticateAndPay = useCallback(async (culqiToken: string, culqiEmail?: string) => {
+    if (!user) return;
+
+    if (!window.Culqi3DS) {
+      await completeCulqiPayment(culqiToken, culqiEmail);
+      return;
+    }
+
+    setProcessing(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const culqi3DS = window.Culqi3DS;
+      culqi3DS.reset();
+      culqi3DS.publicKey = CULQI_PUBLIC_KEY;
+      culqi3DS.settings = {
+        charge: {
+          totalAmount: amountInCents,
+          returnUrl: window.location.href,
+          currency: "PEN",
+        },
+        card: {
+          email: culqiEmail ?? user.email,
+        },
+      };
+      culqi3DS.options = {
+        showModal: true,
+        showLoading: true,
+        showIcon: true,
+        style: {
+          btnColor: "#FF4B36",
+          btnTextColor: "#FFFFFF",
+        },
+      };
+
+      const deviceFingerPrintId = await culqi3DS.generateDevice();
+      const authentication3DS = await new Promise<Culqi3DSParameters>((resolve, reject) => {
+        const timeout = window.setTimeout(() => {
+          cleanup();
+          reject(new Error("No se pudo completar la autenticacion 3DS. Intentalo nuevamente."));
+        }, 120000);
+
+        const cleanup = () => {
+          window.clearTimeout(timeout);
+          window.removeEventListener("message", handleMessage);
+        };
+
+        const handleMessage = (event: MessageEvent) => {
+          const response = event.data as {
+            loading?: boolean;
+            parameters3DS?: Culqi3DSParameters;
+            error?: string;
+          } | null;
+
+          if (!response || typeof response !== "object") return;
+
+          if (response.loading) {
+            setProcessing(true);
+          }
+
+          if (response.parameters3DS) {
+            cleanup();
+            resolve(response.parameters3DS);
+          }
+
+          if (response.error) {
+            cleanup();
+            reject(new Error(response.error));
+          }
+        };
+
+        window.addEventListener("message", handleMessage);
+        void culqi3DS.initAuthentication(culqiToken).catch((err: unknown) => {
+          cleanup();
+          reject(err instanceof Error ? err : new Error("No se pudo iniciar la autenticacion 3DS."));
+        });
+      });
+
+      await completeCulqiPayment(culqiToken, culqiEmail, {
+        deviceFingerPrintId,
+        authentication3DS,
+      });
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "No se pudo autenticar el pago con 3DS."));
+      setProcessing(false);
+    }
+  }, [amountInCents, completeCulqiPayment, user]);
 
   useEffect(() => {
     if (!CULQI_PUBLIC_KEY) {
@@ -113,6 +230,31 @@ function SubscriptionCheckoutPage() {
     script.async = true;
     script.onload = markReady;
     script.onerror = () => setError("No se pudo cargar Culqi Custom Checkout. Revisa tu conexión o la llave pública.");
+    document.body.appendChild(script);
+  }, []);
+
+  useEffect(() => {
+    if (!CULQI_PUBLIC_KEY) return;
+
+    const existing = document.querySelector<HTMLScriptElement>('script[src="https://3ds.culqi.com"]');
+
+    const markReady = () => {
+      if (window.Culqi3DS) {
+        window.Culqi3DS.publicKey = CULQI_PUBLIC_KEY;
+      }
+      setCulqi3dsReady(Boolean(window.Culqi3DS));
+    };
+
+    if (existing) {
+      markReady();
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://3ds.culqi.com";
+    script.async = true;
+    script.onload = markReady;
+    script.onerror = () => setError("No se pudo cargar Culqi3DS. Revisa tu conexion o prueba nuevamente.");
     document.body.appendChild(script);
   }, []);
 
@@ -190,7 +332,7 @@ function SubscriptionCheckoutPage() {
         const culqiToken = checkout.token.id;
         const culqiEmail = checkout.token.email;
         checkout.close();
-        void completeCulqiPayment(culqiToken, culqiEmail);
+        void authenticateAndPay(culqiToken, culqiEmail);
         return;
       }
 
@@ -208,7 +350,7 @@ function SubscriptionCheckoutPage() {
     }, 100);
 
     return () => window.clearTimeout(timer);
-  }, [amount, amountInCents, completeCulqiPayment, culqiReady, user]);
+  }, [amount, amountInCents, authenticateAndPay, culqiReady, user]);
 
   const reloadEmbeddedCheckout = () => {
     setError(null);
@@ -291,7 +433,7 @@ function SubscriptionCheckoutPage() {
                   id="culqi-embedded-container"
                   className="min-h-[600px] overflow-visible rounded-xl border border-border bg-white"
                 >
-                  {!culqiReady ? (
+                  {!culqiReady || !culqi3dsReady ? (
                     <div className="grid min-h-[600px] place-items-center text-center">
                       <div>
                         <Loader2 className="mx-auto h-7 w-7 animate-spin text-muted-foreground" />
