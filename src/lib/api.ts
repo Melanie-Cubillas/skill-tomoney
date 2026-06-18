@@ -5,7 +5,7 @@ export const API_ROOT_URL = API_URL.replace(/\/api\/?$/, "");
 
 const responseCache = new Map<string, { expiresAt: number; payload: unknown }>();
 const inFlightRequests = new Map<string, Promise<unknown>>();
-const PERSISTED_CACHE_PREFIX = "skill-to-money:api-cache:v2:";
+const PERSISTED_CACHE_PREFIX = "skill-to-money:api-cache:v3:";
 
 export function resolveAssetUrl(value: string | null | undefined): string | null {
   if (!value) return null;
@@ -1148,8 +1148,7 @@ export const api = {
 
     return apiRequest<CatalogPayload>(`/catalog${query}`, {
       token,
-      cacheKey: `catalog${query}:${token.slice(-12)}`,
-      cacheTtlMs: 60 * 1000,
+      skipCache: true,
     });
   },
 
@@ -1167,8 +1166,7 @@ export const api = {
 
     return apiRequest<ServicesPayload>(`/services${query}`, {
       token,
-      cacheKey: `services${query}:${token.slice(-12)}`,
-      cacheTtlMs: 60 * 1000,
+      skipCache: true,
     });
   },
 
@@ -1244,8 +1242,7 @@ export const api = {
   getFavorites: (token: string) =>
     apiRequest<FavoritesPayload>("/favorites", {
       token,
-      cacheKey: `favorites:${token.slice(-12)}`,
-      cacheTtlMs: 60 * 1000,
+      skipCache: true,
     }),
 
   addFavorite: (token: string, freelancerProfileId: number) =>
