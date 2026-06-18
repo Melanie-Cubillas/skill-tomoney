@@ -157,7 +157,7 @@ function SubscriptionCheckoutPage() {
         hiddenBannerContent: true,
         hiddenToolBarAmount: true,
         menuType: "select",
-        buttonCardPayText: `Pagar S/ ${amount}`,
+        buttonCardPayText: "Pagar",
         defaultStyle: {
           bannerColor: "#00C9BA",
           buttonBackground: "#FF4B36",
