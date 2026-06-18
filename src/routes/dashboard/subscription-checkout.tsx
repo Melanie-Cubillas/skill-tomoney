@@ -38,7 +38,7 @@ export const Route = createFileRoute("/dashboard/subscription-checkout")({
 
 type BillingCycle = "monthly" | "yearly";
 
-const CULQI_PUBLIC_KEY = import.meta.env.VITE_CULQI_PUBLIC_KEY ?? "";
+const CULQI_PUBLIC_KEY = import.meta.env.VITE_CULQI_PUBLIC_KEY || "pk_test_6h2PtcfvP3UjXKyL";
 
 function SubscriptionCheckoutPage() {
   const token = getToken();
