@@ -112,7 +112,7 @@ function SubscriptionCheckoutPage() {
           subscription_status: response.data.status,
         });
         setSuccess(`Pago aprobado. Referencia: ${response.data.payment?.reference ?? "CULQI"}.`);
-        setTimeout(() => void navigate({ to: "/dashboard/premium" }), 1200);
+        setTimeout(() => void navigate({ to: "/dashboard/premium", search: { upgraded: "1" } }), 1200);
       }
     } catch (err: unknown) {
       setError(getErrorMessage(err, "Culqi no pudo procesar el pago."));
