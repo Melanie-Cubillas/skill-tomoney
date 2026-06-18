@@ -1,4 +1,4 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
@@ -17,6 +17,9 @@ import { getSessionUser, getToken, saveSession } from "@/lib/auth";
 
 export const Route = createFileRoute("/dashboard/premium")({
   head: () => ({ meta: [{ title: "SkillPro - SkilltoMoney" }] }),
+  validateSearch: (search: Record<string, string | undefined>) => ({
+    upgraded: search.upgraded === "1" ? "1" : undefined,
+  }),
   component: DashboardPremiumPage,
 });
 
@@ -56,6 +59,7 @@ const freelancerUpgradeChanges = [
 function DashboardPremiumPage() {
   const token = getToken();
   const user = getSessionUser();
+  const search = useSearch({ from: Route.id });
   const role = user?.account_type === "mype" ? "client" : "freelancer";
   const isMype = user?.account_type === "mype";
   const [cycle, setCycle] = useState<BillingCycle>("monthly");
@@ -127,6 +131,18 @@ function DashboardPremiumPage() {
             </button>
           </div>
         </div>
+
+        {search.upgraded === "1" ? (
+          <Card className="rounded-2xl border-secondary/40 bg-secondary/10 p-5 shadow-soft">
+            <div className="flex items-center gap-2 font-display text-xl font-bold text-secondary">
+              <BadgeCheck className="h-5 w-5" />
+              Pago aprobado. Ya eres SkillPro.
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Tu suscripción fue activada correctamente. Tus nuevos límites y beneficios Pro ya están disponibles.
+            </p>
+          </Card>
+        ) : null}
 
         {error ? <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</div> : null}
 
